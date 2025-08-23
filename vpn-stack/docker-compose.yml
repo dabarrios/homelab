@@ -27,7 +27,6 @@ services:
       
             # ProtonVPN [Interface]
             - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-            - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
             - SERVER_COUNTRIES=${SERVER_COUNTRIES}
       
             # Port Mapping
@@ -48,5 +47,5 @@ services:
             - WEBUI_PORT=8080
         volumes:
             - ./qbittorrent/config:/config
-            - /media/vault/staging:/staging
+            - ${STAGING_PATH}:/staging
         restart: unless-stopped
