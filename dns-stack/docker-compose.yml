@@ -9,8 +9,8 @@ networks:
             macvlan_mode: bridge
         ipam:
             config:
-                - subnet: '{SUBNET}'
-                  gateway: '{GATEWAY}'
+                - subnet: '${SUBNET}'
+                  gateway: '${GATEWAY}'
     veil:
         external: true
 
@@ -21,7 +21,7 @@ services:
         hostname: pihole
         networks:
             lan-macvlan:
-                ipv4_address: '{IPV4_ADDRESS}'
+                ipv4_address: '${IPV4_ADDRESS}'
             veil: {}
         ports:
             #- 53:53/tcp # DNS Ports
@@ -29,9 +29,9 @@ services:
             - 67:67/udp # Only required if you are using Pihole as your DHCP server
             - 80:80/tcp # Default HTTP Port
         environment:
-            TZ: '{TZ}'
-            FTLCONF_webserver_api_password: '{WEB_SERVER_PASSWORD}'
-            FTLCONF_LOCAL_IPV4: '{IPV4_ADDRESS}'
+            TZ: '${TZ}'
+            FTLCONF_webserver_api_password: '${WEB_SERVER_PASSWORD}'
+            FTLCONF_LOCAL_IPV4: '${IPV4_ADDRESS}'
         volumes:
             - ./pihole:/etc/pihole # For persisting Pi-hole's databases and common configuration file
             - ./pihole/dnsmasq.d:/etc/dnsmasq.d
