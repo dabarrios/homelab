@@ -15,7 +15,7 @@ services:
             - TZ=${TZ}
         volumes:
             - ./bazarr/config:/config
-            - /media/vault/library:/library
+            - ${LIBRARY_PATH}:/library
         ports:
             - 6767:6767
         restart: unless-stopped
@@ -42,7 +42,7 @@ services:
             - JELLYFIN_PublishedServerUrl=http://192.168.4.210 # Optional
         volumes:
             - ./jellyfin/config:/config
-            - /media/vault/library:/library
+            - ${LIBRARY_PATH}:/library
         ports:
             - 8096:8096         # http web ui
             - 7359:7359/udp     # service discovery for clients
@@ -70,12 +70,12 @@ services:
     profilarr:
         image: santiagosayshey/profilarr:latest
         container_name: profilarr
+        environment:
+            - TZ=${TZ}
         ports:
             - 6868:6868
         volumes:
             - ./profilarr/config:/config
-        environment:
-            - TZ=${TZ}
         restart: unless-stopped
 
 
@@ -101,8 +101,8 @@ services:
             - TZ=${TZ}
         volumes:
             - ./radarr/config:/config
-            - /media/vault/library:/library          
-            - /media/vault/staging:/staging  
+            - ${LIBRARY_PATH}:/library          
+            - ${STAGING_PATH}:/staging  
         ports:
             - 7878:7878
         restart: unless-stopped
@@ -127,8 +127,8 @@ services:
             - TZ=${TZ}
         volumes:
             - ./sonarr/config:/config
-            - /media/vault/library:/library
-            - /media/vault/staging:/staging  
+            - ${LIBRARY_PATH}:/library
+            - ${STAGING_PATH}:/staging  
         ports:
             - 8989:8989
         restart: unless-stopped
