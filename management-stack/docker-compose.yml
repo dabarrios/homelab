@@ -13,6 +13,7 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
             - ./homarr/appdata:/appdata
         environment:
+            - TZ=${TZ}
             - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
         ports:
             - 7575:7575
@@ -21,6 +22,8 @@ services:
     portainer:
         image: portainer/portainer-ce:latest
         container_name: portainer
+        environment:
+            - TZ=${TZ}
         ports:
             - 9443:9443
         volumes:
