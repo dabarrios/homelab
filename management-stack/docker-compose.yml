@@ -1,0 +1,29 @@
+name: management-stack
+
+networks:
+    default:
+        name: veil
+        external: true
+
+services:
+    homarr:
+        image: ghcr.io/homarr-labs/homarr:latest
+        container_name: homarr
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./homarr/appdata:/appdata
+        environment:
+            - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
+        ports:
+            - 7575:7575
+        restart: unless-stopped
+        
+    portainer:
+        image: portainer/portainer-ce:latest
+        container_name: portainer
+        ports:
+            - 9443:9443
+        volumes:
+            - ./portainer/data:/data
+            - /var/run/docker.sock:/var/run/docker.sock
+        restart: unless-stopped

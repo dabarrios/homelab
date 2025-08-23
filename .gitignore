@@ -1,0 +1,30 @@
+# Never commit .env
+*.env
+
+# dns-stack
+**/pihole/
+
+# immich-stack
+**/db/
+**/immich-machine-learning
+
+# management-stack
+**/homarr/
+**/portainer/
+
+# media-stack
+**/bazarr/
+**/jellyfin/
+**/jellyseerr/
+**/profilarr/
+**/prowlarr/
+**/radarr/
+**/recyclarr/
+**/sonarr/
+
+# vpn-stack
+**/gluetun/
+**/qbittorrent/
+
+# Editor
+.vscode/

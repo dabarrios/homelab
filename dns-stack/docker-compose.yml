@@ -1,0 +1,41 @@
+name: network-stack
+
+networks:
+    lan-macvlan:
+        name: lan-macvlan
+        driver: macvlan
+        driver_opts:
+            parent: enp4s0
+            macvlan_mode: bridge
+        ipam:
+            config:
+                - subnet: 192.168.4.0/24
+                  gateway: 192.168.4.1
+    veil:
+        external: true
+
+services:
+    pihole:
+        image: pihole/pihole:latest
+        container_name: pihole
+        hostname: pihole
+        networks:
+            lan-macvlan:
+                ipv4_address: 192.168.4.215
+            veil: {}
+        ports:
+            #- 53:53/tcp # DNS Ports
+            #- 53:53/udp
+            - 67:67/udp # Only required if you are using Pihole as your DHCP server
+            - 80:80/tcp # Default HTTP Port
+        environment:
+            TZ: '{TZ}'
+            FTLCONF_webserver_api_password: '$$Kyr$$p33dypihole'
+            FTLCONF_LOCAL_IPV4: 192.168.4.215
+        volumes:
+            - ./pihole:/etc/pihole # For persisting Pi-hole's databases and common configuration file
+            - ./pihole/dnsmasq.d:/etc/dnsmasq.d
+        cap_add:
+            - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+            - SYS_NICE
+        restart: unless-stopped
