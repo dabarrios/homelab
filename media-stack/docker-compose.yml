@@ -39,7 +39,7 @@ services:
             - PUID=${PUID}
             - PGID=${PGID}
             - TZ=${TZ}
-            - JELLYFIN_PublishedServerUrl=http://192.168.4.210 # Optional
+            - JELLYFIN_PublishedServerUrl=${JELLYFIN_SERVER_URL}
         volumes:
             - ./jellyfin/config:/config
             - ${LIBRARY_PATH}:/library
