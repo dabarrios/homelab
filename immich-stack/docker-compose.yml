@@ -2,7 +2,7 @@ name: immich-stack
 
 networks:
     default:
-        name: veil
+        name: media-net
         external: true
 
 services:
