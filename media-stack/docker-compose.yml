@@ -106,17 +106,6 @@ services:
         ports:
             - 7878:7878
         restart: unless-stopped
-        
-    recyclarr:
-      image: ghcr.io/recyclarr/recyclarr
-      container_name: recyclarr
-      environment:
-          - PUID=${PUID}
-          - PGID=${PGID}
-          - TZ=${TZ}
-      volumes:
-          - ./recyclarr/config:/config
-      restart: unless-stopped
 
     sonarr:
         image: lscr.io/linuxserver/sonarr:latest
