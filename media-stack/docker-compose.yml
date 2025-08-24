@@ -1,10 +1,10 @@
 name: media-stack
-
+    
 networks:
     default:
-        name: veil
+        name: media-net
         external: true
-        
+
 services:
     bazarr: 
         image: lscr.io/linuxserver/bazarr:latest
