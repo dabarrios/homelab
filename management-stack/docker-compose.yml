@@ -7,21 +7,16 @@ networks:
 
 services:
     dash:
-        image: mauricenino/dashdot:nvidia
+        image: mauricenino/dashdot:latest
         container_name: dash
         privileged: true
-        deploy:
-            resources:
-                reservations:
-                    devices:
-                        - capabilities:
-                            - gpu
         ports:
             - '80:3001'
         volumes:
             - ./dash:/mnt/host:ro
         environment:
-            DASHDOT_WIDGET_LIST: 'os,cpu,storage,ram,network,gpu'
+            DASHDOT_WIDGET_LIST: 'os,cpu,storage,ram,network'
+            DASHDOT_ENABLE_CPU_TEMPS: 'true'
         restart: unless-stopped
 
     homarr:
