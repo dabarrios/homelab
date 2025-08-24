@@ -1,14 +1,15 @@
 name: vpn-stack
 
 networks:
-    default:
-        name: veil
+    media-net:
         external: true
         
 services:
     gluetun:
         image: qmcgaw/gluetun
         container_name: gluetun
+        networks:
+            - media-net
         cap_add:
             - NET_ADMIN
         devices:
