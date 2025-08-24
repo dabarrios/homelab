@@ -5,7 +5,7 @@ networks:
         name: lan-macvlan
         driver: macvlan
         driver_opts:
-            parent: enp4s0
+            parent: ${PARENT_NETWORK_CARD}
             macvlan_mode: bridge
         ipam:
             config:
