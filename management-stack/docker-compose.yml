@@ -2,10 +2,28 @@ name: management-stack
 
 networks:
     default:
-        name: veil
+        name: media-net
         external: true
 
 services:
+    dash:
+        image: mauricenino/dashdot:nvidia
+        container_name: dash
+        privileged: true
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - capabilities:
+                            - gpu
+        ports:
+            - '80:3001'
+        volumes:
+            - ./dash:/mnt/host:ro
+        environment:
+            DASHDOT_WIDGET_LIST: 'os,cpu,storage,ram,network,gpu'
+        restart: unless-stopped
+
     homarr:
         image: ghcr.io/homarr-labs/homarr:latest
         container_name: homarr
