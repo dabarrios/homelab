@@ -1,4 +1,4 @@
-name: media-stack
+name: network-stack
 
 networks:
     macvlan-net:
@@ -20,23 +20,17 @@ services:
         container_name: pihole
         hostname: pihole
         networks:
-            #macvlan-net:
-            #    ipv4_address: '${IPV4_ADDRESS}'
             media-net: {}
-        ports:
-            #- 53:53/tcp     # DNS Ports
-            #- 53:53/udp
-            - 80:80/tcp     # Default HTTP port
-            - 443:443/tcp   # Default HTTPS port
+            macvlan-net:
+                ipv4_address: '${IPV4_ADDRESS}'
         environment:
             TZ: '${TZ}'
             FTLCONF_webserver_api_password: '${WEB_SERVER_PASSWORD}'
             FTLCONF_LOCAL_IPV4: '${IPV4_ADDRESS}'
             FTLCONF_dns_listeningMode: 'all'
         volumes:
-            - ./pihole:/etc/pihole # For persisting Pi-hole's databases and common configuration file
-            - ./pihole/dnsmasq.d:/etc/dnsmasq.d
+            - ./pihole/etc/pihole:/etc/pihole # For persisting Pi-hole's databases and common configuration file
+            - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d
         cap_add:
-            - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
             - SYS_NICE
         restart: unless-stopped
