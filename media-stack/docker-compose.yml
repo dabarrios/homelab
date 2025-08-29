@@ -39,7 +39,6 @@ services:
             - PUID=${PUID}
             - PGID=${PGID}
             - TZ=${TZ}
-            - JELLYFIN_PublishedServerUrl=${JELLYFIN_SERVER_URL}
         volumes:
             - ./jellyfin/config:/config
             - ${LIBRARY_PATH}:/library
