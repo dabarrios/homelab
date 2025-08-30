@@ -14,7 +14,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./bazarr/config:/config
+            - ./services/bazarr:/config
             - ${LIBRARY_PATH}:/library
         ports:
             - 6767:6767
@@ -40,7 +40,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./jellyfin/config:/config
+            - ./services/jellyfin:/config
             - ${LIBRARY_PATH}:/library
         ports:
             - 8096:8096         # http web ui
@@ -57,7 +57,7 @@ services:
         ports:
             - 5055:5055
         volumes:
-            - ./jellyseerr/app/config:/app/config
+            - ./services/jellyseerr:/app/config
         healthcheck:
             test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
             start_period: 20s
@@ -66,18 +66,16 @@ services:
             retries: 3
         restart: unless-stopped
 
-    profilarr:
-        image: santiagosayshey/profilarr:latest
-        container_name: profilarr
+    recyclarr:
+        image: ghcr.io/recyclarr/recyclarr
+        container_name: recyclarr
         environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
             - TZ=${TZ}
-        ports:
-            - 6868:6868
         volumes:
-            - ./profilarr/config:/config
-        restart: unless-stopped
-
-
+            - ./services/recyclarr:/config
+        
     prowlarr:
         image: lscr.io/linuxserver/prowlarr:latest
         container_name: prowlarr
@@ -86,7 +84,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./prowlarr/config:/config
+            - ./services/prowlarr:/config
         ports:
             - 9696:9696
         restart: unless-stopped
@@ -99,7 +97,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./radarr/config:/config
+            - ./services/radarr:/config
             - ${LIBRARY_PATH}:/library          
             - ${STAGING_PATH}:/staging  
         ports:
@@ -114,7 +112,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./sonarr/config:/config
+            - ./services/sonarr:/config
             - ${LIBRARY_PATH}:/library
             - ${STAGING_PATH}:/staging  
         ports:
