@@ -31,6 +31,8 @@ services:
         volumes:
             - ./pihole/etc/pihole:/etc/pihole # For persisting Pi-hole's databases and common configuration file
             - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d
+        ports:
+            - 443:443/tcp # HTTPS port
         cap_add:
             - SYS_NICE
         restart: unless-stopped
