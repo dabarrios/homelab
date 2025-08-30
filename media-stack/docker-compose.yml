@@ -14,7 +14,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./services/bazarr:/config
+            - ./bazarr:/config
             - ${LIBRARY_PATH}:/library
         ports:
             - 6767:6767
@@ -40,7 +40,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./services/jellyfin:/config
+            - ./jellyfin:/config
             - ${LIBRARY_PATH}:/library
         ports:
             - 8096:8096         # http web ui
@@ -57,7 +57,7 @@ services:
         ports:
             - 5055:5055
         volumes:
-            - ./services/jellyseerr:/app/config
+            - ./jellyseerr:/app/config
         healthcheck:
             test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
             start_period: 20s
@@ -74,7 +74,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./services/recyclarr:/config
+            - ./recyclarr:/config
         
     prowlarr:
         image: lscr.io/linuxserver/prowlarr:latest
@@ -84,7 +84,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./services/prowlarr:/config
+            - ./prowlarr:/config
         ports:
             - 9696:9696
         restart: unless-stopped
@@ -97,7 +97,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./services/radarr:/config
+            - ./radarr:/config
             - ${LIBRARY_PATH}:/library          
             - ${STAGING_PATH}:/staging  
         ports:
@@ -112,7 +112,7 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./services/sonarr:/config
+            - ./sonarr:/config
             - ${LIBRARY_PATH}:/library
             - ${STAGING_PATH}:/staging  
         ports:
