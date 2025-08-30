@@ -15,7 +15,7 @@ services:
         volumes:
             - ./dash:/mnt/host:ro
         environment:
-            DASHDOT_WIDGET_LIST: 'os,cpu,storage,ram,network'
+            DASHDOT_WIDGET_LIST: 'os,cpu,storage,ram,network,gpu'
             DASHDOT_ENABLE_CPU_TEMPS: 'true'
         restart: unless-stopped
 
@@ -24,7 +24,7 @@ services:
         container_name: homarr
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - ./homarr/appdata:/appdata
+            - ./homarr:/appdata
         environment:
             - TZ=${TZ}
             - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
@@ -40,6 +40,6 @@ services:
         ports:
             - 9443:9443
         volumes:
-            - ./portainer/data:/data
+            - ./portainer:/data
             - /var/run/docker.sock:/var/run/docker.sock
         restart: unless-stopped
