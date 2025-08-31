@@ -16,8 +16,8 @@ services:
         volumes:
             - ./bazarr:/config
             - ${SHOWS_PATH}:/shows
-            - ${ANIME_SERIES_PATH}:/anime-series
             - ${MOVIES_PATH}:/movies
+            - ${ANIME_SERIES_PATH}:/anime-series
             - ${ANIME_MOVIES_PATH}:/anime-movies
         ports:
             - 6767:6767
@@ -44,8 +44,11 @@ services:
             - TZ=${TZ}
         volumes:
             - ./jellyfin:/config
-            - ${LIBRARY_PATH}:/library
             - ${TRANSCODES_PATH}:/transcodes
+            - ${SHOWS_PATH}:/shows
+            - ${MOVIES_PATH}:/movies
+            - ${ANIME_SERIES_PATH}:/anime/series
+            - ${ANIME_MOVIES_PATH}:/anime/movies
         ports:
             - 8096:8096         # http web ui
             - 7359:7359/udp     # service discovery for clients
@@ -104,8 +107,8 @@ services:
         volumes:
             - ./radarr:/config
             - ${MOVIES_PATH}:/movies
-            - ${ANIME_MOVIES_PATH}:/anime-movies          
-            - ${STAGING_PATH}:/staging  
+            - ${ANIME_MOVIES_PATH}:/anime/movies          
+            - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - 7878:7878
         restart: unless-stopped
@@ -120,8 +123,8 @@ services:
         volumes:
             - ./sonarr:/config
             - ${SHOWS_PATH}:/shows
-            - ${ANIME_SERIES_PATH}:/anime-series
-            - ${STAGING_PATH}:/staging  
+            - ${ANIME_SERIES_PATH}:/anime/series
+            - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - 8989:8989
         restart: unless-stopped
