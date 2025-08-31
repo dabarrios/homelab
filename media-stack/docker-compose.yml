@@ -98,7 +98,8 @@ services:
             - TZ=${TZ}
         volumes:
             - ./radarr:/config
-            - ${LIBRARY_PATH}:/library          
+            - ${MOVIES_PATH}:/movies
+            - ${ANIME_MOVIES_PATH}:/anime-movies          
             - ${STAGING_PATH}:/staging  
         ports:
             - 7878:7878
@@ -113,7 +114,8 @@ services:
             - TZ=${TZ}
         volumes:
             - ./sonarr:/config
-            - ${LIBRARY_PATH}:/library
+            - ${SHOWS_PATH}:/shows
+            - ${ANIME_SERIES_PATH}:/anime-series
             - ${STAGING_PATH}:/staging  
         ports:
             - 8989:8989
