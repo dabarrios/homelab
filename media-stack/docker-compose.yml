@@ -15,7 +15,10 @@ services:
             - TZ=${TZ}
         volumes:
             - ./bazarr:/config
-            - ${LIBRARY_PATH}:/library
+            - ${SHOWS_PATH}:/shows
+            - ${ANIME_SERIES_PATH}:/anime-series
+            - ${MOVIES_PATH}:/movies
+            - ${ANIME_MOVIES_PATH}:/anime-movies
         ports:
             - 6767:6767
         restart: unless-stopped
@@ -42,6 +45,7 @@ services:
         volumes:
             - ./jellyfin:/config
             - ${LIBRARY_PATH}:/library
+            - ${TRANSCODES_PATH}:/transcodes
         ports:
             - 8096:8096         # http web ui
             - 7359:7359/udp     # service discovery for clients
