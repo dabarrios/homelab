@@ -20,10 +20,20 @@ radarr:
                 - name: Remux-1080p - Anime
                   score: 1300
             - trash_ids:
+                - 4a3b087eea2ce012fcc1ce319259a3be  # Anime Dual Audio
+              assign_scores_to:
+                - name: Remux-1080p - Anime
+                  score: 1250
+            - trash_ids:
                 - fa857662bad28d5ff21a6e611869a0ff  # Anime BD Tier 03 (SeaDex Muxers)
               assign_scores_to:
                 - name: Remux-1080p - Anime
                   score: 1200
+            - trash_ids:
+                - b23eae459cc960816f2d6ba84af45055  # Dubs Only
+              assign_scores_to:
+                - name: Remux-1080p - Anime
+                  score: 1150
             - trash_ids:
                 - f262f1299d99b1a2263375e8fa2ddbb3  # Anime BD Tier 04 (SeaDex Muxers)
               assign_scores_to:
@@ -65,16 +75,6 @@ radarr:
               assign_scores_to:
                 - name: Remux-1080p - Anime
                   score: 500
-            - trash_ids:
-                - b23eae459cc960816f2d6ba84af45055  # Dubs Only
-              assign_scores_to:
-                - name: Remux-1080p - Anime
-                  score: 450
-            - trash_ids:
-                - 4a3b087eea2ce012fcc1ce319259a3be  # Anime Dual Audio
-              assign_scores_to:
-                - name: Remux-1080p - Anime
-                  score: 425
             - trash_ids:
                 - de41e72708d2c856fa261094c85e965d  # Anime Web Tier 03 (Official Subs)
               assign_scores_to:
@@ -168,10 +168,20 @@ sonarr:
                 - name: Remux-1080p - Anime
                   score: 1300
             - trash_ids:
+                - 418f50b10f1907201b6cfdf881f467b7  # Anime Dual Audio
+              assign_scores_to:
+                - name: Remux-1080p - Anime
+                  score: 1250
+            - trash_ids:
                 - 096e406c92baa713da4a72d88030b815  # Anime BD Tier 03 (SeaDex Muxers)
               assign_scores_to:
                 - name: Remux-1080p - Anime
                   score: 1200
+            - trash_ids:
+                - 9c14d194486c4014d422adc64092d794  # Dubs Only
+              assign_scores_to:
+                - name: Remux-1080p - Anime
+                  score: 1150
             - trash_ids:
                 - 30feba9da3030c5ed1e0f7d610bcadc4  # Anime BD Tier 04 (SeaDex Muxers)
               assign_scores_to:
@@ -213,16 +223,6 @@ sonarr:
               assign_scores_to:
                 - name: Remux-1080p - Anime
                   score: 500
-            - trash_ids:
-                - 9c14d194486c4014d422adc64092d794  # Dubs Only
-              assign_scores_to:
-                - name: Remux-1080p - Anime
-                  score: 450
-            - trash_ids:
-                - 418f50b10f1907201b6cfdf881f467b7  # Anime Dual Audio
-              assign_scores_to:
-                - name: Remux-1080p - Anime
-                  score: 425
             - trash_ids:
                 - c27f2ae6a4e82373b0f1da094e2489ad  # Anime Web Tier 03 (Official Subs)
               assign_scores_to:
