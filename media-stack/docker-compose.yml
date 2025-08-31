@@ -79,6 +79,7 @@ services:
             - TZ=${TZ}
         volumes:
             - ./recyclarr:/config
+        restart: unless-stopped
         
     prowlarr:
         image: lscr.io/linuxserver/prowlarr:latest
