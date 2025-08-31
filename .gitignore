@@ -19,12 +19,15 @@
 **/profilarr/
 **/prowlarr/
 **/radarr/
-**/recyclarr/
+**/recyclarr/*
 **/sonarr/
 
 # vpn-stack
 **/gluetun/
 **/qbittorrent/
+
+# Exceptions
+!**/recyclarr/recyclarr.example.yml
 
 # Editor
 .vscode/
