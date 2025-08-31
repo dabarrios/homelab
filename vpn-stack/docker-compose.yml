@@ -48,5 +48,7 @@ services:
             - WEBUI_PORT=8080
         volumes:
             - ./qbittorrent/config:/config
-            - ${STAGING_PATH}:/staging
+            - ${DOWNLOADS_PATH}:/downloads
+            - ${INCOMPLETE_DOWNLOADS_PATH}:/incomplete
+            - ${TORRENTS_PATH}:/torrents
         restart: unless-stopped
