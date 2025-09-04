@@ -8,14 +8,16 @@
 **/db/
 **/immich-machine-learning
 
+# frontend-stack
+**/jellyfin/
+**/jellyseerr/
+
 # management-stack
 **/homarr/
 **/portainer/
 
 # media-stack
 **/bazarr/
-**/jellyfin/
-**/jellyseerr/
 **/prowlarr/
 **/radarr/
 **/radarr_anime/
