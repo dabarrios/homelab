@@ -15,14 +15,27 @@ services:
             - TZ=${TZ}
         volumes:
             - ./bazarr:/config
-            - ${SHOWS_PATH}:/shows
             - ${MOVIES_PATH}:/movies
-            - ${ANIME_SERIES_PATH}:/anime_series
-            - ${ANIME_MOVIES_PATH}:/anime_movies
+            - ${SHOWS_PATH}:/shows
         ports:
             - 6767:6767
         restart: unless-stopped
 
+    bazarr_anime: 
+        image: lscr.io/linuxserver/bazarr:latest
+        container_name: bazarr_anime
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./bazarr_anime:/config
+            - ${ANIME_MOVIES_PATH}:/anime_movies
+            - ${ANIME_SERIES_PATH}:/anime_series
+        ports:
+            - 6768:6767
+        restart: unless-stopped
+            
     flaresolverr:
         image: ghcr.io/flaresolverr/flaresolverr:latest
         container_name: flaresolverr
