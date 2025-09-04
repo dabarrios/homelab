@@ -16,11 +16,12 @@
 **/bazarr/
 **/jellyfin/
 **/jellyseerr/
-**/profilarr/
 **/prowlarr/
 **/radarr/
+**/radarr_anime/
 **/recyclarr/*
 **/sonarr/
+**/sonarr_anime/
 
 # vpn-stack
 **/gluetun/
