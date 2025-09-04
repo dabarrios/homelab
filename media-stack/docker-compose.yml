@@ -17,8 +17,8 @@ services:
             - ./bazarr:/config
             - ${SHOWS_PATH}:/shows
             - ${MOVIES_PATH}:/movies
-            - ${ANIME_SERIES_PATH}:/anime-series
-            - ${ANIME_MOVIES_PATH}:/anime-movies
+            - ${ANIME_SERIES_PATH}:/anime_series
+            - ${ANIME_MOVIES_PATH}:/anime_movies
         ports:
             - 6767:6767
         restart: unless-stopped
@@ -47,8 +47,8 @@ services:
             - ${TRANSCODES_PATH}:/transcodes
             - ${SHOWS_PATH}:/shows
             - ${MOVIES_PATH}:/movies
-            - ${ANIME_SERIES_PATH}:/anime/series
-            - ${ANIME_MOVIES_PATH}:/anime/movies
+            - ${ANIME_SERIES_PATH}:/anime_series
+            - ${ANIME_MOVIES_PATH}:/anime_movies
         ports:
             - 8096:8096         # http web ui
             - 7359:7359/udp     # service discovery for clients
@@ -107,7 +107,7 @@ services:
         volumes:
             - ./radarr:/config
             - ${MOVIES_PATH}:/movies
-            - ${ANIME_MOVIES_PATH}:/anime/movies          
+            - ${ANIME_MOVIES_PATH}:/anime_movies        
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - 7878:7878
@@ -123,7 +123,7 @@ services:
         volumes:
             - ./sonarr:/config
             - ${SHOWS_PATH}:/shows
-            - ${ANIME_SERIES_PATH}:/anime/series
+            - ${ANIME_SERIES_PATH}:/anime_series
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - 8989:8989
