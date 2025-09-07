@@ -13,6 +13,8 @@ services:
             - PUID=${PUID}
             - PGID=${PGID}
             - TZ=${TZ}
+        group_add:
+            - ${RENDER_GROUP}
         volumes:
             - ./jellyfin:/config
             - ${TRANSCODES_PATH}:/transcodes
@@ -20,6 +22,8 @@ services:
             - ${MOVIES_PATH}:/movies
             - ${ANIME_SERIES_PATH}:/anime_series
             - ${ANIME_MOVIES_PATH}:/anime_movies
+        devices:
+            - /dev/dri/renderD128:/dev/dri/renderD128
         ports:
             - 8096:8096         # http web ui
             - 7359:7359/udp     # service discovery for clients
