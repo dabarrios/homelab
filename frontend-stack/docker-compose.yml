@@ -13,11 +13,12 @@ services:
             - PUID=${PUID}
             - PGID=${PGID}
             - TZ=${TZ}
+            - JELLYFIN_PublishedServerUrl=${JELLYFIN_SERVER_URL}
         group_add:
             - ${RENDER_GROUP}
         volumes:
             - ./jellyfin:/config
-            - ${TRANSCODES_PATH}:/transcodes
+            - ${CACHE_PATH}:/cache
             - ${SHOWS_PATH}:/shows
             - ${MOVIES_PATH}:/movies
             - ${ANIME_SERIES_PATH}:/anime_series
