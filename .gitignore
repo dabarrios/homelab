@@ -7,7 +7,6 @@
 # immich-stack
 **/db/
 **/immich_machine_learning/
-**/immich_duplicate_finder/
 
 # frontend-stack
 **/jellyfin/
