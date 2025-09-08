@@ -10,24 +10,24 @@ services:
         image: mauricenino/dashdot:latest
         container_name: dash
         privileged: true
-        ports:
-            - 3001:3001
-        volumes:
-            - ./dash:/mnt/host:ro
         environment:
             DASHDOT_WIDGET_LIST: 'os,cpu,storage,ram,network,gpu'
             DASHDOT_ENABLE_CPU_TEMPS: 'true'
+        volumes:
+            - ./dash:/mnt/host:ro
+        ports:
+            - 3001:3001
         restart: unless-stopped
 
     homarr:
         image: ghcr.io/homarr-labs/homarr:latest
         container_name: homarr
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - ./homarr:/appdata
         environment:
             - TZ=${TZ}
             - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./homarr:/appdata
         ports:
             - 7575:7575
         restart: unless-stopped
@@ -37,9 +37,9 @@ services:
         container_name: portainer
         environment:
             - TZ=${TZ}
-        ports:
-            - 9443:9443
         volumes:
             - ./portainer:/data
             - /var/run/docker.sock:/var/run/docker.sock
+        ports:
+            - 9443:9443
         restart: unless-stopped
