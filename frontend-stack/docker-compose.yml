@@ -9,13 +9,13 @@ services:
     jellyfin:
         image: lscr.io/linuxserver/jellyfin:latest
         container_name: jellyfin
+        group_add:
+            - ${RENDER_GROUP}
         environment:
             - PUID=${PUID}
             - PGID=${PGID}
             - TZ=${TZ}
             - JELLYFIN_PublishedServerUrl=${JELLYFIN_SERVER_URL}
-        group_add:
-            - ${RENDER_GROUP}
         volumes:
             - ./jellyfin:/config
             - ${CACHE_PATH}:/cache
@@ -23,11 +23,11 @@ services:
             - ${MOVIES_PATH}:/movies
             - ${ANIME_SERIES_PATH}:/anime_series
             - ${ANIME_MOVIES_PATH}:/anime_movies
-        devices:
-            - /dev/dri/renderD128:/dev/dri/renderD128
         ports:
             - 8096:8096         # http web ui
             - 7359:7359/udp     # service discovery for clients
+        devices:
+            - /dev/dri/renderD128:/dev/dri/renderD128
         restart: unless-stopped
         
     jellyseerr:
