@@ -19,16 +19,7 @@ services:
         volumes:
             - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
         restart: always
-    immich_duplicate_finder:
-        container_name: immich_duplicate_finder
-        image: eulemitkeule/immich-duplicate-finder:latest
-        depends_on:
-            - immich_server
-        volumes:
-            - ./immich_duplicate_finder:/config
-        ports:
-            - 8501:8501
-        restart: unless-stopped
+        
     immich_machine_learning:
         container_name: immich_machine_learning
         image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
