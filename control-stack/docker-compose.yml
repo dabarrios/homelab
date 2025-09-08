@@ -43,3 +43,13 @@ services:
         ports:
             - 9443:9443
         restart: unless-stopped
+
+    watchtower:
+        image: containrrr/watchtower
+        container_name: watchtower
+        environment:
+            - LOG_LEVEL=info
+            - TZ=${TZ}
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        restart: unless-stopped
