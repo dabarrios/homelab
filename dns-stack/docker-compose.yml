@@ -1,4 +1,4 @@
-name: network-stack
+name: dns-stack
 
 networks:
     macvlan-net:
