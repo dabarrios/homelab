@@ -11,7 +11,7 @@ networks:
             config:
                 - subnet: '${SUBNET}'
                   gateway: '${GATEWAY}'
-    media-net:
+    home-net:
         external: true
 
 services:
@@ -20,7 +20,7 @@ services:
         container_name: pihole
         hostname: pihole
         networks:
-            media-net: {}
+            home-net: {}
             macvlan-net:
                 ipv4_address: '${IPV4_ADDRESS}'
         environment:

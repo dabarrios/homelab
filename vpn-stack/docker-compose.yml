@@ -1,7 +1,7 @@
 name: vpn-stack
 
 networks:
-    media-net:
+    home-net:
         external: true
         
 services:
@@ -9,7 +9,7 @@ services:
         image: qmcgaw/gluetun
         container_name: gluetun
         networks:
-            - media-net        
+            - home-net        
         cap_add:
             - NET_ADMIN
         environment:

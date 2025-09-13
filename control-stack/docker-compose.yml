@@ -2,7 +2,7 @@ name: control-stack
 
 networks:
     default:
-        name: media-net
+        name: home-net
         external: true
 
 services:
