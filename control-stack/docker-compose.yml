@@ -17,7 +17,6 @@ services:
             DASHDOT_SHOW_HOST: 'true'
             DASHDOT_CUSTOM_HOST: 'htpc'
             DASHDOT_OS_WIDGET_GROW: '1'
-            DASHDOT_ENABLE_STORAGE_TEMPS: 'true'
             DASHDOT_STORAGE_WIDGET_ITEMS_PER_PAGE: '5'
             DASHDOT_STORAGE_WIDGET_GROW: '5'
             DASHDOT_NETWORK_WIDGET_GROW: '4'
