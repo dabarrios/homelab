@@ -1,0 +1,133 @@
+name: media-stack
+    
+networks:
+    default:
+        name: home-net
+        external: true
+
+services:
+    bazarr: 
+        image: lscr.io/linuxserver/bazarr:latest
+        container_name: bazarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./bazarr:/config
+            - ${MOVIES_PATH}:/movies
+            - ${SHOWS_PATH}:/shows
+        ports:
+            - 6767:6767
+        restart: unless-stopped
+
+    bazarr_anime: 
+        image: lscr.io/linuxserver/bazarr:latest
+        container_name: bazarr_anime
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./bazarr_anime:/config
+            - ${ANIME_MOVIES_PATH}:/anime_movies
+            - ${ANIME_SERIES_PATH}:/anime_series
+        ports:
+            - 6768:6767
+        restart: unless-stopped
+            
+    flaresolverr:
+        image: ghcr.io/flaresolverr/flaresolverr:latest
+        container_name: flaresolverr
+        environment:
+            - LOG_LEVEL=info
+            - LOG_HTML=false
+            - CAPTCHA_SOLVER=none
+            - TZ=${TZ}
+        ports:
+            - 8191:8191
+        restart: unless-stopped
+        
+    recyclarr:
+        image: ghcr.io/recyclarr/recyclarr
+        container_name: recyclarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./recyclarr:/config
+        restart: unless-stopped
+        
+    prowlarr:
+        image: lscr.io/linuxserver/prowlarr:latest
+        container_name: prowlarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./prowlarr:/config
+        ports:
+            - 9696:9696
+        restart: unless-stopped
+        
+    radarr:
+        image: lscr.io/linuxserver/radarr:latest
+        container_name: radarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./radarr:/config
+            - ${MOVIES_PATH}:/movies      
+            - ${DOWNLOADS_PATH}:/downloads  
+        ports:
+            - 7878:7878
+        restart: unless-stopped
+
+    radarr_anime:
+        image: lscr.io/linuxserver/radarr:latest
+        container_name: radarr_anime
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./radarr_anime:/config
+            - ${ANIME_MOVIES_PATH}:/anime_movies        
+            - ${DOWNLOADS_PATH}:/downloads  
+        ports:
+            - 7879:7878
+        restart: unless-stopped
+
+    sonarr:
+        image: lscr.io/linuxserver/sonarr:latest
+        container_name: sonarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./sonarr:/config
+            - ${SHOWS_PATH}:/shows
+            - ${DOWNLOADS_PATH}:/downloads  
+        ports:
+            - 8989:8989
+        restart: unless-stopped
+
+    sonarr_anime:
+        image: lscr.io/linuxserver/sonarr:latest
+        container_name: sonarr_anime
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./sonarr_anime:/config
+            - ${ANIME_SERIES_PATH}:/anime_series
+            - ${DOWNLOADS_PATH}:/downloads  
+        ports:
+            - 8990:8989
+        restart: unless-stopped
