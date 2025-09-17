@@ -1,23 +1,7 @@
-# Never commit .env
+# Never commit secrets
 *.env
 
-# dns-stack
-**/pihole/
-
-# immich-stack
-**/db/
-**/immich_machine_learning/
-
-# frontend-stack
-**/jellyfin/
-**/jellyseerr/
-
-# control-stack
-**/homarr/
-**/portainer/
-**/dash/
-
-# media-stack
+# automation-stack
 **/bazarr/
 **/bazarr_anime/
 **/prowlarr/
@@ -26,6 +10,22 @@
 **/recyclarr/*
 **/sonarr/
 **/sonarr_anime/
+
+# dns-stack
+**/pihole/
+
+# frontend-stack
+**/jellyfin/
+**/jellyseerr/
+
+# immich-stack
+**/db/
+**/immich_machine_learning/
+
+# management-stack
+**/homarr/
+**/portainer/
+**/dash/
 
 # vpn-stack
 **/gluetun/
