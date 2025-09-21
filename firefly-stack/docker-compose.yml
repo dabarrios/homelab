@@ -3,7 +3,7 @@ name: firefly-stack
 networks:
     home-net:
         external: true
-    firefly_iii:
+    firefly-net:
         driver: bridge
 
 services:
@@ -12,7 +12,7 @@ services:
         hostname: app
         container_name: firefly_iii_core
         networks:
-        - firefly_iii
+        - firefly-net
         - home-net
         depends_on:
         - db
@@ -26,7 +26,7 @@ services:
         image: alpine
         container_name: firefly_iii_cron
         networks:
-        - firefly_iii
+        - firefly-net
         - home-net
         depends_on:
         - app
@@ -39,7 +39,7 @@ services:
         container_name: firefly_iii_db
         env_file: .db.env
         networks:
-        - firefly_iii
+        - firefly-net
         - home-net 
         volumes:
         - ./firefly_iii_db:/var/lib/mysql
@@ -49,7 +49,7 @@ services:
         hostname: importer
         container_name: firefly_iii_importer
         networks:
-        - firefly_iii
+        - firefly-net
         - home-net
         depends_on:
         - app
