@@ -31,6 +31,9 @@
 **/gluetun/
 **/qbittorrent/
 
+# vtt-stack
+**/planarally/
+
 # Exceptions
 !**/recyclarr/recyclarr.example.yml
 
