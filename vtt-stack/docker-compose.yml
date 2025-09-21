@@ -1,0 +1,21 @@
+name: vtt-stack
+
+networks:
+    default:
+        name: home-net
+        external: true
+
+services:
+    planarally:
+        image: kruptein/planarally
+        container_name: planarally
+        environment:
+            - LOG_LEVEL=info
+            - TZ=${TZ}
+        volumes:
+            - ./planarally:/data
+            - ./planarally/static/assets:/static/assets
+            - ./planarally/static/mods:/static/mods
+        ports:
+            - 8000:8000/tcp
+        restart: unless-stopped
