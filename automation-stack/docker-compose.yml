@@ -47,7 +47,22 @@ services:
         ports:
             - 8191:8191
         restart: unless-stopped
-        
+
+    kavita:
+        image: lscr.io/linuxserver/kavita:latest
+        container_name: kavita
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./kavita/config:/config
+            - ./kavita:/data
+            - ${MANGA_PATH}:/manga
+        ports:
+            - 5000:5000
+        restart: unless-stopped
+
     recyclarr:
         image: ghcr.io/recyclarr/recyclarr
         container_name: recyclarr
@@ -57,6 +72,19 @@ services:
             - TZ=${TZ}
         volumes:
             - ./recyclarr:/config
+        restart: unless-stopped
+    suwayomi_server:
+        image: ghcr.io/suwayomi/suwayomi-server:stable
+        container_name: Suwayomi-Server
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+        - ${DOWNLOADS_PATH}:/home/suwayomi/.local/share/Tachidesk/downloads
+        - ./suwayomi:/home/suwayomi/.local/share/Tachidesk
+        ports:
+        - 4568:4567
         restart: unless-stopped
         
     prowlarr:
