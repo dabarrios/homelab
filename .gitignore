@@ -4,12 +4,15 @@
 # automation-stack
 **/bazarr/
 **/bazarr_anime/
+**/kavita/
 **/prowlarr/
 **/radarr/
 **/radarr_anime/
 **/recyclarr/*
 **/sonarr/
 **/sonarr_anime/
+**/suwayomi/
+
 
 # dns-stack
 **/pihole/
