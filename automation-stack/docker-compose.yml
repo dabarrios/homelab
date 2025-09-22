@@ -73,6 +73,7 @@ services:
         volumes:
             - ./recyclarr:/config
         restart: unless-stopped
+
     suwayomi_server:
         image: ghcr.io/suwayomi/suwayomi-server:stable
         container_name: Suwayomi-Server
@@ -81,10 +82,10 @@ services:
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-        - ${DOWNLOADS_PATH}:/home/suwayomi/.local/share/Tachidesk/downloads
+        - ${SUWAYOMI_DOWNLOADS_PATH}:/home/suwayomi/.local/share/Tachidesk/downloads
         - ./suwayomi:/home/suwayomi/.local/share/Tachidesk
         ports:
-        - 4568:4567
+        - 4567:4567
         restart: unless-stopped
         
     prowlarr:
