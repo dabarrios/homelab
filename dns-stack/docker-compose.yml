@@ -25,15 +25,16 @@ services:
             macvlan-net:
                 ipv4_address: '${IPV4_ADDRESS}'
                 mac_address: '${MAC_ADDRESS}'
+        cap_add:
+            - CAP_SYS_TIME
+            - SYS_NICE
         environment:
             TZ: '${TZ}'
             WEBPASSWORD: '${WEB_SERVER_PASSWORD}'
             DNSMASQ_LISTENING: 'all'
         volumes:
-            - ./pihole/etc/pihole:/etc/pihole # For persisting Pi-hole's databases and common configuration file
+            - ./pihole/etc/pihole:/etc/pihole
             - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d
         ports:
-            - 443:443/tcp # HTTPS port
-        cap_add:
-            - SYS_NICE
+            - 443:443/tcp
         restart: unless-stopped
