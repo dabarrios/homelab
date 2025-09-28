@@ -11,6 +11,7 @@ networks:
             config:
                 - subnet: '${SUBNET}'
                   gateway: '${GATEWAY}'
+
     home-net:
         external: true
 
@@ -23,11 +24,11 @@ services:
             home-net: {}
             macvlan-net:
                 ipv4_address: '${IPV4_ADDRESS}'
+                mac_address: '${MAC_ADDRESS}'
         environment:
             TZ: '${TZ}'
-            FTLCONF_webserver_api_password: '${WEB_SERVER_PASSWORD}'
-            FTLCONF_LOCAL_IPV4: '${IPV4_ADDRESS}'
-            FTLCONF_dns_listeningMode: 'all'
+            WEBPASSWORD: '${WEB_SERVER_PASSWORD}'
+            DNSMASQ_LISTENING: 'all'
         volumes:
             - ./pihole/etc/pihole:/etc/pihole # For persisting Pi-hole's databases and common configuration file
             - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d
