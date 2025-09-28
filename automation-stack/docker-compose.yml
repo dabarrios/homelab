@@ -62,6 +62,21 @@ services:
         ports:
             - 5000:5000
         restart: unless-stopped
+
+    lidarr:
+        image: lscr.io/linuxserver/lidarr:latest
+        container_name: lidarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./lidarr/config:/config
+            - ${MUSIC_PATH}:/music
+            - ${DOWNLOADS_PATH}:/downloads
+        ports:
+            - 8686:8686
+        restart: unless-stopped
         
     navidrome:
         image: deluan/navidrome:latest
