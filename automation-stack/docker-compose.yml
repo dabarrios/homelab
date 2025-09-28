@@ -6,129 +6,8 @@ networks:
         external: true
 
 services:
-    bazarr: 
-        image: lscr.io/linuxserver/bazarr:latest
-        container_name: bazarr
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-        volumes:
-            - ./bazarr:/config
-            - ${MOVIES_PATH}:/movies
-            - ${SHOWS_PATH}:/shows
-        ports:
-            - 6767:6767
-        restart: unless-stopped
 
-    bazarr_anime: 
-        image: lscr.io/linuxserver/bazarr:latest
-        container_name: bazarr_anime
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-        volumes:
-            - ./bazarr_anime:/config
-            - ${ANIME_MOVIES_PATH}:/anime_movies
-            - ${ANIME_SERIES_PATH}:/anime_series
-        ports:
-            - 6768:6767
-        restart: unless-stopped
-            
-    flaresolverr:
-        image: ghcr.io/flaresolverr/flaresolverr:latest
-        container_name: flaresolverr
-        environment:
-            - LOG_LEVEL=info
-            - LOG_HTML=false
-            - CAPTCHA_SOLVER=none
-            - TZ=${TZ}
-        ports:
-            - 8191:8191
-        restart: unless-stopped
-
-    kavita:
-        image: lscr.io/linuxserver/kavita:latest
-        container_name: kavita
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-        volumes:
-            - ./kavita/config:/config
-            - ./kavita:/data
-            - ${MANGA_PATH}:/manga
-        ports:
-            - 5000:5000
-        restart: unless-stopped
-
-    lidarr:
-        image: lscr.io/linuxserver/lidarr:latest
-        container_name: lidarr
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-        volumes:
-            - ./lidarr/config:/config
-            - ${MUSIC_PATH}:/music
-            - ${DOWNLOADS_PATH}:/downloads
-        ports:
-            - 8686:8686
-        restart: unless-stopped
-        
-    navidrome:
-        image: deluan/navidrome:latest
-        container_name: navidrome
-        user: ${PUID}:${PGID}
-        environment:
-            - ND_LOGLEVEL=debug
-        volumes:
-            - ./navidrome:/data
-            - ${MUSIC_PATH}:/music:ro"
-        ports:
-            - 4533:4533
-        restart: unless-stopped
-
-    recyclarr:
-        image: ghcr.io/recyclarr/recyclarr
-        container_name: recyclarr
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-        volumes:
-            - ./recyclarr:/config
-        restart: unless-stopped
-
-    suwayomi_server:
-        image: ghcr.io/suwayomi/suwayomi-server:stable
-        container_name: suwayomi
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-        volumes:
-        - ${SUWAYOMI_DOWNLOADS_PATH}:/home/suwayomi/.local/share/Tachidesk/downloads
-        - ./suwayomi:/home/suwayomi/.local/share/Tachidesk
-        ports:
-        - 4567:4567
-        restart: unless-stopped
-        
-    prowlarr:
-        image: lscr.io/linuxserver/prowlarr:latest
-        container_name: prowlarr
-        environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-        volumes:
-            - ./prowlarr:/config
-        ports:
-            - 9696:9696
-        restart: unless-stopped
-        
+# Movies/Shows/Anime Services
     radarr:
         image: lscr.io/linuxserver/radarr:latest
         container_name: radarr
@@ -187,4 +66,102 @@ services:
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - 8990:8989
+        restart: unless-stopped
+
+# Subtitle Services for Regular/Anime Media
+    bazarr: 
+        image: lscr.io/linuxserver/bazarr:latest
+        container_name: bazarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./bazarr:/config
+            - ${MOVIES_PATH}:/movies
+            - ${SHOWS_PATH}:/shows
+        ports:
+            - 6767:6767
+        restart: unless-stopped
+
+    bazarr_anime: 
+        image: lscr.io/linuxserver/bazarr:latest
+        container_name: bazarr_anime
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./bazarr_anime:/config
+            - ${ANIME_MOVIES_PATH}:/anime_movies
+            - ${ANIME_SERIES_PATH}:/anime_series
+        ports:
+            - 6768:6767
+        restart: unless-stopped
+        
+# Indexing Services - Flaresolverr for Cloudflare
+    prowlarr:
+        image: lscr.io/linuxserver/prowlarr:latest
+        container_name: prowlarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./prowlarr:/config
+        ports:
+            - 9696:9696
+        restart: unless-stopped
+
+    flaresolverr:
+        image: ghcr.io/flaresolverr/flaresolverr:latest
+        container_name: flaresolverr
+        environment:
+            - LOG_LEVEL=info
+            - LOG_HTML=false
+            - CAPTCHA_SOLVER=none
+            - TZ=${TZ}
+        ports:
+            - 8191:8191
+        restart: unless-stopped
+
+# Quality Profile Configuration Service
+    recyclarr:
+        image: ghcr.io/recyclarr/recyclarr
+        container_name: recyclarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./recyclarr:/config
+        restart: unless-stopped
+
+# Manga Services
+    suwayomi_server:
+        image: ghcr.io/suwayomi/suwayomi-server:stable
+        container_name: suwayomi
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+        - ${SUWAYOMI_DOWNLOADS_PATH}:/home/suwayomi/.local/share/Tachidesk/downloads
+        - ./suwayomi:/home/suwayomi/.local/share/Tachidesk
+        ports:
+        - 4567:4567
+        restart: unless-stopped
+    kavita:
+        image: lscr.io/linuxserver/kavita:latest
+        container_name: kavita
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ./kavita/config:/config
+            - ./kavita:/data
+            - ${MANGA_PATH}:/manga
+        ports:
+            - 5000:5000
         restart: unless-stopped
