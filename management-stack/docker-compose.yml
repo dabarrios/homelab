@@ -1,4 +1,4 @@
-name: control-stack
+name: management-stack
 
 networks:
     default:
