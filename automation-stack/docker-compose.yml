@@ -62,6 +62,19 @@ services:
         ports:
             - 5000:5000
         restart: unless-stopped
+        
+    navidrome:
+        image: deluan/navidrome:latest
+        container_name: navidrome
+        user: ${PUID}:${PGID}
+        environment:
+            - ND_LOGLEVEL=debug
+        volumes:
+            - ./navidrome:/data
+            - ${MUSIC_PATH}:/music:ro"
+        ports:
+            - 4533:4533
+        restart: unless-stopped
 
     recyclarr:
         image: ghcr.io/recyclarr/recyclarr
@@ -76,7 +89,7 @@ services:
 
     suwayomi_server:
         image: ghcr.io/suwayomi/suwayomi-server:stable
-        container_name: Suwayomi-Server
+        container_name: suwayomi
         environment:
             - PUID=${PUID}
             - PGID=${PGID}
