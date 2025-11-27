@@ -20,7 +20,7 @@ services:
             - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
         restart: always
         
-    immich_machine_learning:
+    immich-machine-learning:
         container_name: immich_machine_learning
         image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
         env_file:
@@ -30,7 +30,7 @@ services:
         healthcheck:
             disable: false
         restart: always
-    immich_server:
+    immich-server:
         container_name: immich_server
         image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
         env_file:
