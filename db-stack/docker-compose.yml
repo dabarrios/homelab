@@ -1,0 +1,19 @@
+name: db-stack
+
+networks:
+    default:
+        name: home-net
+        external: true
+
+services:        
+    db:
+        image: mysql
+        container_name: mysql
+        environment:
+            - MYSQL_USER=${SQL_USER}
+            - MYSQL_PASSWORD=${SQL_PW}
+            - MYSQL_ROOT_PASSWORD=${SQL_ROOT_PW}
+            - MYSQL_DATABASE=${SQL_DB}
+        ports:
+            - 3306:3306
+        restart: unless-stopped
