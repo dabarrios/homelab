@@ -1,15 +1,27 @@
+# Helpful links:
+# Tailscale Serve: https://tailscale.com/kb/1312/serve
+# Nextcloud AIO Tailscale Setup/Troubleshooting: https://github.com/nextcloud/all-in-one/discussions/6817
+
 name: nextcloud-stack
 
 networks:
     default:
       name: home-net
       external: true
-
+  
 services:
     nextcloud-aio-mastercontainer:
-        image: ghcr.io/nextcloud-releases/all-in-one:latest 
-        init: true 
+        image: ghcr.io/nextcloud-releases/all-in-one:latest
         container_name: nextcloud-aio-mastercontainer
+        init: true
+        dns:
+            - 100.100.100.100  # Tailscale Magic DNS
+            - 192.168.6.3      # Pihole DNS
+            - 1.1.1.1          # Fallback DNS
+        environment:
+            APACHE_PORT: 11000
+            APACHE_IP_BINDING: 0.0.0.0
+            SKIP_DOMAIN_VALIDATION: 'true' # Workaround to skip domain validation when using Tailscale
         volumes:
             - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
             - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -21,3 +33,4 @@ services:
 volumes:
     nextcloud_aio_mastercontainer:
         name: nextcloud_aio_mastercontainer
+        
