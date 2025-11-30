@@ -1,0 +1,12 @@
+# Set this as a service on startup at /etc/systemd/system/tailscale-serve-nextcloud.service:
+
+[Unit]
+Description=Serve Nextcloud backend through Tailscale
+After=network.target
+
+[Service]
+ExecStart=tailscale serve http://127.0.0.1:11000
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
