@@ -35,8 +35,8 @@ services:
             - TZ=${TZ}
             - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
         volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
             - ./homarr:/appdata
+            - /var/run/docker.sock:/var/run/docker.sock
         ports:
             - 7575:7575
         restart: unless-stopped
