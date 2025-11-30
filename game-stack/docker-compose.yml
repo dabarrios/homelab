@@ -1,0 +1,23 @@
+name: game-stack
+    
+networks:
+    default:
+        name: home-net
+        external: true
+
+services:
+    minecraft:
+        image: itzg/minecraft-server
+        container_name: minecraft
+        environment:
+            - EULA=TRUE
+            - MEMORY=6G
+            - TYPE=FABRIC
+            - OPS=${OPS_LIST}
+            - ENABLE_WHITELIST=TRUE
+            - ENFORCE_WHITELIST=TRUE
+        volumes:
+            - ${WORLD_DATA_PATH}:/data
+        ports:
+            - 25565:25565
+        restart: unless-stopped
