@@ -35,6 +35,4 @@ services:
         volumes:
             - ./pihole/etc/pihole:/etc/pihole
             - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d
-        ports:
-            - 443:443/tcp
         restart: unless-stopped
