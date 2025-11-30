@@ -4,22 +4,18 @@
 # automation-stack
 **/bazarr/
 **/bazarr_anime/
-**/kavita/
 **/prowlarr/
 **/radarr/
 **/radarr_anime/
 **/recyclarr/*
 **/sonarr/
 **/sonarr_anime/
-**/suwayomi/
 
+# db-stack
+**/mysql/
 
 # dns-stack
 **/pihole/
-
-# firefly-stack
-**/firefly_iii_db
-**/firefly_iii_upload
 
 # frontend-stack
 **/jellyfin/
