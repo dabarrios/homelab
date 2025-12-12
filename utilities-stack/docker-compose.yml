@@ -1,0 +1,14 @@
+name: utilities-stack
+
+networks:
+    default:
+        name: home-net
+        external: true
+
+services:
+    bentopdf:
+        image: bentopdf/bentopdf:latest
+        container_name: bentopdf
+        ports:
+        - '3000:8080'
+        restart: unless-stopped
