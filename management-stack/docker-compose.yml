@@ -52,6 +52,17 @@ services:
         ports:
             - 9443:9443
         restart: unless-stopped
+        
+    uptime-kuma:
+        image: louislam/uptime-kuma:2
+        container_name: uptime-kuma
+        environment:
+            - TZ=${TZ}
+        volumes:
+            - ./uptime-kuma:/app/data
+        ports:
+            - 3002:3001
+        restart: unless-stopped
 
     watchtower:
         image: containrrr/watchtower
