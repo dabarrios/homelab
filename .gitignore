@@ -3,13 +3,13 @@
 
 # automation-stack
 **/bazarr/
-**/bazarr_anime/
+**/bazarr-anime/
 **/prowlarr/
 **/radarr/
-**/radarr_anime/
+**/radarr-anime/
 **/recyclarr/*
 **/sonarr/
-**/sonarr_anime/
+**/sonarr-anime/
 
 # db-stack
 **/mysql/
