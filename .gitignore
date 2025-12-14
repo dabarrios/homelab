@@ -32,6 +32,10 @@
 **/dash/
 **/uptime-kuma/
 
+# utilities-stack
+**/bentopdf/
+**/omni-tools/
+
 # vpn-stack
 **/gluetun/
 **/qbittorrent/
