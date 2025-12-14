@@ -14,3 +14,12 @@ services:
         ports:
             - 3000:8080
         restart: unless-stopped
+
+    omni-tools:
+        image: iib0011/omni-tools:latest
+        container_name: omni-tools
+        volumes:
+            - ./omni-tools:/data
+        ports:
+            - 8085:80
+        restart: unless-stopped
