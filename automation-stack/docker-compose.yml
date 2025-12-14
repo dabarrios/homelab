@@ -23,15 +23,15 @@ services:
             - 7878:7878
         restart: unless-stopped
 
-    radarr_anime:
+    radarr-anime:
         image: lscr.io/linuxserver/radarr:latest
-        container_name: radarr_anime
+        container_name: radarr-anime
         environment:
             - PUID=${PUID}
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./radarr_anime:/config
+            - ./radarr-anime:/config
             - ${ANIME_MOVIES_PATH}:/anime_movies        
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
@@ -53,15 +53,15 @@ services:
             - 8989:8989
         restart: unless-stopped
 
-    sonarr_anime:
+    sonarr-anime:
         image: lscr.io/linuxserver/sonarr:latest
-        container_name: sonarr_anime
+        container_name: sonarr-anime
         environment:
             - PUID=${PUID}
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./sonarr_anime:/config
+            - ./sonarr-anime:/config
             - ${ANIME_SERIES_PATH}:/anime_series
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
@@ -84,15 +84,15 @@ services:
             - 6767:6767
         restart: unless-stopped
 
-    bazarr_anime: 
+    bazarr-anime: 
         image: lscr.io/linuxserver/bazarr:latest
-        container_name: bazarr_anime
+        container_name: bazarr-anime
         environment:
             - PUID=${PUID}
             - PGID=${PGID}
             - TZ=${TZ}
         volumes:
-            - ./bazarr_anime:/config
+            - ./bazarr-anime:/config
             - ${ANIME_MOVIES_PATH}:/anime_movies
             - ${ANIME_SERIES_PATH}:/anime_series
         ports:
