@@ -11,13 +11,21 @@ services:
         container_name: minecraft
         environment:
             - EULA=TRUE
+            - VERSION=1.21.11
             - MEMORY=6G
             - TYPE=FABRIC
+            - DIFFICULTY=HARD
+            - WHITELIST=${WHITELIST}
             - OPS=${OPS_LIST}
+            - SPAWN_PROTECTION=0
             - ENABLE_WHITELIST=TRUE
             - ENFORCE_WHITELIST=TRUE
+            - MOTD=${MOTD}
         volumes:
             - ${WORLD_DATA_PATH}:/data
         ports:
-            - 25565:25565
+            - 25565:25565 # Minecraft
+            - 24454:24454 # Simple Voice Chat
+        labels:
+            - "com.centurylinklabs.watchtower.enable=false"
         restart: unless-stopped
