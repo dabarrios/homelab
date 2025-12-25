@@ -21,6 +21,7 @@ services:
             - ENABLE_WHITELIST=TRUE
             - ENFORCE_WHITELIST=TRUE
             - MOTD=${MOTD}
+            - TZ=${TZ}
         volumes:
             - ${WORLD_DATA_PATH}:/data
         ports:
