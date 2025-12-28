@@ -14,6 +14,7 @@ services:
             - VERSION=1.21.11
             - MEMORY=6G
             - TYPE=FABRIC
+            - ALLOW_FLIGHT=TRUE
             - DIFFICULTY=HARD
             - WHITELIST=${WHITELIST}
             - OPS=${OPS_LIST}
