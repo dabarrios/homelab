@@ -21,6 +21,7 @@ services:
             - SPAWN_PROTECTION=0
             - ENABLE_WHITELIST=TRUE
             - ENFORCE_WHITELIST=TRUE
+            - MAX_PLAYERS=${MAX_PLAYERS}
             - MOTD=${MOTD}
             - TZ=${TZ}
         volumes:
