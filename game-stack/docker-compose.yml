@@ -25,10 +25,39 @@ services:
             - MOTD=${MOTD}
             - TZ=${TZ}
         volumes:
-            - ${WORLD_DATA_PATH}:/data
+            - ${SERVER_DATA_PATH}:/data
         ports:
             - 25565:25565 # Minecraft
             - 24455:24455/udp # Simple Voice Chat
+        labels:
+            - "com.centurylinklabs.watchtower.enable=false"
+        restart: unless-stopped
+    backup:
+        image: itzg/mc-backup
+        container_name: mc-backup
+        depends_on:
+            minecraft:
+                condition: service_healthy
+        environment:
+            - TZ=${TZ}
+            - SRC_DIR=/data
+            - BACKUP_METHOD=tar
+            - BACKUP_INTERVAL=1h
+            - INITIAL_DELAY=0
+            - BACKUP_ON_STARTUP=TRUE
+            - DEST_DIR=/backups
+            - PAUSE_IF_NO_PLAYERS=TRUE
+            - PLAYERS_ONLINE_CHECK_INTERVAL=30m
+            - PRUNE_BACKUPS_DAYS=7
+            - SERVER_PORT=25565
+            - ENABLE_SAVE_ALL=TRUE
+            - ENABLE_SYNC=TRUE
+            - RCON_HOST=minecraft
+        volumes:
+            - ${SERVER_DATA_PATH}:/data:ro
+            - ${BACKUP_PATH}:/backups
+            - /etc/localtime:/etc/localtime:ro
+            - /etc/timezone:/etc/timezone:ro
         labels:
             - "com.centurylinklabs.watchtower.enable=false"
         restart: unless-stopped
