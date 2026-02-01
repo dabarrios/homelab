@@ -34,7 +34,7 @@ services:
         restart: unless-stopped
     backup:
         image: itzg/mc-backup
-        container_name: mc-backup
+        container_name: minecraft-backup
         depends_on:
             minecraft:
                 condition: service_healthy
