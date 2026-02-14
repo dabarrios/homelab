@@ -4,60 +4,89 @@ networks:
     default:
         name: home-net
         external: true
+    
+x-minecraft: &x-minecraft
+    image: itzg/minecraft-server
+    environment:
+        - EULA=TRUE
+        - VERSION=1.21.11
+        - TYPE=FABRIC
+        - ALLOW_FLIGHT=TRUE
+        - DIFFICULTY=HARD
+        - SPAWN_PROTECTION=0
+        - ENABLE_WHITELIST=TRUE
+        - ENFORCE_WHITELIST=TRUE
+        - TZ=America/Los_Angeles
+    labels:
+        - "com.centurylinklabs.watchtower.enable=false"
+    restart: unless-stopped
+
+x-backup: &x-backup
+    image: itzg/mc-backup
+    environment:
+        - SRC_DIR=/data
+        - BACKUP_METHOD=tar
+        - BACKUP_INTERVAL=1h
+        - INITIAL_DELAY=0
+        - BACKUP_ON_STARTUP=TRUE
+        - DEST_DIR=/backups
+        - PAUSE_IF_NO_PLAYERS=TRUE
+        - PLAYERS_ONLINE_CHECK_INTERVAL=30m
+        - PRUNE_BACKUPS_DAYS=7
+        - ENABLE_SAVE_ALL=TRUE
+        - ENABLE_SYNC=TRUE
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /etc/timezone:/etc/timezone:ro
+    labels:
+        - "com.centurylinklabs.watchtower.enable=false"
+    restart: unless-stopped
 
 services:
-    minecraft:
-        image: itzg/minecraft-server
-        container_name: minecraft
-        environment:
-            - EULA=TRUE
-            - VERSION=1.21.11
-            - MEMORY=6G
-            - TYPE=FABRIC
-            - ALLOW_FLIGHT=TRUE
-            - DIFFICULTY=HARD
-            - WHITELIST=${WHITELIST}
-            - OPS=${OPS_LIST}
-            - SPAWN_PROTECTION=0
-            - ENABLE_WHITELIST=TRUE
-            - ENFORCE_WHITELIST=TRUE
-            - MAX_PLAYERS=${MAX_PLAYERS}
-            - MOTD=${MOTD}
-            - TZ=${TZ}
+    mc1:
+        <<: *x-minecraft
+        container_name: mc1
+        env_file:
+            - mc1.env
         volumes:
-            - ${SERVER_DATA_PATH}:/data
+            - ${MC1_DATA_PATH}:/data
         ports:
             - 25565:25565 # Minecraft
             - 24455:24455/udp # Simple Voice Chat
-        labels:
-            - "com.centurylinklabs.watchtower.enable=false"
-        restart: unless-stopped
-    backup:
-        image: itzg/mc-backup
-        container_name: minecraft-backup
+    mc1-backup:
+        <<: *x-backup
+        container_name: mc1-backup
+        env_file:
+            - mc1.env
         depends_on:
-            minecraft:
+            mc1:
                 condition: service_healthy
         environment:
-            - TZ=${TZ}
-            - SRC_DIR=/data
-            - BACKUP_METHOD=tar
-            - BACKUP_INTERVAL=1h
-            - INITIAL_DELAY=0
-            - BACKUP_ON_STARTUP=TRUE
-            - DEST_DIR=/backups
-            - PAUSE_IF_NO_PLAYERS=TRUE
-            - PLAYERS_ONLINE_CHECK_INTERVAL=30m
-            - PRUNE_BACKUPS_DAYS=7
             - SERVER_PORT=25565
-            - ENABLE_SAVE_ALL=TRUE
-            - ENABLE_SYNC=TRUE
-            - RCON_HOST=minecraft
+            - RCON_HOST=mc1
         volumes:
-            - ${SERVER_DATA_PATH}:/data:ro
-            - ${BACKUP_PATH}:/backups
-            - /etc/localtime:/etc/localtime:ro
-            - /etc/timezone:/etc/timezone:ro
-        labels:
-            - "com.centurylinklabs.watchtower.enable=false"
-        restart: unless-stopped
+            - ${MC1_DATA_PATH}:/data:ro
+            - ${MC1_BACKUP_PATH}:/backups
+    mc2:
+        <<: *x-minecraft
+        container_name: mc2
+        env_file:
+            - mc2.env
+        volumes:
+            - ${MC2_DATA_PATH}:/data
+        ports:
+            - 25566:25565 # Minecraft
+    mc2-backup:
+        <<: *x-backup
+        container_name: mc2-backup
+        env_file:
+            - mc2.env
+        depends_on:
+            mc2:
+                condition: service_healthy
+        environment:
+            - SERVER_PORT=25566
+            - RCON_HOST=mc2
+        volumes:
+            - ${MC2_DATA_PATH}:/data:ro
+            - ${MC2_BACKUP_PATH}:/backups
