@@ -57,13 +57,10 @@ services:
         <<: *x-backup
         container_name: mc1-backup
         env_file:
-            - mc1.env
+            - mc1-backup.env
         depends_on:
             mc1:
                 condition: service_healthy
-        environment:
-            - SERVER_PORT=25565
-            - RCON_HOST=mc1
         volumes:
             - ${MC1_DATA_PATH}:/data:ro
             - ${MC1_BACKUP_PATH}:/backups
@@ -76,17 +73,15 @@ services:
             - ${MC2_DATA_PATH}:/data
         ports:
             - 25566:25565 # Minecraft
+            - 24454:24454/udp # Simple Voice Chat
     mc2-backup:
         <<: *x-backup
         container_name: mc2-backup
         env_file:
-            - mc2.env
+            - mc2-backup.env
         depends_on:
             mc2:
                 condition: service_healthy
-        environment:
-            - SERVER_PORT=25566
-            - RCON_HOST=mc2
         volumes:
             - ${MC2_DATA_PATH}:/data:ro
             - ${MC2_BACKUP_PATH}:/backups
