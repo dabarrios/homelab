@@ -16,7 +16,6 @@ x-minecraft: &x-minecraft
         - SPAWN_PROTECTION=0
         - ENABLE_WHITELIST=TRUE
         - ENFORCE_WHITELIST=TRUE
-        - TZ=America/Los_Angeles
     labels:
         - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
