@@ -35,6 +35,7 @@
 # utilities-stack
 **/bentopdf/
 **/omni-tools/
+**/paperless-ngx/
 
 # vpn-stack
 **/gluetun/
