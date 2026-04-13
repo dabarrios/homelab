@@ -26,6 +26,7 @@ services:
             - 8096:8096         # http web ui
             - 7359:7359/udp     # service discovery for clients
         devices:
+            - /dev/dri:/dev/dri
             - /dev/dri/renderD128:/dev/dri/renderD128
         restart: unless-stopped
         
