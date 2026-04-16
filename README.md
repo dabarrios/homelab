@@ -8,7 +8,7 @@ I originally set this up just to run Jellyfin, but it kept growing as I added mo
 
 - **Host OS:** Ubuntu Server
 - **Container Platform:** Docker Compose
-- **Remote Access:** Tailscale
+- **Remote Access:** Tailscale (installed on host)
 - **Service Management:** systemd + Docker
 - **Storage Layout:** Separate drives for OS, application data, media, game servers, and backups
 
@@ -90,7 +90,7 @@ Just a basic database I keep around for testing:
 Most services are connected through a shared Docker network so they can talk to each other easily. I only break things out into separate networks when there’s a reason to.
 
 - **macvlan** – used for services that need their own IP on the LAN (like Pi-hole)
-- **Tailscale** – handles remote access
+- **Tailscale** – installed on the host for remote access (not containerized)
 - No direct port forwarding for internal services unless needed
 
 ## Why I Keep This Project
