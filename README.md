@@ -1,85 +1,98 @@
 # Homelab
 
-This repository documents my personal homelab — a project I built and continue to maintain to better understand Linux systems, Docker, networking, and self-hosted services.
+This repository contains the Docker Compose stacks and configs for my personal homelab.
 
-What started as “I want to try Jellyfin” slowly turned into a full setup involving automation, VPN routing, DNS, monitoring, and persistent storage. Every service here exists because it solved a real problem I ran into along the way.
-
----
+I originally set this up just to run Jellyfin, but it kept growing as I added more services and learned more along the way. Now it includes things like container management, VPN routing, DNS, monitoring, storage separation, and a few other self-hosted apps.
 
 ## Environment
 
 - **Host OS:** Ubuntu Server
-- **Container Platform:** Docker + Docker Compose
-- **Service Control:** systemd
+- **Container Platform:** Docker Compose
 - **Remote Access:** Tailscale
-- **Storage:** Multiple SSDs/HDDs separated by purpose (OS, services, game servers, backups)
+- **Service Management:** systemd + Docker
+- **Storage Layout:** Separate drives for OS, application data, media, game servers, and backups
 
----
+## Repository Layout
 
-## Service Layout
-
-Services are grouped by **function** instead of being placed into a single compose file. This keeps things easier to manage and troubleshoot.
-
----
+Services are split into separate stacks by function instead of being placed in one large Compose file. This keeps the setup easier to maintain, troubleshoot, and expand over time.
 
 ### Management Stack
+Tools I use to keep track of everything and make sure things are running properly:
 
-Tools I use to keep track of what is running and to troubleshoot issues
+- **Portainer** – manage containers, check logs, restart stuff when needed
+- **Homarr** – dashboard to access all my services in one place
+- **Uptime Kuma** – monitors services and alerts me if something goes down
+- **Dashdot** – shows system stats like CPU, RAM, etc.
+- **Watchtower** – handles automatic container updates
 
-- **Portainer** – Inspect containers, logs, volumes, and restart services
-- **Homarr** – Central dashboard for quick access to services
-- **Uptime Kuma** – Basic uptime monitoring and e-mail alerts
+### Frontend Stack
+This is what I actually use day-to-day for media:
 
----
+- **Jellyfin** – media server for watching everything
+- **Jellyseerr** – lets me request movies/shows and ties into the automation
 
-### Media & Automation Stack
+### Automation Stack
+This is what handles grabbing, organizing, and keeping media up to date:
 
-This is where most of the learning happened.
-
-- **Jellyfin** – Media server
-- **Sonarr / Radarr** – Automated TV and movie management
-- **Prowlarr** – Indexer management
-- **Bazarr** – Subtitle automation
-- **qBittorrent** – Download client
-
-Download traffic is routed through a VPN container instead of running a VPN on the host.
-
----
+- **Sonarr** / **Sonarr Anime** – manages TV shows
+- **Radarr** / **Radarr Anime** – manages movies
+- **Bazarr** / **Bazarr Anime** – handles subtitles
+- **Prowlarr** – manages indexers
+- **Flaresolverr** – helps bypass some site protections
+- **Recyclarr** – keeps quality profiles and settings in sync
 
 ### VPN Stack
+This is how I keep download traffic separate from the rest of the system:
 
-- **Gluetun** – VPN gateway for qBittorrent
-
----
+- **Gluetun** – acts as the VPN gateway
+- **qBittorrent** – runs through Gluetun instead of directly on the host
 
 ### DNS Stack
+Handles DNS and basic ad blocking on my network:
 
-- **Pi-hole** – Network-wide ad and tracker blocking
+- **Pi-hole** – blocks ads and trackers
 
-Runs on a macvlan network so it has its own LAN IP and behaves like a normal network device.
+Pi-hole runs on a `macvlan` network so it shows up on my LAN like its own device with a separate IP.
 
----
-
-### Immich Stack (Photos)
+### Immich Stack
+Self-hosted photo management:
 
 - **Immich**
 - **PostgreSQL**
 - **Redis**
-- **Machine learning service**
+- **Machine Learning service**
 
-This setup gave me hands-on experience working with multi-container apps that rely on databases and internal networking.
+### Nextcloud Stack
+Used for file syncing and cloud-style storage:
 
----
+- **Nextcloud AIO**
 
-## Networking Setup
+### Utilities Stack
+A few extra tools I use outside of the main setup:
 
-- Custom Docker bridge networks for service isolation
-- macvlan used only when LAN visibility is needed
-- No public port forwarding
-- Remote access handled through Tailscale
+- **Paperless-ngx** – document storage and organization
+- **Omni Tools** – small utility tools
+- **BentoPDF** – simple PDF tools
 
----
+### Game Stack
+Where I run my Minecraft servers:
+
+- Multiple **Minecraft** server instances
+- Automated backups using **itzg/mc-backup**
+
+### Database Stack
+Just a basic database I keep around for testing:
+
+- **MySQL**
+
+## Networking Notes
+
+Most services are connected through a shared Docker network so they can talk to each other easily. I only break things out into separate networks when there’s a reason to.
+
+- **macvlan** – used for services that need their own IP on the LAN (like Pi-hole)
+- **Tailscale** – handles remote access
+- No direct port forwarding for internal services unless needed
 
 ## Why I Keep This Project
 
-This lab gives me a place to experiment, break things, and fix them in a realistic environment. It’s been one of the most practical ways I’ve learned infrastructure concepts outside of school and work.
+This lab gives me a place to try things out, break stuff, and fix it. It’s been one of the best ways for me to actually learn Linux, Docker, and networking outside of school.
