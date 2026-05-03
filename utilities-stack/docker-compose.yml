@@ -24,6 +24,15 @@ services:
             - 8085:80
         restart: unless-stopped
 
+    paperless-ai:
+        image: clusterzx/paperless-ai:latest
+        container_name: paperless-ai
+        volumes:
+            - ./paperless-ai:/app/data
+        ports:
+            - 3001:3000
+        restart: unless-stopped
+
     broker:
         image: docker.io/library/redis:8
         container_name: paperless-broker
