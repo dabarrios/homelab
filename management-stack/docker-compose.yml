@@ -25,55 +25,55 @@ services:
         volumes:
             - /:/mnt/host:ro
         ports:
-            - 3001:3001
+            - ${DASHDOT_PORT:-4001}:3001
         restart: unless-stopped
 
     homarr:
         image: ghcr.io/homarr-labs/homarr:latest
         container_name: homarr
         environment:
-            - TZ=${TZ}
-            - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
+            TZ: ${TZ}
+            SECRET_ENCRYPTION_KEY: ${SECRET_ENCRYPTION_KEY}
         volumes:
             - ./homarr:/appdata
             - /var/run/docker.sock:/var/run/docker.sock
         ports:
-            - 7575:7575
+            - ${HOMARR_PORT:-4002}:7575
         restart: unless-stopped
         
     portainer:
         image: portainer/portainer-ce:latest
         container_name: portainer
         environment:
-            - TZ=${TZ}
+            TZ: ${TZ}
         volumes:
             - ./portainer:/data
             - /var/run/docker.sock:/var/run/docker.sock
         ports:
-            - 9443:9443
+            - ${PORTAINER_PORT:-4003}:9443
         restart: unless-stopped
         
     uptime-kuma:
         image: louislam/uptime-kuma:2
         container_name: uptime-kuma
         environment:
-            - TZ=${TZ}
+            TZ: ${TZ}
         volumes:
             - ./uptime-kuma:/app/data
         ports:
-            - 3002:3001
+            - ${UPTIME_KUMA_PORT:-4004}:3001
         restart: unless-stopped
 
     watchtower:
         image: nickfedor/watchtower
         container_name: watchtower
         environment:
-            - LOG_LEVEL=info
-            - TZ=${TZ}
-            - WATCHTOWER_CLEANUP=true
-            - WATCHTOWER_REMOVE_VOLUMES=true
-            - WATCHTOWER_LOG_LEVEL=info
-            - WATCHTOWER_POLL_INTERVAL=86400
+            LOG_LEVEL: info
+            TZ: ${TZ}
+            WATCHTOWER_CLEANUP: true
+            WATCHTOWER_REMOVE_VOLUMES: true
+            WATCHTOWER_LOG_LEVEL: info
+            WATCHTOWER_POLL_INTERVAL: 86400
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
         restart: unless-stopped
