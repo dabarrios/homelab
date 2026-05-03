@@ -36,6 +36,8 @@
 **/bentopdf/
 **/omni-tools/
 **/paperless-ngx/
+**/paperless-web/
+**/paperless-ai/
 
 # vpn-stack
 **/gluetun/
