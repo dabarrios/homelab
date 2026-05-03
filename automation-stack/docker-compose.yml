@@ -12,60 +12,60 @@ services:
         image: lscr.io/linuxserver/radarr:latest
         container_name: radarr
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
         volumes:
             - ./radarr:/config
             - ${MOVIES_PATH}:/movies      
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
-            - 7878:7878
+            - ${RADARR_PORT:-6001}:7878
         restart: unless-stopped
 
     radarr-anime:
         image: lscr.io/linuxserver/radarr:latest
         container_name: radarr-anime
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
         volumes:
             - ./radarr-anime:/config
             - ${ANIME_MOVIES_PATH}:/anime_movies        
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
-            - 7879:7878
+            - ${RADARR_ANIME_PORT:-6002}:7878
         restart: unless-stopped
 
     sonarr:
         image: lscr.io/linuxserver/sonarr:latest
         container_name: sonarr
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
         volumes:
             - ./sonarr:/config
             - ${SHOWS_PATH}:/shows
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
-            - 8989:8989
+            - ${SONARR_PORT:-6003}:8989
         restart: unless-stopped
 
     sonarr-anime:
         image: lscr.io/linuxserver/sonarr:latest
         container_name: sonarr-anime
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
         volumes:
             - ./sonarr-anime:/config
             - ${ANIME_SERIES_PATH}:/anime_series
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
-            - 8990:8989
+            - ${SONARR_ANIME_PORT:-6004}:8989
         restart: unless-stopped
 
 # Subtitle Services for Regular/Anime Media
@@ -73,30 +73,30 @@ services:
         image: lscr.io/linuxserver/bazarr:latest
         container_name: bazarr
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
         volumes:
             - ./bazarr:/config
             - ${MOVIES_PATH}:/movies
             - ${SHOWS_PATH}:/shows
         ports:
-            - 6767:6767
+            - ${BAZARR_PORT:-6005}:6767
         restart: unless-stopped
 
     bazarr-anime: 
         image: lscr.io/linuxserver/bazarr:latest
         container_name: bazarr-anime
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
         volumes:
             - ./bazarr-anime:/config
             - ${ANIME_MOVIES_PATH}:/anime_movies
             - ${ANIME_SERIES_PATH}:/anime_series
         ports:
-            - 6768:6767
+            - ${BAZARR_ANIME_PORT:-6006}:6767
         restart: unless-stopped
         
 # Indexing Services - Flaresolverr for Cloudflare
@@ -104,27 +104,25 @@ services:
         image: lscr.io/linuxserver/prowlarr:latest
         container_name: prowlarr
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
         volumes:
             - ./prowlarr:/config
         ports:
-            - 9696:9696
+            - ${PROWLARR_PORT:-6007}:9696
         restart: unless-stopped
 
     flaresolverr:
         image: ghcr.io/flaresolverr/flaresolverr:latest
         container_name: flaresolverr
         environment:
-            - LOG_LEVEL=info
-            - LOG_HTML=false
-            - CAPTCHA_SOLVER=none
-            - TZ=${TZ}
+            LOG_LEVEL: info
+            LOG_HTML: false
+            CAPTCHA_SOLVER: none
+            TZ: ${TZ}
         volumes:
             - ./flaresolverr:/config
-        ports:
-            - 8191:8191
         restart: unless-stopped
 
 # Quality Profile Configuration Service
@@ -132,9 +130,9 @@ services:
         image: ghcr.io/recyclarr/recyclarr
         container_name: recyclarr
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
         volumes:
             - ./recyclarr:/config
         restart: unless-stopped
