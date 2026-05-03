@@ -10,12 +10,10 @@ services:
         image: mysql
         container_name: mysql
         environment:
-            - MYSQL_USER=${SQL_USER}
-            - MYSQL_PASSWORD=${SQL_PW}
-            - MYSQL_ROOT_PASSWORD=${SQL_ROOT_PW}
-            - MYSQL_DATABASE=${SQL_DB}
+            MYSQL_USER: ${SQL_USER}
+            MYSQL_PASSWORD: ${SQL_PW}
+            MYSQL_ROOT_PASSWORD: ${SQL_ROOT_PW}
+            MYSQL_DATABASE: ${SQL_DB}
         volumes:
             - ./mysql:/var/lib/mysql
-        ports:
-            - 3306:3306
         restart: unless-stopped
