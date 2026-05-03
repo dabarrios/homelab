@@ -12,7 +12,7 @@ services:
         volumes:
             - ./bentopdf:/data
         ports:
-            - 3000:8080
+            - ${BENTOPDF_PORT:-3001}:8080
         restart: unless-stopped
 
     omni-tools:
@@ -21,29 +21,35 @@ services:
         volumes:
             - ./omni-tools:/data
         ports:
-            - 8085:80
+            - ${OMNI_TOOLS_PORT:-3002}:80
         restart: unless-stopped
 
     paperless-ai:
         image: clusterzx/paperless-ai:latest
         container_name: paperless-ai
+        environment:
+            RAG_SERVICE_URL: http://webserver:8000
+            RAG_SERVICE_ENABLED: true
+            PUID: ${PUID}
+            PGID: ${PGID}
+            PAPERLESS_TIME_ZONE: ${TZ}
         volumes:
             - ./paperless-ai:/app/data
         ports:
-            - 3001:3000
+            - ${PAPERLESS_AI_PORT:-3003}:3000
         restart: unless-stopped
 
     broker:
         image: docker.io/library/redis:8
         container_name: paperless-broker
         volumes:
-            - ./paperless-ngx/redisdata:/data
+            - ./paperless-ngx/data:/data
         restart: unless-stopped
     db:
         image: docker.io/library/postgres:18
         container_name: paperless-db
         volumes:
-            - ./paperless-ngx/pgdata:/var/lib/postgresql
+            - ./paperless-ngx/postgresql:/var/lib/postgresql
         environment:
             POSTGRES_DB: paperless
             POSTGRES_USER: paperless
@@ -56,13 +62,12 @@ services:
             - db
             - broker
         ports:
-            - "8000:8000"
+            - ${PAPERLESS_WEB_PORT:-3004}:8000
         volumes:
-            - ./paperless-ngx/data:/usr/src/paperless/data
-            - ./paperless-ngx/media:/usr/src/paperless/media
-            - ./paperless-ngx/export:/usr/src/paperless/export
-            - ./paperless-ngx/consume:/usr/src/paperless/consume
-        env_file: docker-compose.env
+            - ./paperless-web/data:/usr/src/paperless/data
+            - ./paperless-web/media:/usr/src/paperless/media
+            - ./paperless-web/export:/usr/src/paperless/export
+            - ./paperless-web/consume:/usr/src/paperless/consume
         environment:
             PAPERLESS_REDIS: redis://broker:6379
             PAPERLESS_DBHOST: db
