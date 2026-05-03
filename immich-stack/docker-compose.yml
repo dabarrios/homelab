@@ -13,43 +13,48 @@ services:
         environment:
             POSTGRES_PASSWORD: ${DB_PASSWORD}
             POSTGRES_USER: ${DB_USERNAME}
-            POSTGRES_DB: ${DB_DATABASE_NAME}
+            POSTGRES_DB: ${DB_NAME}
             POSTGRES_INITDB_ARGS: '--data-checksums'
             DB_STORAGE_TYPE: 'HDD'
         volumes:
-            - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+            - ${IMMICH_DB_PATH}:/var/lib/postgresql/data
         restart: always
         
     immich-machine-learning:
-        container_name: immich_machine_learning
         image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
-        env_file:
-            - .env
+        container_name: immich_machine_learning
+        environment:
+            DB_USERNAME: ${DB_USERNAME}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_DATABASE_NAME: ${DB_NAME}
         volumes:
             - ./immich_machine_learning/model-cache:/cache
         healthcheck:
             disable: false
         restart: always
+
     immich-server:
-        container_name: immich_server
         image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
-        env_file:
-            - .env
+        container_name: immich_server
+        environment:
+            DB_USERNAME: ${DB_USERNAME}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_DATABASE_NAME: ${DB_NAME}
         depends_on:
             - redis
             - database
         volumes:
-            - ${UPLOAD_LOCATION}:/data
+            - ${IMMICH_UPLOAD_PATH}:/data
             - /etc/localtime:/etc/localtime:ro
         ports:
-            - 2283:2283
+            - ${IMMICH_HOST_PORT:-5001}:2283
         healthcheck:
             disable: false
         restart: always
 
     redis:
-        container_name: immich_redis
         image: docker.io/valkey/valkey:8-bookworm@sha256:facc1d2c3462975c34e10fccb167bfa92b0e0dbd992fc282c29a61c3243afb11
+        container_name: immich_redis
         volumes:
             - ./redis:/data
         healthcheck:
