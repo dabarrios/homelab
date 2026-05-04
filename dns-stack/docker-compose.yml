@@ -30,7 +30,6 @@ services:
             home-net: {}
             macvlan-net:
                 ipv4_address: '${IPV4_ADDRESS}'
-                mac_address: '${MAC_ADDRESS}'
         cap_add:
             - CAP_SYS_TIME
             - SYS_NICE
