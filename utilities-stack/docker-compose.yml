@@ -51,9 +51,9 @@ services:
         volumes:
             - ./paperless-ngx/postgresql:/var/lib/postgresql
         environment:
-            POSTGRES_DB: paperless
-            POSTGRES_USER: paperless
-            POSTGRES_PASSWORD: paperless
+            POSTGRES_DB: ${PAPERLESS_DB}
+            POSTGRES_USER: ${PAPERLESS_USER}
+            POSTGRES_PASSWORD: ${PAPERLESS_PASSWORD}
         restart: unless-stopped
     webserver:
         image: ghcr.io/paperless-ngx/paperless-ngx:latest
