@@ -26,7 +26,7 @@ services:
             - ${MOVIES_PATH}:/movies      
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
-            - ${RADARR_PORT:-6001}:7878
+            - "${RADARR_PORT:-6001}:7878"
         logging: *default-logging
         restart: unless-stopped
 
@@ -42,7 +42,7 @@ services:
             - ${ANIME_MOVIES_PATH}:/anime_movies        
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
-            - ${RADARR_ANIME_PORT:-6002}:7878
+            - "${RADARR_ANIME_PORT:-6002}:7878"
         logging: *default-logging
         restart: unless-stopped
 
@@ -58,7 +58,7 @@ services:
             - ${SHOWS_PATH}:/shows
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
-            - ${SONARR_PORT:-6003}:8989
+            - "${SONARR_PORT:-6003}:8989"
         logging: *default-logging
         restart: unless-stopped
 
@@ -74,7 +74,7 @@ services:
             - ${ANIME_SERIES_PATH}:/anime_series
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
-            - ${SONARR_ANIME_PORT:-6004}:8989
+            - "${SONARR_ANIME_PORT:-6004}:8989"
         logging: *default-logging
         restart: unless-stopped
 
@@ -91,7 +91,7 @@ services:
             - ${MOVIES_PATH}:/movies
             - ${SHOWS_PATH}:/shows
         ports:
-            - ${BAZARR_PORT:-6005}:6767
+            - "${BAZARR_PORT:-6005}:6767"
         logging: *default-logging
         restart: unless-stopped
 
@@ -107,7 +107,7 @@ services:
             - ${ANIME_MOVIES_PATH}:/anime_movies
             - ${ANIME_SERIES_PATH}:/anime_series
         ports:
-            - ${BAZARR_ANIME_PORT:-6006}:6767
+            - "${BAZARR_ANIME_PORT:-6006}:6767"
         logging: *default-logging
         restart: unless-stopped
         
@@ -122,7 +122,7 @@ services:
         volumes:
             - ./prowlarr:/config
         ports:
-            - ${PROWLARR_PORT:-6007}:9696
+            - "${PROWLARR_PORT:-6007}:9696"
         logging: *default-logging
         restart: unless-stopped
 

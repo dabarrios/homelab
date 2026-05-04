@@ -55,7 +55,7 @@ services:
             - ${IMMICH_UPLOAD_PATH}:/data
             - /etc/localtime:/etc/localtime:ro
         ports:
-            - ${IMMICH_HOST_PORT:-5001}:2283
+            - "${IMMICH_HOST_PORT:-5001}:2283"
         healthcheck:
             disable: false
         logging: *default-logging

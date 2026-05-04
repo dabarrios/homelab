@@ -31,7 +31,7 @@ services:
         volumes:
             - /:/mnt/host:ro
         ports:
-            - ${DASHDOT_PORT:-4001}:3001
+            - "${DASHDOT_PORT:-4001}:3001"
         logging: *default-logging
         restart: unless-stopped
 
@@ -45,7 +45,7 @@ services:
             - ./homarr:/appdata
             - /var/run/docker.sock:/var/run/docker.sock
         ports:
-            - ${HOMARR_PORT:-4002}:7575
+            - "${HOMARR_PORT:-4002}:7575"
         logging: *default-logging
         restart: unless-stopped
         
@@ -58,7 +58,7 @@ services:
             - ./portainer:/data
             - /var/run/docker.sock:/var/run/docker.sock
         ports:
-            - ${PORTAINER_PORT:-4003}:9443
+            - "${PORTAINER_PORT:-4003}:9443"
         logging: *default-logging
         restart: unless-stopped
         
@@ -70,7 +70,7 @@ services:
         volumes:
             - ./uptime-kuma:/app/data
         ports:
-            - ${UPTIME_KUMA_PORT:-4004}:3001
+            - "${UPTIME_KUMA_PORT:-4004}:3001"
         logging: *default-logging
         restart: unless-stopped
 

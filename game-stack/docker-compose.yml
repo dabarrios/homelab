@@ -58,8 +58,8 @@ services:
         volumes:
             - ${MC1_DATA_PATH}:/data
         ports:
-            - 25565:25565 # Minecraft
-            - 24455:24455/udp # Simple Voice Chat
+            - "25565:25565" # Minecraft
+            - "24455:24455/udp" # Simple Voice Chat
     mc1-backup:
         <<: *x-backup
         container_name: mc1-backup
@@ -79,8 +79,8 @@ services:
         volumes:
             - ${MC2_DATA_PATH}:/data
         ports:
-            - 25566:25565 # Minecraft
-            - 24454:24454/udp # Simple Voice Chat
+            - "25566:25565" # Minecraft
+            - "24454:24454/udp" # Simple Voice Chat
     mc2-backup:
         <<: *x-backup
         container_name: mc2-backup
