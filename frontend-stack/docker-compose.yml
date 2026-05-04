@@ -29,7 +29,7 @@ services:
             - ${ANIME_SERIES_PATH}:/anime_series
             - ${ANIME_MOVIES_PATH}:/anime_movies
         ports:
-            - ${JELLYFIN_PORT:-8001}:8096         # http web ui
+            - "${JELLYFIN_PORT:-8001}:8096"         # http web ui
         devices:
             - /dev/dri:/dev/dri
             - /dev/dri/renderD128:/dev/dri/renderD128
@@ -45,7 +45,7 @@ services:
         volumes:
             - ./jellyseerr:/app/config
         ports:
-            - ${JELLYSEERR_PORT:-8002}:5055
+            - "${JELLYSEERR_PORT:-8002}:5055"
         healthcheck:
             test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
             start_period: 20s

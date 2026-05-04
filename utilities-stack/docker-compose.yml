@@ -18,7 +18,7 @@ services:
         volumes:
             - ./bentopdf:/data
         ports:
-            - ${BENTOPDF_PORT:-3001}:8080
+            - "${BENTOPDF_PORT:-3001}:8080"
         logging: *default-logging
         restart: unless-stopped
 
@@ -28,7 +28,7 @@ services:
         volumes:
             - ./omni-tools:/data
         ports:
-            - ${OMNI_TOOLS_PORT:-3002}:80
+            - "${OMNI_TOOLS_PORT:-3002}:80"
         logging: *default-logging
         restart: unless-stopped
 
@@ -44,7 +44,7 @@ services:
         volumes:
             - ./paperless-ai:/app/data
         ports:
-            - ${PAPERLESS_AI_PORT:-3003}:3000
+            - "${PAPERLESS_AI_PORT:-3003}:3000"
         logging: *default-logging
         restart: unless-stopped
 
@@ -85,7 +85,7 @@ services:
             broker:
                 condition: service_healthy
         ports:
-            - ${PAPERLESS_WEB_PORT:-3004}:8000
+            - "${PAPERLESS_WEB_PORT:-3004}:8000"
         volumes:
             - ./paperless-web/data:/usr/src/paperless/data
             - ./paperless-web/media:/usr/src/paperless/media
