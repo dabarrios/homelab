@@ -44,6 +44,11 @@ services:
         container_name: paperless-broker
         volumes:
             - ./paperless-ngx/data:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 30s
+            timeout: 5s
+            retries: 5
         restart: unless-stopped
     db:
         image: docker.io/library/postgres:18
@@ -51,16 +56,23 @@ services:
         volumes:
             - ./paperless-ngx/postgresql:/var/lib/postgresql
         environment:
-            POSTGRES_DB: ${PAPERLESS_DB}
-            POSTGRES_USER: ${PAPERLESS_USER}
-            POSTGRES_PASSWORD: ${PAPERLESS_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+            interval: 30s
+            timeout: 5s
+            retries: 5
         restart: unless-stopped
     webserver:
         image: ghcr.io/paperless-ngx/paperless-ngx:latest
         container_name: paperless-webserver
         depends_on:
-            - db
-            - broker
+            db:
+                condition: service_healthy
+            broker:
+                condition: service_healthy
         ports:
             - ${PAPERLESS_WEB_PORT:-3004}:8000
         volumes:
