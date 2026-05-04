@@ -19,23 +19,23 @@ services:
         cap_add:
             - NET_ADMIN
         environment:
-            - TZ=${TZ}
-            - UPDATER_PERIOD=24h
-            - VPN_SERVICE_PROVIDER=protonvpn
-            - VPN_TYPE=wireguard
-            - VPN_PORT_FORWARDING=on
-            - PORT_FORWARD_ONLY=on
+            TZ: ${TZ}
+            UPDATER_PERIOD: 24h
+            VPN_SERVICE_PROVIDER: protonvpn
+            VPN_TYPE: wireguard
+            VPN_PORT_FORWARDING: on
+            PORT_FORWARD_ONLY: on
       
-            # ProtonVPN [Interface]
-            - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-            - SERVER_COUNTRIES=${SERVER_COUNTRIES}
+            # ProtonVPN Interface
+            WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
+            SERVER_COUNTRIES: ${SERVER_COUNTRIES}
       
-            # Port Mapping
-            - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8181/api/v2/app/setPreferences 2>&1'
+            # Port Mapping Automation Script
+            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8181/api/v2/app/setPreferences 2>&1'
         volumes:
             - ./gluetun:/gluetun
         ports:
-            - 8181:8181/tcp # qBittorrent Web UI
+            - "${QBITTORRENT_PORT:-7001}:8181/tcp" # qBittorrent Web UI
         devices:
             - /dev/net/tun:/dev/net/tun  
         logging: *default-logging
@@ -49,10 +49,10 @@ services:
             gluetun:
                 condition: service_healthy
         environment:
-            - PUID=${PUID}
-            - PGID=${PGID}
-            - TZ=${TZ}
-            - WEBUI_PORT=8181
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
+            WEBUI_PORT: 8181
         volumes:
             - ./qbittorrent/config:/config
             - ${DOWNLOADS_PATH}:/downloads
