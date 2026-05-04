@@ -71,4 +71,7 @@ services:
         environment:
             PAPERLESS_REDIS: redis://broker:6379
             PAPERLESS_DBHOST: db
+            PAPERLESS_TIME_ZONE: ${TZ}
+            PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng}
+            PAPERLESS_OCR_LANGUAGES: ${PAPERLESS_OCR_LANGUAGES:-eng}
         restart: unless-stopped
