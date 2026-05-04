@@ -5,6 +5,12 @@ networks:
         name: home-net
         external: true
 
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
+
 services:
     dash:
         image: mauricenino/dashdot:latest
@@ -26,6 +32,7 @@ services:
             - /:/mnt/host:ro
         ports:
             - ${DASHDOT_PORT:-4001}:3001
+        logging: *default-logging
         restart: unless-stopped
 
     homarr:
@@ -39,6 +46,7 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
         ports:
             - ${HOMARR_PORT:-4002}:7575
+        logging: *default-logging
         restart: unless-stopped
         
     portainer:
@@ -51,6 +59,7 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
         ports:
             - ${PORTAINER_PORT:-4003}:9443
+        logging: *default-logging
         restart: unless-stopped
         
     uptime-kuma:
@@ -62,6 +71,7 @@ services:
             - ./uptime-kuma:/app/data
         ports:
             - ${UPTIME_KUMA_PORT:-4004}:3001
+        logging: *default-logging
         restart: unless-stopped
 
     watchtower:
@@ -71,9 +81,10 @@ services:
             LOG_LEVEL: info
             TZ: ${TZ}
             WATCHTOWER_CLEANUP: true
-            WATCHTOWER_REMOVE_VOLUMES: true
+            WATCHTOWER_REMOVE_VOLUMES: false
             WATCHTOWER_LOG_LEVEL: info
             WATCHTOWER_POLL_INTERVAL: 86400
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+        logging: *default-logging
         restart: unless-stopped

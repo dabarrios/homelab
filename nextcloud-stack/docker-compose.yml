@@ -8,6 +8,12 @@ networks:
     default:
       name: home-net
       external: true
+
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
   
 services:
     nextcloud-aio-mastercontainer:
@@ -28,6 +34,7 @@ services:
         ports:
             - 80:80
             - 8080:8080 
+        logging: *default-logging
         restart: unless-stopped
 
 volumes:

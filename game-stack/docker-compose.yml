@@ -4,6 +4,12 @@ networks:
     default:
         name: home-net
         external: true
+
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
     
 x-minecraft: &x-minecraft
     image: itzg/minecraft-server
@@ -18,6 +24,7 @@ x-minecraft: &x-minecraft
         - ENFORCE_WHITELIST=TRUE
     labels:
         - "com.centurylinklabs.watchtower.enable=false"
+    logging: *default-logging
     restart: unless-stopped
 
 x-backup: &x-backup
@@ -39,6 +46,7 @@ x-backup: &x-backup
         - /etc/timezone:/etc/timezone:ro
     labels:
         - "com.centurylinklabs.watchtower.enable=false"
+    logging: *default-logging
     restart: unless-stopped
 
 services:

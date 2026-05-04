@@ -5,6 +5,12 @@ networks:
         name: home-net
         external: true
 
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
+
 services:
     database:
         image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:32324a2f41df5de9efe1af166b7008c3f55646f8d0e00d9550c16c9822366b4a
@@ -18,6 +24,7 @@ services:
             DB_STORAGE_TYPE: 'HDD'
         volumes:
             - ${IMMICH_DB_PATH}:/var/lib/postgresql/data
+        logging: *default-logging
         restart: always
         
     immich-machine-learning:
@@ -31,6 +38,7 @@ services:
             - ./immich_machine_learning/model-cache:/cache
         healthcheck:
             disable: false
+        logging: *default-logging
         restart: always
 
     immich-server:
@@ -50,6 +58,7 @@ services:
             - ${IMMICH_HOST_PORT:-5001}:2283
         healthcheck:
             disable: false
+        logging: *default-logging
         restart: always
 
     redis:
@@ -59,4 +68,5 @@ services:
             - ./redis:/data
         healthcheck:
             test: redis-cli ping || exit 1
+        logging: *default-logging
         restart: always
