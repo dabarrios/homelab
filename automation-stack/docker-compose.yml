@@ -5,6 +5,12 @@ networks:
         name: home-net
         external: true
 
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
+
 services:
 
 # Movies/Shows/Anime Services
@@ -21,6 +27,7 @@ services:
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - ${RADARR_PORT:-6001}:7878
+        logging: *default-logging
         restart: unless-stopped
 
     radarr-anime:
@@ -36,6 +43,7 @@ services:
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - ${RADARR_ANIME_PORT:-6002}:7878
+        logging: *default-logging
         restart: unless-stopped
 
     sonarr:
@@ -51,6 +59,7 @@ services:
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - ${SONARR_PORT:-6003}:8989
+        logging: *default-logging
         restart: unless-stopped
 
     sonarr-anime:
@@ -66,6 +75,7 @@ services:
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
             - ${SONARR_ANIME_PORT:-6004}:8989
+        logging: *default-logging
         restart: unless-stopped
 
 # Subtitle Services for Regular/Anime Media
@@ -82,6 +92,7 @@ services:
             - ${SHOWS_PATH}:/shows
         ports:
             - ${BAZARR_PORT:-6005}:6767
+        logging: *default-logging
         restart: unless-stopped
 
     bazarr-anime: 
@@ -97,6 +108,7 @@ services:
             - ${ANIME_SERIES_PATH}:/anime_series
         ports:
             - ${BAZARR_ANIME_PORT:-6006}:6767
+        logging: *default-logging
         restart: unless-stopped
         
 # Indexing Services - Flaresolverr for Cloudflare
@@ -111,6 +123,7 @@ services:
             - ./prowlarr:/config
         ports:
             - ${PROWLARR_PORT:-6007}:9696
+        logging: *default-logging
         restart: unless-stopped
 
     flaresolverr:
@@ -123,6 +136,7 @@ services:
             TZ: ${TZ}
         volumes:
             - ./flaresolverr:/config
+        logging: *default-logging
         restart: unless-stopped
 
 # Quality Profile Configuration Service
@@ -135,4 +149,5 @@ services:
             TZ: ${TZ}
         volumes:
             - ./recyclarr:/config
+        logging: *default-logging
         restart: unless-stopped

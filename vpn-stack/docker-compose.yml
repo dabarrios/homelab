@@ -3,6 +3,12 @@ name: vpn-stack
 networks:
     home-net:
         external: true
+
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
         
 services:
     gluetun:
@@ -32,6 +38,7 @@ services:
             - 8181:8181/tcp # qBittorrent Web UI
         devices:
             - /dev/net/tun:/dev/net/tun  
+        logging: *default-logging
         restart: unless-stopped
             
     qbittorrent:
@@ -51,4 +58,5 @@ services:
             - ${DOWNLOADS_PATH}:/downloads
             - ${INCOMPLETE_DOWNLOADS_PATH}:/incomplete
             - ${TORRENTS_PATH}:/torrents
+        logging: *default-logging
         restart: unless-stopped

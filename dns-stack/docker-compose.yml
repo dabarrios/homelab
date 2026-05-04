@@ -15,6 +15,12 @@ networks:
     home-net:
         external: true
 
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
+
 services:
     pihole:
         image: pihole/pihole:latest
@@ -35,4 +41,5 @@ services:
         volumes:
             - ./pihole/etc/pihole:/etc/pihole
             - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d
+        logging: *default-logging
         restart: unless-stopped
