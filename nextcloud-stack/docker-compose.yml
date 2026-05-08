@@ -1,20 +1,16 @@
-# Helpful links:
-# Tailscale Serve: https://tailscale.com/kb/1312/serve
-# Nextcloud AIO Tailscale Setup/Troubleshooting: https://github.com/nextcloud/all-in-one/discussions/6817
-
 name: nextcloud-stack
 
 networks:
     default:
-      name: home-net
-      external: true
+        name: home-net
+        external: true
 
 x-logging: &default-logging
     driver: json-file
     options:
         max-size: "10m"
         max-file: "3"
-  
+
 services:
     nextcloud-aio-mastercontainer:
         image: ghcr.io/nextcloud-releases/all-in-one:latest
@@ -25,19 +21,17 @@ services:
             - 192.168.6.3      # Pihole DNS
             - 1.1.1.1          # Fallback DNS
         environment:
-            APACHE_PORT: 11000
-            APACHE_IP_BINDING: 0.0.0.0
-            SKIP_DOMAIN_VALIDATION: 'true' # Workaround to skip domain validation when using Tailscale
+            APACHE_PORT: ${NEXTCLOUD_BACKEND_PORT:-9002}
+            APACHE_IP_BINDING: 127.0.0.1
+            SKIP_DOMAIN_VALIDATION: "true"
         volumes:
             - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
             - /var/run/docker.sock:/var/run/docker.sock:ro
         ports:
-            - "80:80"
-            - "8080:8080"
+            - "${NEXTCLOUD_AIO_PORT:-9001}:8080"
         logging: *default-logging
         restart: unless-stopped
 
 volumes:
     nextcloud_aio_mastercontainer:
         name: nextcloud_aio_mastercontainer
-        
