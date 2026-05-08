@@ -32,6 +32,12 @@
 **/dash/
 **/uptime-kuma/
 
+# monitoring-stack
+**/.data/
+**/grafana/
+**/loki/
+**/alloy/
+
 # utilities-stack
 **/bentopdf/
 **/omni-tools/
