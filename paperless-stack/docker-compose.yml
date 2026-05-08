@@ -1,0 +1,81 @@
+name: paperless-stack
+
+networks:
+    default:
+        name: home-net
+        external: true
+
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
+
+services:
+    paperless-ai:
+        image: clusterzx/paperless-ai:latest
+        container_name: paperless-ai
+        environment:
+            RAG_SERVICE_URL: http://webserver:8000
+            RAG_SERVICE_ENABLED: true
+            PUID: ${PUID}
+            PGID: ${PGID}
+            PAPERLESS_TIME_ZONE: ${TZ}
+        volumes:
+            - ./paperless-ai:/app/data
+        ports:
+            - "${PAPERLESS_AI_PORT:-3003}:3000"
+        logging: *default-logging
+        restart: unless-stopped
+
+    paperless-broker:
+        image: docker.io/library/redis:8
+        container_name: paperless-broker
+        volumes:
+            - ./paperless-ngx/data:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 30s
+            timeout: 5s
+            retries: 5
+        logging: *default-logging
+        restart: unless-stopped
+    paperless-db:
+        image: docker.io/library/postgres:18
+        container_name: paperless-db
+        volumes:
+            - ./paperless-ngx/postgresql:/var/lib/postgresql
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+            interval: 30s
+            timeout: 5s
+            retries: 5
+        logging: *default-logging
+        restart: unless-stopped
+    paperless-webserver:
+        image: ghcr.io/paperless-ngx/paperless-ngx:latest
+        container_name: paperless-webserver
+        depends_on:
+            paperless-db:
+                condition: service_healthy
+            paperless-broker:
+                condition: service_healthy
+        ports:
+            - "${PAPERLESS_WEB_PORT:-3004}:8000"
+        volumes:
+            - ./paperless-web/data:/usr/src/paperless/data
+            - ./paperless-web/media:/usr/src/paperless/media
+            - ./paperless-web/export:/usr/src/paperless/export
+            - ./paperless-web/consume:/usr/src/paperless/consume
+        environment:
+            PAPERLESS_REDIS: redis://broker:6379
+            PAPERLESS_DBHOST: db
+            PAPERLESS_TIME_ZONE: ${TZ}
+            PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng}
+            PAPERLESS_OCR_LANGUAGES: ${PAPERLESS_OCR_LANGUAGES:-eng}
+        logging: *default-logging
+        restart: unless-stopped
