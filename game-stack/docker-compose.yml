@@ -22,8 +22,6 @@ x-minecraft: &x-minecraft
         - SPAWN_PROTECTION=0
         - ENABLE_WHITELIST=TRUE
         - ENFORCE_WHITELIST=TRUE
-    labels:
-        - "com.centurylinklabs.watchtower.enable=false"
     logging: *default-logging
     restart: unless-stopped
 
@@ -44,8 +42,6 @@ x-backup: &x-backup
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - /etc/timezone:/etc/timezone:ro
-    labels:
-        - "com.centurylinklabs.watchtower.enable=false"
     logging: *default-logging
     restart: unless-stopped
 
