@@ -1,4 +1,4 @@
-name: db-stack
+name: database-stack
 
 networks:
     default:
