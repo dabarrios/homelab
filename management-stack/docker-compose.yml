@@ -73,18 +73,3 @@ services:
             - "${UPTIME_KUMA_PORT:-4004}:3001"
         logging: *default-logging
         restart: unless-stopped
-
-    watchtower:
-        image: nickfedor/watchtower
-        container_name: watchtower
-        environment:
-            LOG_LEVEL: info
-            TZ: ${TZ}
-            WATCHTOWER_CLEANUP: true
-            WATCHTOWER_REMOVE_VOLUMES: false
-            WATCHTOWER_LOG_LEVEL: info
-            WATCHTOWER_POLL_INTERVAL: 86400
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-        logging: *default-logging
-        restart: unless-stopped
