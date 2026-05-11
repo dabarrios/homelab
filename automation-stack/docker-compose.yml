@@ -23,6 +23,7 @@ services:
             TZ: ${TZ}
         volumes:
             - ./radarr:/config
+            - ${SANDBOX_PATH}:/sandbox
             - ${MOVIES_PATH}:/movies      
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
@@ -39,6 +40,7 @@ services:
             TZ: ${TZ}
         volumes:
             - ./radarr-anime:/config
+            - ${SANDBOX_PATH}:/sandbox
             - ${ANIME_MOVIES_PATH}:/anime_movies        
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
@@ -55,6 +57,7 @@ services:
             TZ: ${TZ}
         volumes:
             - ./sonarr:/config
+            - ${SANDBOX_PATH}:/sandbox
             - ${SHOWS_PATH}:/shows
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
@@ -71,6 +74,7 @@ services:
             TZ: ${TZ}
         volumes:
             - ./sonarr-anime:/config
+            - ${SANDBOX_PATH}:/sandbox
             - ${ANIME_SERIES_PATH}:/anime_series
             - ${DOWNLOADS_PATH}:/downloads  
         ports:
@@ -88,6 +92,7 @@ services:
             TZ: ${TZ}
         volumes:
             - ./bazarr:/config
+            - ${SANDBOX_PATH}:/sandbox
             - ${MOVIES_PATH}:/movies
             - ${SHOWS_PATH}:/shows
         ports:
@@ -104,6 +109,7 @@ services:
             TZ: ${TZ}
         volumes:
             - ./bazarr-anime:/config
+            - ${SANDBOX_PATH}:/sandbox
             - ${ANIME_MOVIES_PATH}:/anime_movies
             - ${ANIME_SERIES_PATH}:/anime_series
         ports:
