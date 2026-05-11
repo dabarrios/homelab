@@ -24,6 +24,7 @@ services:
             JELLYFIN_PublishedServerUrl: ${JELLYFIN_SERVER_URL}
         volumes:
             - ./jellyfin:/config
+            - ${SANDBOX_PATH}:/sandbox
             - ${SHOWS_PATH}:/shows
             - ${MOVIES_PATH}:/movies
             - ${ANIME_SERIES_PATH}:/anime_series
