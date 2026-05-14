@@ -16,7 +16,7 @@ services:
         image: clusterzx/paperless-ai:latest
         container_name: paperless-ai
         environment:
-            RAG_SERVICE_URL: http://webserver:8000
+            RAG_SERVICE_URL: http://paperless-webserver:8000
             RAG_SERVICE_ENABLED: true
             PUID: ${PUID}
             PGID: ${PGID}
@@ -72,8 +72,8 @@ services:
             - ./paperless-web/export:/usr/src/paperless/export
             - ./paperless-web/consume:/usr/src/paperless/consume
         environment:
-            PAPERLESS_REDIS: redis://broker:6379
-            PAPERLESS_DBHOST: db
+            PAPERLESS_REDIS: redis://paperless-broker:6379
+            PAPERLESS_DBHOST: paperless-db
             PAPERLESS_TIME_ZONE: ${TZ}
             PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng}
             PAPERLESS_OCR_LANGUAGES: ${PAPERLESS_OCR_LANGUAGES:-eng}
