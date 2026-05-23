@@ -21,14 +21,14 @@ services:
             - 192.168.6.3      # Pihole DNS
             - 1.1.1.1          # Fallback DNS
         environment:
-            APACHE_PORT: ${NEXTCLOUD_BACKEND_HOST_PORT:-9002}
+            APACHE_PORT: ${NEXTCLOUD_BACKEND_PORT:-9002}
             APACHE_IP_BINDING: 127.0.0.1
             SKIP_DOMAIN_VALIDATION: "true"
         volumes:
             - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
             - /var/run/docker.sock:/var/run/docker.sock:ro
         ports:
-            - "${NEXTCLOUD_AIO_HOST_PORT:-9001}:8080"
+            - "${NEXTCLOUD_AIO_PORT:-9001}:8080"
         logging: *default-logging
         restart: unless-stopped
 

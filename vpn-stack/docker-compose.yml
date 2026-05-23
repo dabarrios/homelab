@@ -35,7 +35,7 @@ services:
         volumes:
             - ./gluetun:/gluetun
         ports:
-            - "${QBITTORRENT_HOST_PORT:-6101}:8181/tcp" # qBittorrent Web UI
+            - "${QBITTORRENT_PORT:-7001}:8181/tcp" # qBittorrent Web UI
         devices:
             - /dev/net/tun:/dev/net/tun  
         logging: *default-logging
