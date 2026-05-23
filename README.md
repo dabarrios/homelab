@@ -93,6 +93,8 @@ Most services are connected through a shared Docker network so they can talk to 
 - **Tailscale** – installed on the host for remote access (not containerized)
 - No direct port forwarding for internal services unless needed
 
+For a quick port-mapping reference, see [PORTS.md](PORTS.md).
+
 ## Why I Keep This Project
 
 This lab gives me a place to try things out, break stuff, and fix it. It’s been one of the best ways for me to actually learn Linux, Docker, and networking outside of school.
