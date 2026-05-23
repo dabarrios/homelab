@@ -1,0 +1,50 @@
+name: drive-stack
+
+networks:
+    default:
+        name: home-net
+        external: true
+
+x-logging: &default-logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "3"
+
+services:
+
+    filebrowser:
+        image: filebrowser/filebrowser:latest
+        container_name: filebrowser
+        environment:
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
+        volumes:
+            - ./filebrowser/srv:/srv
+            - ./filebrowser/database:/database
+            - ./filebrowser/config:/config
+        ports:
+            - "${FILEBROWSER_PORT:-8081}:80"
+        logging: *default-logging
+        restart: unless-stopped
+
+    syncthing:
+        image: lscr.io/linuxserver/syncthing:latest
+        container_name: syncthing
+        hostname: syncthing 
+        environment:
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
+        volumes:
+            - ./syncthing/config:/config
+            - ./syncthing/data1:/data1
+            - ./syncthing/data2:/data2
+        ports:
+            - "${SYNCTHING_PORT:-8384}:8384"
+            - "22000:22000/tcp"
+            - "22000:22000/udp"
+            - "21027:21027/udp"
+        logging: *default-logging
+        restart: unless-stopped
