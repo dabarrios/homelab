@@ -12,85 +12,6 @@ x-logging: &default-logging
         max-file: "3"
 
 services:
-
-    alloy:
-        image: grafana/alloy:latest
-        container_name: alloy
-        command:
-            - run
-            - --server.http.listen-addr=0.0.0.0:12345
-            - --storage.path=/var/lib/alloy/data
-            - /etc/alloy/config.alloy
-        volumes:
-            - ./loki/alloy-local-config.yaml:/etc/alloy/config.alloy:ro
-            - ./alloy/data:/var/lib/alloy/data
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-        ports:
-            - "${ALLOY_HOST_PORT:-4101}:12345"
-        depends_on:
-            - loki-gateway
-        logging: *default-logging
-        restart: unless-stopped
-
-    dash:
-        image: mauricenino/dashdot:latest
-        container_name: dash
-        privileged: true
-        environment:
-            DASHDOT_WIDGET_LIST: 'os,cpu,ram,storage,network'
-            DASHDOT_ENABLE_CPU_TEMPS: 'true'
-            DASHDOT_OVERRIDE_RAM_BRAND: 'G.SKILL Ripjaws V'
-            DASHDOT_SHOW_HOST: 'true'
-            DASHDOT_CUSTOM_HOST: 'Homelab'
-            DASHDOT_OS_WIDGET_GROW: '1'
-            DASHDOT_STORAGE_WIDGET_ITEMS_PER_PAGE: '5'
-            DASHDOT_STORAGE_WIDGET_GROW: '5'
-            DASHDOT_NETWORK_WIDGET_GROW: '4'
-            DASHDOT_ALWAYS_SHOW_PERCENTAGES: 'true'
-            DASHDOT_NETWORK_SPEED_AS_BYTES: 'true'
-        volumes:
-            - /:/mnt/host:ro
-        ports:
-            - "${DASHDOT_HOST_PORT:-4102}:3001"
-        logging: *default-logging
-        restart: unless-stopped
-
-    grafana:
-        image: grafana/grafana:latest
-        container_name: grafana
-        user: "${PUID:-1000}:${PGID:-1000}"
-        environment:
-            TZ: ${TZ}
-            GF_PATHS_PROVISIONING: /etc/grafana/provisioning
-            GF_AUTH_ANONYMOUS_ENABLED: true
-            GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
-        volumes:
-            - ./grafana/data:/var/lib/grafana
-            - ./grafana/provisioning:/etc/grafana/provisioning:ro
-        ports:
-            - "${GRAFANA_HOST_PORT:-4103}:3000"
-        depends_on:
-            - loki-gateway
-        healthcheck:
-            test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-        logging: *default-logging
-        restart: unless-stopped
-
-    flog:
-        image: mingrammer/flog
-        container_name: flog
-        command:
-            - -f
-            - json
-            - -d
-            - 200ms
-            - -l
-        logging: *default-logging
-        restart: unless-stopped
-
     loki-read:
         image: grafana/loki:latest
         container_name: loki-read
@@ -222,12 +143,31 @@ services:
                 EOF
                 /docker-entrypoint.sh nginx -g "daemon off;"
         ports:
-            - "${LOKI_GATEWAY_HOST_PORT:-4104}:3100"
+            - "${LOKI_GATEWAY_PORT:-4502}:3100"
         healthcheck:
             test: ["CMD", "service", "nginx", "status"]
             interval: 10s
             timeout: 5s
             retries: 5
+        logging: *default-logging
+        restart: unless-stopped
+
+    alloy:
+        image: grafana/alloy:latest
+        container_name: alloy
+        command:
+            - run
+            - --server.http.listen-addr=0.0.0.0:12345
+            - --storage.path=/var/lib/alloy/data
+            - /etc/alloy/config.alloy
+        volumes:
+            - ./loki/alloy-local-config.yaml:/etc/alloy/config.alloy:ro
+            - ./alloy/data:/var/lib/alloy/data
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        ports:
+            - "${ALLOY_PORT:-4503}:12345"
+        depends_on:
+            - loki-gateway
         logging: *default-logging
         restart: unless-stopped
 
@@ -256,14 +196,38 @@ services:
         logging: *default-logging
         restart: unless-stopped
 
-    uptime-kuma:
-        image: louislam/uptime-kuma:2
-        container_name: uptime-kuma
+    grafana:
+        image: grafana/grafana:latest
+        container_name: grafana
+        user: "${PUID:-1000}:${PGID:-1000}"
         environment:
             TZ: ${TZ}
+            GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+            GF_AUTH_ANONYMOUS_ENABLED: true
+            GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
         volumes:
-            - ./uptime-kuma:/app/data
+            - ./grafana/data:/var/lib/grafana
+            - ./grafana/provisioning:/etc/grafana/provisioning:ro
         ports:
-            - "${UPTIME_KUMA_HOST_PORT:-4105}:3001"
+            - "${GRAFANA_PORT:-4501}:3000"
+        depends_on:
+            - loki-gateway
+        healthcheck:
+            test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        logging: *default-logging
+        restart: unless-stopped
+
+    flog:
+        image: mingrammer/flog
+        container_name: flog
+        command:
+            - -f
+            - json
+            - -d
+            - 200ms
+            - -l
         logging: *default-logging
         restart: unless-stopped
