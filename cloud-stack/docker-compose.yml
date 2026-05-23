@@ -1,4 +1,4 @@
-name: drive-stack
+name: cloud-stack
 
 networks:
     default:
