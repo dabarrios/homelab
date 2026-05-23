@@ -18,7 +18,7 @@ services:
         volumes:
             - ./bentopdf:/data
         ports:
-            - "${BENTOPDF_PORT:-3001}:8080"
+            - "${BENTOPDF_HOST_PORT:-3001}:8080"
         logging: *default-logging
         restart: unless-stopped
 
@@ -28,6 +28,6 @@ services:
         volumes:
             - ./omni-tools:/data
         ports:
-            - "${OMNI_TOOLS_PORT:-3002}:80"
+            - "${OMNI_TOOLS_HOST_PORT:-3002}:80"
         logging: *default-logging
         restart: unless-stopped
