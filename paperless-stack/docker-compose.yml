@@ -25,7 +25,7 @@ services:
         volumes:
             - ./paperless-ai:/app/data
         ports:
-            - "${PAPERLESS_AI_HOST_PORT:-3003}:3000"
+            - "${PAPERLESS_AI_HOST_PORT:-3101}:3000"
         logging: *default-logging
         restart: unless-stopped
 
@@ -68,7 +68,7 @@ services:
             paperless-broker:
                 condition: service_healthy
         ports:
-            - "${PAPERLESS_WEB_HOST_PORT:-3004}:8000"
+            - "${PAPERLESS_WEB_HOST_PORT:-3102}:8000"
         volumes:
             - ./paperless-web/data:/usr/src/paperless/data
             - ./paperless-web/media:/usr/src/paperless/media
