@@ -1,4 +1,4 @@
-name: drive-stack
+name: cloud-stack
 
 networks:
     default:
@@ -25,7 +25,7 @@ services:
             - ./filebrowser/database:/database
             - ./filebrowser/config:/config
         ports:
-            - "${FILEBROWSER_PORT:-8081}:80"
+            - "${FILEBROWSER_HOST_PORT:-9001}:80"
         logging: *default-logging
         restart: unless-stopped
 
@@ -42,9 +42,9 @@ services:
             - ./syncthing/data1:/data1
             - ./syncthing/data2:/data2
         ports:
-            - "${SYNCTHING_PORT:-8384}:8384"
-            - "22000:22000/tcp"
-            - "22000:22000/udp"
-            - "21027:21027/udp"
+            - "${SYNCTHING_HOST_PORT:-9002}:8384"
+            - "${SYNCTHING_TCP_HOST_PORT:-9003}:22000/tcp"
+            - "${SYNCTHING_UDP_HOST_PORT:-9003}:22000/udp"
+            - "${SYNCTHING_DISCOVERY_HOST_PORT:-9004}:21027/udp"
         logging: *default-logging
         restart: unless-stopped
