@@ -21,7 +21,7 @@ services:
             PGID: ${PGID}
             TZ: ${TZ}
         volumes:
-            - ./filebrowser/srv:/srv
+            - ${CLOUD_SYNC_PATH}:/srv
             - ./filebrowser/database:/database
             - ./filebrowser/config:/config
         ports:
@@ -38,9 +38,8 @@ services:
             PGID: ${PGID}
             TZ: ${TZ}
         volumes:
+            - ${CLOUD_SYNC_PATH}:/data
             - ./syncthing/config:/config
-            - ./syncthing/data1:/data1
-            - ./syncthing/data2:/data2
         ports:
             - "${SYNCTHING_HOST_PORT:-9002}:8384"
             - "${SYNCTHING_TCP_HOST_PORT:-9003}:22000/tcp"
