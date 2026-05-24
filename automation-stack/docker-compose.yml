@@ -13,71 +13,6 @@ x-logging: &default-logging
 
 services:
 
-# Movies/Shows/Anime Services
-    radarr:
-        image: lscr.io/linuxserver/radarr:latest
-        container_name: radarr
-        environment:
-            PUID: ${PUID}
-            PGID: ${PGID}
-            TZ: ${TZ}
-        volumes:
-            - ./radarr:/config
-            - ${MOVIES_PATH}:/movies      
-            - ${DOWNLOADS_PATH}:/downloads  
-        ports:
-            - "${RADARR_PORT:-6001}:7878"
-        logging: *default-logging
-        restart: unless-stopped
-
-    radarr-anime:
-        image: lscr.io/linuxserver/radarr:latest
-        container_name: radarr-anime
-        environment:
-            PUID: ${PUID}
-            PGID: ${PGID}
-            TZ: ${TZ}
-        volumes:
-            - ./radarr-anime:/config
-            - ${ANIME_MOVIES_PATH}:/anime_movies        
-            - ${DOWNLOADS_PATH}:/downloads  
-        ports:
-            - "${RADARR_ANIME_PORT:-6002}:7878"
-        logging: *default-logging
-        restart: unless-stopped
-
-    sonarr:
-        image: lscr.io/linuxserver/sonarr:latest
-        container_name: sonarr
-        environment:
-            PUID: ${PUID}
-            PGID: ${PGID}
-            TZ: ${TZ}
-        volumes:
-            - ./sonarr:/config
-            - ${SHOWS_PATH}:/shows
-            - ${DOWNLOADS_PATH}:/downloads  
-        ports:
-            - "${SONARR_PORT:-6003}:8989"
-        logging: *default-logging
-        restart: unless-stopped
-
-    sonarr-anime:
-        image: lscr.io/linuxserver/sonarr:latest
-        container_name: sonarr-anime
-        environment:
-            PUID: ${PUID}
-            PGID: ${PGID}
-            TZ: ${TZ}
-        volumes:
-            - ./sonarr-anime:/config
-            - ${ANIME_SERIES_PATH}:/anime_series
-            - ${DOWNLOADS_PATH}:/downloads  
-        ports:
-            - "${SONARR_ANIME_PORT:-6004}:8989"
-        logging: *default-logging
-        restart: unless-stopped
-
 # Subtitle Services for Regular/Anime Media
     bazarr: 
         image: lscr.io/linuxserver/bazarr:latest
@@ -91,7 +26,7 @@ services:
             - ${MOVIES_PATH}:/movies
             - ${SHOWS_PATH}:/shows
         ports:
-            - "${BAZARR_PORT:-6005}:6767"
+            - "${BAZARR_HOST_PORT:-6001}:6767"
         logging: *default-logging
         restart: unless-stopped
 
@@ -107,7 +42,72 @@ services:
             - ${ANIME_MOVIES_PATH}:/anime_movies
             - ${ANIME_SERIES_PATH}:/anime_series
         ports:
-            - "${BAZARR_ANIME_PORT:-6006}:6767"
+            - "${BAZARR_ANIME_HOST_PORT:-6002}:6767"
+        logging: *default-logging
+        restart: unless-stopped
+
+# Movies/Shows/Anime Services
+    radarr:
+        image: lscr.io/linuxserver/radarr:latest
+        container_name: radarr
+        environment:
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
+        volumes:
+            - ./radarr:/config
+            - ${MOVIES_PATH}:/movies      
+            - ${DOWNLOADS_PATH}:/downloads  
+        ports:
+            - "${RADARR_HOST_PORT:-6003}:7878"
+        logging: *default-logging
+        restart: unless-stopped
+
+    radarr-anime:
+        image: lscr.io/linuxserver/radarr:latest
+        container_name: radarr-anime
+        environment:
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
+        volumes:
+            - ./radarr-anime:/config
+            - ${ANIME_MOVIES_PATH}:/anime_movies        
+            - ${DOWNLOADS_PATH}:/downloads  
+        ports:
+            - "${RADARR_ANIME_HOST_PORT:-6004}:7878"
+        logging: *default-logging
+        restart: unless-stopped
+
+    sonarr:
+        image: lscr.io/linuxserver/sonarr:latest
+        container_name: sonarr
+        environment:
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
+        volumes:
+            - ./sonarr:/config
+            - ${SHOWS_PATH}:/shows
+            - ${DOWNLOADS_PATH}:/downloads  
+        ports:
+            - "${SONARR_HOST_PORT:-6005}:8989"
+        logging: *default-logging
+        restart: unless-stopped
+
+    sonarr-anime:
+        image: lscr.io/linuxserver/sonarr:latest
+        container_name: sonarr-anime
+        environment:
+            PUID: ${PUID}
+            PGID: ${PGID}
+            TZ: ${TZ}
+        volumes:
+            - ./sonarr-anime:/config
+            - ${ANIME_SERIES_PATH}:/anime_series
+            - ${DOWNLOADS_PATH}:/downloads  
+        ports:
+            - "${SONARR_ANIME_HOST_PORT:-6006}:8989"
         logging: *default-logging
         restart: unless-stopped
         
@@ -122,7 +122,7 @@ services:
         volumes:
             - ./prowlarr:/config
         ports:
-            - "${PROWLARR_PORT:-6007}:9696"
+            - "${PROWLARR_HOST_PORT:-6007}:9696"
         logging: *default-logging
         restart: unless-stopped
 
