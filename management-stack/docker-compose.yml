@@ -23,7 +23,7 @@ services:
             - ./homarr:/appdata
             - /var/run/docker.sock:/var/run/docker.sock
         ports:
-            - "${HOMARR_HOST_PORT:-4002}:7575"
+            - "${HOMARR_HOST_PORT:-4001}:7575"
         logging: *default-logging
         restart: unless-stopped
         
@@ -36,6 +36,6 @@ services:
             - ./portainer:/data
             - /var/run/docker.sock:/var/run/docker.sock
         ports:
-            - "${PORTAINER_HOST_PORT:-4003}:9443"
+            - "${PORTAINER_HOST_PORT:-4002}:9443"
         logging: *default-logging
         restart: unless-stopped
