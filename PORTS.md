@@ -13,8 +13,8 @@ Quick reference for what lives where. There is no direct internet exposure.
 
 | Port | Service | Notes |
 | --- | --- | --- |
-| `3003` | Paperless AI | AI helper for Paperless |
-| `3004` | Paperless-ngx | Main Paperless web UI |
+| `3101` | Paperless AI | AI helper for Paperless |
+| `3102` | Paperless-ngx | Main Paperless web UI |
 
 ## Management Stack
 
