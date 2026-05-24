@@ -76,13 +76,6 @@ qBittorrent itself uses Gluetun's network namespace, so the web UI port is publi
 | --- | --- | --- |
 | `9101` | Immich | Photo management |
 
-## Nextcloud Stack
-
-| Port | Service | Notes |
-| --- | --- | --- |
-| `9001` | Nextcloud AIO | AIO mastercontainer UI |
-| `9002` | Nextcloud backend | Internal Apache backend port from `NEXTCLOUD_BACKEND_PORT` |
-
 ## DNS Stack
 
 | Address | Service | Notes |
