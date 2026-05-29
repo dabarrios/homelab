@@ -15,7 +15,6 @@ x-minecraft: &x-minecraft
     image: itzg/minecraft-server
     environment:
         - EULA=TRUE
-        - VERSION=1.21.11
         - TYPE=FABRIC
         - ALLOW_FLIGHT=TRUE
         - DIFFICULTY=HARD
@@ -51,6 +50,8 @@ services:
         container_name: mc1
         env_file:
             - mc1.env
+        environment:
+            - VERSION=1.21.11
         volumes:
             - ${MC1_DATA_PATH}:/data
         ports:
@@ -72,6 +73,8 @@ services:
         container_name: mc2
         env_file:
             - mc2.env
+        environment:
+            - VERSION=1.21.11
         volumes:
             - ${MC2_DATA_PATH}:/data
         ports:
@@ -93,10 +96,12 @@ services:
         container_name: mc3
         env_file:
             - mc3.env
+        environment:
+            - VERSION=1.21.1
         volumes:
             - ${MC3_DATA_PATH}:/data
         ports:
-            - "25566:25565" # Minecraft
+            - "25567:25565" # Minecraft
             - "24454:24454/udp" # Simple Voice Chat
     mc3-backup:
         <<: *x-backup
