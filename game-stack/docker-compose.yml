@@ -88,3 +88,24 @@ services:
         volumes:
             - ${MC2_DATA_PATH}:/data:ro
             - ${MC2_BACKUP_PATH}:/backups
+    mc3:
+        <<: *x-minecraft
+        container_name: mc3
+        env_file:
+            - mc3.env
+        volumes:
+            - ${MC3_DATA_PATH}:/data
+        ports:
+            - "25566:25565" # Minecraft
+            - "24454:24454/udp" # Simple Voice Chat
+    mc3-backup:
+        <<: *x-backup
+        container_name: mc3-backup
+        env_file:
+            - mc3-backup.env
+        depends_on:
+            mc3:
+                condition: service_healthy
+        volumes:
+            - ${MC3_DATA_PATH}:/data:ro
+            - ${MC3_BACKUP_PATH}:/backups
