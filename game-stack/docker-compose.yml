@@ -50,13 +50,11 @@ services:
         container_name: mc1
         env_file:
             - mc1.env
-        environment:
-            - VERSION=1.21.11
         volumes:
             - ${MC1_DATA_PATH}:/data
         ports:
             - "25565:25565" # Minecraft
-            - "24455:24455/udp" # Simple Voice Chat
+            - "24454:24454/udp" # Simple Voice Chat
     mc1-backup:
         <<: *x-backup
         container_name: mc1-backup
@@ -73,13 +71,11 @@ services:
         container_name: mc2
         env_file:
             - mc2.env
-        environment:
-            - VERSION=1.21.11
         volumes:
             - ${MC2_DATA_PATH}:/data
         ports:
             - "25566:25565" # Minecraft
-            - "24454:24454/udp" # Simple Voice Chat
+            - "24455:24455/udp" # Simple Voice Chat
     mc2-backup:
         <<: *x-backup
         container_name: mc2-backup
@@ -96,13 +92,11 @@ services:
         container_name: mc3
         env_file:
             - mc3.env
-        environment:
-            - VERSION=1.21.1
         volumes:
             - ${MC3_DATA_PATH}:/data
         ports:
             - "25567:25565" # Minecraft
-            - "24454:24454/udp" # Simple Voice Chat
+            - "24456:24456/udp" # Simple Voice Chat
     mc3-backup:
         <<: *x-backup
         container_name: mc3-backup
