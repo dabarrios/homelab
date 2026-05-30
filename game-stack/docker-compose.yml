@@ -52,6 +52,8 @@ services:
     mc1:
         <<: *x-minecraft
         container_name: mc1
+        profiles:
+            - mc1
         environment:
             <<: *minecraft-env
             VERSION: ${MC1_VERSION}
@@ -70,6 +72,8 @@ services:
     mc1-backup:
         <<: *x-backup
         container_name: mc1-backup
+        profiles:
+            - mc1
         environment:
             <<: *backup-env
             SERVER_PORT: ${BACKUP_SERVER_PORT}
@@ -85,6 +89,8 @@ services:
     mc2:
         <<: *x-minecraft
         container_name: mc2
+        profiles:
+            - mc2
         environment:
             <<: *minecraft-env
             VERSION: ${MC2_VERSION}
@@ -103,6 +109,8 @@ services:
     mc2-backup:
         <<: *x-backup
         container_name: mc2-backup
+        profiles:
+            - mc2
         environment:
             <<: *backup-env
             SERVER_PORT: ${BACKUP_SERVER_PORT}
@@ -118,6 +126,8 @@ services:
     mc3:
         <<: *x-minecraft
         container_name: mc3
+        profiles:
+            - mc3
         environment:
             <<: *minecraft-env
             VERSION: ${MC3_VERSION}
@@ -136,6 +146,8 @@ services:
     mc3-backup:
         <<: *x-backup
         container_name: mc3-backup
+        profiles:
+            - mc3
         environment:
             <<: *backup-env
             SERVER_PORT: ${BACKUP_SERVER_PORT}
