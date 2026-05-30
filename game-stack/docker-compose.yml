@@ -10,17 +10,19 @@ x-logging: &default-logging
     options:
         max-size: "10m"
         max-file: "3"
+
+x-minecraft-env: &minecraft-env
+    EULA: "TRUE"
+    TYPE: FABRIC
+    ALLOW_FLIGHT: "TRUE"
+    DIFFICULTY: HARD
+    SPAWN_PROTECTION: "0"
+    ENABLE_WHITELIST: "TRUE"
+    ENFORCE_WHITELIST: "TRUE"
     
 x-minecraft: &x-minecraft
     image: itzg/minecraft-server
-    environment:
-        - EULA=TRUE
-        - TYPE=FABRIC
-        - ALLOW_FLIGHT=TRUE
-        - DIFFICULTY=HARD
-        - SPAWN_PROTECTION=0
-        - ENABLE_WHITELIST=TRUE
-        - ENFORCE_WHITELIST=TRUE
+    environment: *minecraft-env
     logging: *default-logging
     restart: unless-stopped
 
@@ -48,8 +50,16 @@ services:
     mc1:
         <<: *x-minecraft
         container_name: mc1
-        env_file:
-            - mc1.env
+        environment:
+            <<: *minecraft-env
+            VERSION: ${MC1_VERSION}
+            MEMORY_ALLOCATION: ${MC1_MEMORY_ALLOCATION}
+            WHITELIST: ${GROUP_WHITELIST}
+            OPS: ${DEFAULT_OPS}
+            MAX_PLAYERS: ${GROUP_MAX_PLAYERS}
+            RCON_PORT: ${MC1_RCON_PORT}
+            MOTD: ${MC1_MOTD}
+            TZ: ${TZ}
         volumes:
             - ${MC1_DATA_PATH}:/data
         ports:
@@ -69,8 +79,16 @@ services:
     mc2:
         <<: *x-minecraft
         container_name: mc2
-        env_file:
-            - mc2.env
+        environment:
+            <<: *minecraft-env
+            VERSION: ${MC2_VERSION}
+            MEMORY_ALLOCATION: ${MC2_MEMORY_ALLOCATION}
+            WHITELIST: ${PRIVATE_WHITELIST}
+            OPS: ${DEFAULT_OPS}
+            MAX_PLAYERS: ${PRIVATE_MAX_PLAYERS}
+            RCON_PORT: ${MC2_RCON_PORT}
+            MOTD: ${MC2_MOTD}
+            TZ: ${TZ}
         volumes:
             - ${MC2_DATA_PATH}:/data
         ports:
@@ -90,8 +108,16 @@ services:
     mc3:
         <<: *x-minecraft
         container_name: mc3
-        env_file:
-            - mc3.env
+        environment:
+            <<: *minecraft-env
+            VERSION: ${MC3_VERSION}
+            MEMORY_ALLOCATION: ${MC3_MEMORY_ALLOCATION}
+            WHITELIST: ${GROUP_WHITELIST}
+            OPS: ${DEFAULT_OPS}
+            MAX_PLAYERS: ${GROUP_MAX_PLAYERS}
+            RCON_PORT: ${MC3_RCON_PORT}
+            MOTD: ${MC3_MOTD}
+            TZ: ${TZ}
         volumes:
             - ${MC3_DATA_PATH}:/data
         ports:
