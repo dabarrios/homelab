@@ -21,7 +21,6 @@ x-minecraft-env: &minecraft-env
     ENFORCE_WHITELIST: "TRUE"
     
 x-minecraft: &x-minecraft
-    image: itzg/minecraft-server
     environment: *minecraft-env
     logging: *default-logging
     restart: unless-stopped
@@ -51,6 +50,7 @@ x-backup: &x-backup
 services:
     mc1:
         <<: *x-minecraft
+        image: itzg/minecraft-server:${MC1_IMAGE_TAG:-latest}
         container_name: mc1
         profiles:
             - mc1
@@ -88,6 +88,7 @@ services:
             - ${MC1_BACKUP_PATH}:/backups
     mc2:
         <<: *x-minecraft
+        image: itzg/minecraft-server:${MC2_IMAGE_TAG:-latest}
         container_name: mc2
         profiles:
             - mc2
@@ -125,6 +126,7 @@ services:
             - ${MC2_BACKUP_PATH}:/backups
     mc3:
         <<: *x-minecraft
+        image: itzg/minecraft-server:${MC3_IMAGE_TAG:-latest}
         container_name: mc3
         profiles:
             - mc3
