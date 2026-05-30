@@ -26,20 +26,22 @@ x-minecraft: &x-minecraft
     logging: *default-logging
     restart: unless-stopped
 
+x-backup-env: &backup-env
+    SRC_DIR: /data
+    BACKUP_METHOD: tar
+    BACKUP_INTERVAL: 1h
+    INITIAL_DELAY: "0"
+    BACKUP_ON_STARTUP: "TRUE"
+    DEST_DIR: /backups
+    PAUSE_IF_NO_PLAYERS: "TRUE"
+    PLAYERS_ONLINE_CHECK_INTERVAL: 30m
+    PRUNE_BACKUPS_DAYS: "7"
+    ENABLE_SAVE_ALL: "TRUE"
+    ENABLE_SYNC: "TRUE"
+
 x-backup: &x-backup
     image: itzg/mc-backup
-    environment:
-        - SRC_DIR=/data
-        - BACKUP_METHOD=tar
-        - BACKUP_INTERVAL=1h
-        - INITIAL_DELAY=0
-        - BACKUP_ON_STARTUP=TRUE
-        - DEST_DIR=/backups
-        - PAUSE_IF_NO_PLAYERS=TRUE
-        - PLAYERS_ONLINE_CHECK_INTERVAL=30m
-        - PRUNE_BACKUPS_DAYS=7
-        - ENABLE_SAVE_ALL=TRUE
-        - ENABLE_SYNC=TRUE
+    environment: *backup-env
     volumes:
         - /etc/localtime:/etc/localtime:ro
         - /etc/timezone:/etc/timezone:ro
@@ -68,8 +70,12 @@ services:
     mc1-backup:
         <<: *x-backup
         container_name: mc1-backup
-        env_file:
-            - mc1-backup.env
+        environment:
+            <<: *backup-env
+            SERVER_PORT: ${BACKUP_SERVER_PORT}
+            RCON_PORT: ${MC1_RCON_PORT}
+            RCON_HOST: mc1
+            TZ: ${TZ}
         depends_on:
             mc1:
                 condition: service_healthy
@@ -97,8 +103,12 @@ services:
     mc2-backup:
         <<: *x-backup
         container_name: mc2-backup
-        env_file:
-            - mc2-backup.env
+        environment:
+            <<: *backup-env
+            SERVER_PORT: ${BACKUP_SERVER_PORT}
+            RCON_PORT: ${MC2_RCON_PORT}
+            RCON_HOST: mc2
+            TZ: ${TZ}
         depends_on:
             mc2:
                 condition: service_healthy
@@ -126,8 +136,12 @@ services:
     mc3-backup:
         <<: *x-backup
         container_name: mc3-backup
-        env_file:
-            - mc3-backup.env
+        environment:
+            <<: *backup-env
+            SERVER_PORT: ${BACKUP_SERVER_PORT}
+            RCON_PORT: ${MC3_RCON_PORT}
+            RCON_HOST: mc3
+            TZ: ${TZ}
         depends_on:
             mc3:
                 condition: service_healthy
