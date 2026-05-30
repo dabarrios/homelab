@@ -57,7 +57,7 @@ services:
         environment:
             <<: *minecraft-env
             VERSION: ${MC1_VERSION}
-            MEMORY_ALLOCATION: ${MC1_MEMORY_ALLOCATION}
+            MEMORY: ${MC1_MEMORY_ALLOCATION}
             WHITELIST: ${GROUP_WHITELIST}
             OPS: ${DEFAULT_OPS}
             MAX_PLAYERS: ${GROUP_MAX_PLAYERS}
@@ -94,7 +94,7 @@ services:
         environment:
             <<: *minecraft-env
             VERSION: ${MC2_VERSION}
-            MEMORY_ALLOCATION: ${MC2_MEMORY_ALLOCATION}
+            MEMORY: ${MC2_MEMORY_ALLOCATION}
             WHITELIST: ${PRIVATE_WHITELIST}
             OPS: ${DEFAULT_OPS}
             MAX_PLAYERS: ${PRIVATE_MAX_PLAYERS}
@@ -131,7 +131,7 @@ services:
         environment:
             <<: *minecraft-env
             VERSION: ${MC3_VERSION}
-            MEMORY_ALLOCATION: ${MC3_MEMORY_ALLOCATION}
+            MEMORY: ${MC3_MEMORY_ALLOCATION}
             WHITELIST: ${GROUP_WHITELIST}
             OPS: ${DEFAULT_OPS}
             MAX_PLAYERS: ${GROUP_MAX_PLAYERS}
