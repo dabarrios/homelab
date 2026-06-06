@@ -1,6 +1,11 @@
 # Never commit secrets
 *.env
 
+# Django-related directories
+homelab/db.sqlite3
+**/__pycache__/
+*.pyc
+
 # automation-stack
 **/bazarr/
 **/bazarr-anime/
