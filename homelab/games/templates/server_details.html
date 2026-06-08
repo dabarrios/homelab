@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ server.name }} Details{% endblock %}
+
+{% block content %}
+    <h2>{{ server.name }} Details</h2>
+
+    <ul>
+        <li>Slug: {{ server.slug }}</li>
+        <li>Version: {{ server.version }}</li>
+        <li>Memory: {{ server.memory }}</li>
+        <li>Port: {{ server.port }}</li>
+        <li>Status: {{ server.status }}</li>
+    </ul>
+
+    <a href="{% url 'servers_overview' %}">Back to Game Server Status page</a>
+{% endblock %}
