@@ -2,7 +2,7 @@ from django.db import models
 
 class GameServer(models.Model):
     game = models.CharField(max_length=255, db_column='GAME', verbose_name="Game")
-    name = models.CharField(max_length=255, db_column='NAME', verbose_name="Name")
+    name = models.CharField(unique=True, max_length=255, db_column='NAME', verbose_name="Name")
     slug = models.SlugField(unique=True, db_column='SLUG', verbose_name="Slug")
     allocated_memory = models.CharField(max_length=255, db_column='ALLOCATED_MEMORY', verbose_name="Allocated Memory")
     version = models.CharField(max_length=255, blank=True, db_column='VERSION', verbose_name="Version")
