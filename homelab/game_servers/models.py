@@ -4,6 +4,7 @@ class GameServer(models.Model):
     game = models.CharField(max_length=255, db_column='GAME', verbose_name="Game")
     name = models.CharField(unique=True, max_length=255, db_column='NAME', verbose_name="Name")
     slug = models.SlugField(unique=True, db_column='SLUG', verbose_name="Slug")
+    container_name = models.CharField(unique=True, max_length=255, db_column='CONTAINER_NAME', verbose_name="Container Name")
     allocated_memory = models.CharField(max_length=255, db_column='ALLOCATED_MEMORY', verbose_name="Allocated Memory")
     version = models.CharField(max_length=255, blank=True, db_column='VERSION', verbose_name="Version")
     port = models.PositiveIntegerField(null=True, blank=True, db_column='PORT', verbose_name="Port")
