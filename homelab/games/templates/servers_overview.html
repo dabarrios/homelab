@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Game Server Status{% endblock %}
+
+{% block content %}
+    <h2>Game Server Status</h2>
+
+    {% for server in servers %}
+    <section>
+        <h3><a href="{% url 'server_details' server.slug %}">{{ server.name }}</a></h3>
+
+        <ul>
+            <li>Slug: {{ server.slug }}</li>
+            <li>Version: {{ server.version }}</li>
+            <li>Memory: {{ server.memory }}</li>
+            <li>Port: {{ server.port }}</li>
+            <li>Status: {{ server.status }}</li>
+        </ul>
+    </section>
+    {% endfor %}
+{% endblock %}
