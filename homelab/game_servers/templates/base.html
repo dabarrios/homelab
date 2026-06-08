@@ -1,17 +1,46 @@
 <!doctype html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Homelab{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'game_servers/style.css' %}">
 </head>
 <body>
-    <header>
-        <h1>Homelab Dashboard</h1>
-    </header>
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-mark">H</span>
+                <span>Homelab</span>
+            </div>
+
+            <nav class="nav-list" aria-label="Main navigation">
+                <a class="nav-item active" href="{% url 'game_server_list' %}">Game Servers</a>
+                <span class="nav-item muted-item">Containers</span>
+                <span class="nav-item muted-item">Images</span>
+                <span class="nav-item muted-item">Logs</span>
+                <span class="nav-item muted-item">Settings</span>
+            </nav>
+
+            <div class="host-card">
+                <span class="host-label">Host</span>
+                <strong>HTPC</strong>
+                <span>192.168.6.4</span>
+            </div>
+        </aside>
+
+        <div class="main-area">
+            <header class="topbar">
+                <h1>Homelab Dashboard</h1>
+                <span class="topbar-meta">Game server status</span>
+            </header>
+
+            <main class="page-shell">
+                {% block content %}
+                {% endblock %}
+            </main>
+        </div>
+    </div>
 </body>
 </html>

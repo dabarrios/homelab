@@ -3,19 +3,139 @@
 {% block title %}Game Server Status{% endblock %}
 
 {% block content %}
-    <h2>Game Server Status</h2>
+    <div class="page-header">
+        <div>
+            <h2>Game Servers</h2>
+            <p class="muted">Monitor and manage your configured game server instances.</p>
+        </div>
+    </div>
 
-    {% for server in servers %}
-    <section>
-        <h3><a href="{% url 'game_server_detail' server.slug %}">{{ server.name }}</a></h3>
+    <section class="summary-grid" aria-label="Server summary">
+        <article class="summary-card">
+            <div class="summary-icon summary-total">#</div>
+            <div>
+                <strong>{{ total_servers }}</strong>
+                <span>Total servers</span>
+            </div>
+        </article>
 
-        <ul>
-            <li>Slug: {{ server.slug }}</li>
-            <li>Version: {{ server.version }}</li>
-            <li>Memory: {{ server.allocated_memory }}</li>
-            <li>Port: {{ server.port }}</li>
-            <li>Status: {% if server.is_active %}Active{% else %}Stopped{% endif %}</li>
-        </ul>
+        <article class="summary-card">
+            <div class="summary-icon summary-active">✓</div>
+            <div>
+                <strong>{{ active_servers }}</strong>
+                <span>Active</span>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon summary-stopped">■</div>
+            <div>
+                <strong>{{ stopped_servers }}</strong>
+                <span>Stopped</span>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon summary-memory">GB</div>
+            <div>
+                <strong>{{ total_memory }} GB</strong>
+                <span>Total allocated</span>
+            </div>
+        </article>
     </section>
-    {% endfor %}
+
+    <div class="dashboard-grid">
+        <section class="panel table-panel">
+            <div class="panel-toolbar">
+                <h3>Configured Servers</h3>
+                <span class="muted">Showing {{ total_servers }} server{{ total_servers|pluralize }}</span>
+            </div>
+
+            <div class="table-wrap">
+                <table class="server-table">
+                    <thead>
+                        <tr>
+                            <th>World</th>
+                            <th>Game</th>
+                            <th>Version</th>
+                            <th>Memory</th>
+                            <th>Port</th>
+                            <th>Status</th>
+                            <th>Container</th>
+                            <th class="actions-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for server in servers %}
+                            <tr>
+                                <td>
+                                    <a class="server-link" href="{% url 'game_server_detail' server.slug %}">
+                                        {{ server.name }}
+                                    </a>
+                                    <span class="subtext">{{ server.slug }}</span>
+                                </td>
+                                <td>{{ server.game }}</td>
+                                <td>{{ server.version|default:"Not set" }}</td>
+                                <td>{{ server.allocated_memory }} GB</td>
+                                <td>{{ server.port|default:"Not set" }}</td>
+                                <td>
+                                    {% if server.is_active %}
+                                        <span class="status-pill status-active">Active</span>
+                                    {% else %}
+                                        <span class="status-pill status-stopped">Stopped</span>
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ server.container_name }}</code></td>
+                                <td class="actions-column">
+                                    <a class="button-outline" href="{% url 'game_server_detail' server.slug %}">View</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td class="empty-state" colspan="8">No game servers have been added yet.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <aside class="panel preview-panel">
+            {% if selected_server %}
+                <div class="preview-heading">
+                    <div>
+                        <h3>{{ selected_server.name }}</h3>
+                        <span class="muted">{{ selected_server.container_name }}</span>
+                    </div>
+                    {% if selected_server.is_active %}
+                        <span class="status-pill status-active">Active</span>
+                    {% else %}
+                        <span class="status-pill status-stopped">Stopped</span>
+                    {% endif %}
+                </div>
+
+                <dl class="compact-detail">
+                    <dt>Game</dt>
+                    <dd>{{ selected_server.game }}</dd>
+
+                    <dt>Version</dt>
+                    <dd>{{ selected_server.version|default:"Not set" }}</dd>
+
+                    <dt>Memory</dt>
+                    <dd>{{ selected_server.allocated_memory }} GB</dd>
+
+                    <dt>Port</dt>
+                    <dd>{{ selected_server.port|default:"Not set" }}</dd>
+
+                    <dt>Slug</dt>
+                    <dd><code>{{ selected_server.slug }}</code></dd>
+                </dl>
+
+                <a class="button-link full-width" href="{% url 'game_server_detail' selected_server.slug %}">Open details</a>
+            {% else %}
+                <p class="empty-state">Add a game server in Django admin to see details here.</p>
+            {% endif %}
+        </aside>
+    </div>
+
 {% endblock %}

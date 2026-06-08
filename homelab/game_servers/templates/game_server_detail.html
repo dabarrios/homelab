@@ -3,15 +3,54 @@
 {% block title %}{{ server.name }} Details{% endblock %}
 
 {% block content %}
-    <h2>{{ server.name }} Details</h2>
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">{{ server.game }}</p>
+            <h2>{{ server.name }}</h2>
+        </div>
 
-    <ul>
-        <li>Slug: {{ server.slug }}</li>
-        <li>Version: {{ server.version }}</li>
-        <li>Memory: {{ server.allocated_memory }} GB</li>
-        <li>Port: {{ server.port }}</li>
-        <li>Status: {% if server.is_active %}Active{%else %}Stopped{% endif %}</li>
-    </ul>
+        {% if server.is_active %}
+            <span class="status-pill status-active">Active</span>
+        {% else %}
+            <span class="status-pill status-stopped">Stopped</span>
+        {% endif %}
+    </div>
 
-    <a href="{% url 'game_server_list' %}">Back to Game Server Status page</a>
+    <section class="panel detail-panel">
+        <dl class="detail-grid">
+            <dt>World name</dt>
+            <dd>{{ server.name }}</dd>
+
+            <dt>Game</dt>
+            <dd>{{ server.game }}</dd>
+
+            <dt>Version</dt>
+            <dd>{{ server.version|default:"Not set" }}</dd>
+
+            <dt>Slug</dt>
+            <dd><code>{{ server.slug }}</code></dd>
+
+            <dt>Container name</dt>
+            <dd><code>{{ server.container_name }}</code></dd>
+
+            <dt>Allocated memory</dt>
+            <dd>{{ server.allocated_memory }} GB</dd>
+
+            <dt>Port</dt>
+            <dd>{{ server.port|default:"Not set" }}</dd>
+
+            <dt>Notes</dt>
+            <dd>
+                {% if server.notes %}
+                    {{ server.notes }}
+                {% else %}
+                    <span class="muted">No notes added.</span>
+                {% endif %}
+            </dd>
+        </dl>
+    </section>
+
+    <p class="page-actions">
+        <a class="button-link" href="{% url 'game_server_list' %}">Back to servers</a>
+    </p>
 {% endblock %}
