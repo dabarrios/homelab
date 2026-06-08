@@ -12,9 +12,9 @@
         <ul>
             <li>Slug: {{ server.slug }}</li>
             <li>Version: {{ server.version }}</li>
-            <li>Memory: {{ server.memory }}</li>
+            <li>Memory: {{ server.allocated_memory }}</li>
             <li>Port: {{ server.port }}</li>
-            <li>Status: {{ server.status }}</li>
+            <li>Status: {% if server.is_active %}Active{% else %}Stopped{% endif %}</li>
         </ul>
     </section>
     {% endfor %}
