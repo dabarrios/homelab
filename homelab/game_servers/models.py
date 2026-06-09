@@ -2,12 +2,12 @@ from django.db import models
 
 class GameServer(models.Model):
     game = models.CharField(max_length=255, db_column='GAME', verbose_name="Game")
-    name = models.CharField(unique=True, max_length=255, db_column='NAME', verbose_name="Name")
+    name = models.CharField(unique=True, max_length=255, db_column='NAME', verbose_name="World Name")
     slug = models.SlugField(unique=True, db_column='SLUG', verbose_name="Slug")
     container_name = models.CharField(unique=True, max_length=255, db_column='CONTAINER_NAME', verbose_name="Container Name")
-    allocated_memory = models.CharField(max_length=255, db_column='ALLOCATED_MEMORY', verbose_name="Allocated Memory")
+    allocated_memory = models.PositiveSmallIntegerField(db_column='ALLOCATED_MEMORY', verbose_name="Allocated Memory (GB)")
     version = models.CharField(max_length=255, blank=True, db_column='VERSION', verbose_name="Version")
-    port = models.PositiveIntegerField(null=True, blank=True, db_column='PORT', verbose_name="Port")
+    port = models.PositiveSmallIntegerField(null=True, blank=True, db_column='PORT', verbose_name="Port")
     is_active = models.BooleanField(default=False, db_column='IS_ACTIVE', verbose_name="Is Active?")
     notes = models.TextField(blank=True, db_column='NOTES', verbose_name="Notes")
 

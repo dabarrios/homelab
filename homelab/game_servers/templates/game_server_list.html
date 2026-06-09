@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% block title %}Game Server Status{% endblock %}
-
 {% block content %}
     <h2>Game Server Status</h2>
 
@@ -16,6 +14,6 @@
             <li>Port: {{ server.port }}</li>
             <li>Status: {% if server.is_active %}Active{% else %}Stopped{% endif %}</li>
         </ul>
-    </section>
+        </section>
     {% endfor %}
 {% endblock %}
