@@ -1,100 +1,56 @@
 # Homelab
 
-This repository contains the Docker Compose stacks and configs for my personal homelab.
+This repo is for my personal homelab setup.
 
-I originally set this up just to run Jellyfin, but it kept growing as I added more services and learned more along the way. Now it includes things like container management, VPN routing, DNS, monitoring, storage separation, and a few other self-hosted apps.
+It started as a place to run Jellyfin, then slowly grew into a bunch of Docker Compose stacks for media, monitoring, DNS, VPN-routed downloads, game servers, and other self-hosted tools.
 
-## Environment
+This is mostly here so I can keep the setup organized and remember how things are wired together without losing track of what changes I make.
+
+## Setup
 
 - **Host OS:** Ubuntu Server
-- **Container Platform:** Docker Compose
-- **Remote Access:** Tailscale (installed on host)
-- **Service Management:** systemd + Docker
-- **Storage Layout:** Separate drives for OS, application data, media, game servers, and backups
+- **Containers:** Docker Compose
+- **Remote access:** Tailscale on the host
+- **Service management:** systemd + Docker
+- **Storage:** Separate drives for the OS, app data, media, game servers, and backups
 
-## Repository Layout
+## Repo Layout
 
-Services are split into separate stacks by function instead of being placed in one large Compose file. This keeps the setup easier to maintain, troubleshoot, and expand over time.
+Each folder is a separate stack and serves a different goal:
 
-### Management Stack
-Tools I use to keep track of everything and make sure things are running properly:
+- `management-stack/` - dashboards, monitoring, and container management
+- `frontend-stack/` - day-to-day media apps like Jellyfin and Jellyseerr
+- `automation-stack/` - Sonarr, Radarr, Bazarr, Prowlarr, and related media automation
+- `vpn-stack/` - Gluetun and qBittorrent for VPN-routed downloads
+- `dns-stack/` - Pi-hole and local DNS-related setup
+- `game-stack/` - Minecraft servers and backups
+- `database-stack/` - database containers used for testing or small projects
+- `paperless-stack/` - document storage
+- `immich-stack/` - photo management
+- `cloud-stack/` - cloud/storage-style services
+- `monitoring-stack/` - monitoring tools and configs
+- `utilities-stack/` - small helper services
+- `scripts/` - helper scripts
+- `homelab/` - Django app for homelab/game server pages
 
-- **Portainer** – manage containers, check logs, restart stuff when needed
-- **Homarr** – dashboard to access all my services in one place
-- **Uptime Kuma** – monitors services and alerts me if something goes down
-- **Dashdot** – shows system stats like CPU, RAM, etc.
-- **Watchtower** – handles automatic container updates
+## Django App
 
-### Frontend Stack
-This is what I actually use day-to-day for media:
+The `homelab/` folder is a Django app I am building as part of this repo.
 
-- **Jellyfin** – media server for watching everything
-- **Jellyseerr** – lets me request movies/shows and ties into the automation
+Right now it is focused on homelab and game server pages, but the goal is to keep expanding it into a more complete Django project. I am using it as a practical way to learn patterns that show up in large-scale Django applications.
 
-### Automation Stack
-This is what handles grabbing, organizing, and keeping media up to date:
-
-- **Sonarr** / **Sonarr Anime** – manages TV shows
-- **Radarr** / **Radarr Anime** – manages movies
-- **Bazarr** / **Bazarr Anime** – handles subtitles
-- **Prowlarr** – manages indexers
-- **Flaresolverr** – helps bypass some site protections
-- **Recyclarr** – keeps quality profiles and settings in sync
-
-### VPN Stack
-This is how I keep download traffic separate from the rest of the system:
-
-- **Gluetun** – acts as the VPN gateway
-- **qBittorrent** – runs through Gluetun instead of directly on the host
-
-### DNS Stack
-Handles DNS and basic ad blocking on my network:
-
-- **Pi-hole** – blocks ads and trackers
-
-Pi-hole runs on a `macvlan` network so it shows up on my LAN like its own device with a separate IP.
-
-### Immich Stack
-Self-hosted photo management:
-
-- **Immich**
-- **PostgreSQL**
-- **Redis**
-- **Machine Learning service**
-
-### Nextcloud Stack
-Used for file syncing and cloud-style storage:
-
-- **Nextcloud AIO**
-
-### Utilities Stack
-A few extra tools I use outside of the main setup:
-
-- **Paperless-ngx** – document storage and organization
-- **Omni Tools** – small utility tools
-- **BentoPDF** – simple PDF tools
-
-### Game Stack
-Where I run my Minecraft servers:
-
-- Multiple **Minecraft** server instances
-- Automated backups using **itzg/mc-backup**
-
-### Database Stack
-Just a basic database I keep around for testing:
-
-- **MySQL**
+As it grows, the goal is to include more structured views, templates, static files, forms, models, permissions, and helper logic instead of only simple pages.
 
 ## Networking Notes
 
-Most services are connected through a shared Docker network so they can talk to each other easily. I only break things out into separate networks when there’s a reason to.
+Most services share Docker networks so they can talk to each other when needed.
 
-- **macvlan** – used for services that need their own IP on the LAN (like Pi-hole)
-- **Tailscale** – installed on the host for remote access (not containerized)
-- No direct port forwarding for internal services unless needed
+- Pi-hole uses `macvlan` so it can have its own LAN IP.
+- Tailscale runs on the host, not in Docker.
+- Internal services are not port-forwarded unless there is a real reason.
 
-For a quick port-mapping reference, see [PORTS.md](PORTS.md).
+For port mappings, see [PORTS.md](PORTS.md).
 
-## Why I Keep This Project
+## Purpose
 
-This lab gives me a place to try things out, break stuff, and fix it. It’s been one of the best ways for me to actually learn Linux, Docker, and networking outside of school.
+This is my place to learn Linux, Docker, networking, and self-hosting by actually running stuff. It is also a sandbox to break things, fix them, and reinforce my understanding.
