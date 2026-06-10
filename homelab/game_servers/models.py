@@ -16,7 +16,5 @@ class GameServer(models.Model):
         return self.world_name
     
     class Meta:
-        # Human-readable singular name. Django uses it for: Add game server, Change game server, etc.
-        verbose_name = 'game server'
-        # Human-readable plural name. Django uses it for the label in left-side panel under the header. "Game servers + Add"
-        verbose_name_plural = 'game servers'
+        verbose_name = 'game server'            # Human-readable singular name. Django uses it for: Add game server, Change game server, etc.
+        verbose_name_plural = 'game servers'    # Human-readable plural name. Django uses it for the label in left-side panel under the header. "Game servers + Add"
