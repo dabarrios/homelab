@@ -14,7 +14,7 @@
                 <li><strong>Version:</strong> {{ server.version }}</li>
                 <li><strong>Memory:</strong> {{ server.allocated_memory }} GB</li>
                 <li><strong>Port:</strong> {{ server.port }}</li>
-                <li><strong>Status</strong> {% if server.is_active %}Active{% else %}Stopped{% endif %}</li>
+                <li><strong>Status:</strong> {% if server.is_active %}Active{% else %}Stopped{% endif %}</li>
             </ul>
         </section>
     {% endfor %}

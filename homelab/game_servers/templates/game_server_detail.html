@@ -6,11 +6,12 @@
     <section>
         <h2>{{ server.world_name }} Details</h2>
         <ul>
-            <li>Slug: {{ server.slug }}</li>
-            <li>Version: {{ server.version }}</li>
-            <li>Memory: {{ server.allocated_memory }} GB</li>
-            <li>Port: {{ server.port }}</li>
-            <li>Status: {% if server.is_active %}Active{%else %}Stopped{% endif %}</li>
+            <li><strong>Slug: </strong>{{ server.slug }}</li>
+            <li><strong>Version: </strong>{{ server.version }}</li>
+            <li><strong>Memory: </strong>{{ server.allocated_memory }} GB</li>
+            <li><strong>Port: </strong>{{ server.port }}</li>
+            <li><strong>Status: </strong>{% if server.is_active %}Active{%else %}Stopped{% endif %}</li>
+            <li><strong>Notes: </strong>{{ server.notes|default:"No notes yet." }}</li>
         </ul>
     </section>
     
