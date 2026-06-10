@@ -1,19 +1,21 @@
 {% extends "base.html" %}
 
+{% block title %}Game Servers Overview{% endblock %}
+
 {% block content %}
     <h2>Game Server Status</h2>
 
     {% for server in servers %}
-    <section>
-        <h3><a href="{% url 'game_server_detail' server.slug %}">{{ server.world_name }}</a></h3>
+        <section>
+            <h3><a href="{% url 'game_server_detail' server.slug %}">{{ server.world_name }}</a></h3>
 
-        <ul>
-            <li><strong>Slug:</strong> {{ server.slug }}</li>
-            <li><strong>Version:</strong> {{ server.version }}</li>
-            <li><strong>Memory:</strong> {{ server.allocated_memory }} GB</li>
-            <li><strong>Port:</strong> {{ server.port }}</li>
-            <li><strong>Status</strong> {% if server.is_active %}Active{% else %}Stopped{% endif %}</li>
-        </ul>
+            <ul>
+                <li><strong>Slug:</strong> {{ server.slug }}</li>
+                <li><strong>Version:</strong> {{ server.version }}</li>
+                <li><strong>Memory:</strong> {{ server.allocated_memory }} GB</li>
+                <li><strong>Port:</strong> {{ server.port }}</li>
+                <li><strong>Status</strong> {% if server.is_active %}Active{% else %}Stopped{% endif %}</li>
+            </ul>
         </section>
     {% endfor %}
 {% endblock %}
