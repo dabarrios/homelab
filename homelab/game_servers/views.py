@@ -11,7 +11,7 @@ def game_server_detail(request, slug):
     server = get_object_or_404(GameServer, slug=slug)   # Clean Django shortcut to avoid typing out try/except block
     return render(request, 'game_server_detail.html', {'server': server})
 
-def game_server_edit_notes(request, slug):
+def game_server_edit_detail(request, slug):
     server = get_object_or_404(GameServer, slug=slug)   # Clean Django shortcut to avoid typing out try/except block
 
     if request.method == "POST":    # Checking if form is submitted
@@ -23,4 +23,4 @@ def game_server_edit_notes(request, slug):
     else:
         form = GameServerNotesForm(instance=server)
 
-    return render(request, "game_server_edit_notes.html", {"form": form, "server": server})
+    return render(request, "game_server_edit_detail.html", {"form": form, "server": server})
