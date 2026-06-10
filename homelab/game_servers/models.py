@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 class GameServer(models.Model):
     game = models.CharField(max_length=255, db_column='GAME', verbose_name="Game")
@@ -18,3 +19,9 @@ class GameServer(models.Model):
     class Meta:
         verbose_name = 'game server'            # Human-readable singular name. Django uses it for: Add game server, Change game server, etc.
         verbose_name_plural = 'game servers'    # Human-readable plural name. Django uses it for the label in left-side panel under the header. "Game servers + Add"
+    
+    # What url belongs to this object (self)...
+    def get_absolute_url(self):
+        # URL name = game_server_detail = /details/<str:slug>, we pass slug via kwargs
+        return reverse("game_server_detail", kwargs={"slug": self.slug})
+    

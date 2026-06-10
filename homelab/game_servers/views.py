@@ -19,7 +19,8 @@ def game_server_edit_detail(request, slug):
 
         if form.is_valid(): # Checking if submitted data is valid
             form.save()     # Update database
-            return redirect("game_server_detail", slug=server.slug) # Sends user back to the detail page
+            # Django will check the server object for a get_absolute_url() and redirects
+            return redirect(server)
     else:
         form = GameServerNotesForm(instance=server)
 
