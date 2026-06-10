@@ -22,8 +22,10 @@ class GameServerModelTest(TestCase):
         self.assertEqual(str(self.server), "Test World")
         
     def test_detail_page_loads(self):
+        # Here is the URL name game_server_detail and here is the argument, build the URL for me.
         url = reverse("game_server_detail", args=[self.server.slug])
+        # Pretend a browser visits this URL
         response = self.client.get(url)
-        
+        # Check if Django successfully returned that page AKA returned status code 200
         self.assertEqual(response.status_code, 200)
         
