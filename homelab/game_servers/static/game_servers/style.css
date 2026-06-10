@@ -1,40 +1,82 @@
+/* Added font family. system-ui is the first choice and sans-serif is the final fallback. */
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* 
+This is the normal style for .button.
+.button:hover is when you hover over with your mouse
+.button:focus is when you tab over with a keyboard
+*/
 .button {
     display: inline-block;
-    padding: 10px 16px;
-    background-color: #2563eb;
+    padding: 10px 16px;             /* Button easier to notice and track */
+    background-color: #2563eb;    /* Button is now blue */
     color: white;
     text-decoration: none;
     border-radius: 6px;
     font-weight: 600;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
-    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25); /* Adds soft shadow so it feels like a button */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; /* Makes hover/focus animate smoothly */
 }
 
+/* Darkens the blue button, raises it, strengthens shadow */
 .button:hover {
     background-color: #1d4ed8;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
     transform: translateY(-1px);
 }
 
+/* Adds outline for keyboard nav */
 .button:focus {
     outline: 3px solid #93c5fd;
     outline-offset: 3px;
 }
 
+/* Makes the detail area feel like one table-like box */
 .server-details {
     display: grid;
     grid-template-columns: 100px 1fr;
-    gap: 4px 1px;
+    gap: 0;
+    max-width: 500px;
+    border: 1px solid #d9e2ec;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
+/* Bolds the text for the server.context */
 .server-details dt {
     font-weight: 700;
 }
 
+/* Gives every label/value cell breathing room and row separators with borders */
+.server-details dt,
+.server-details dd {
+    padding: 10px 12px;
+    border-bottom: 1px solid #d9e2ec;
+}
+
+
+/* Remove browser's default outside spacing from the dd tag */
 .server-details dd {
     margin: 0;
+}
+
+/* + dd = The dd immediately after this dt. */
+/* Color odd rows differently */
+.server-details dt:nth-of-type(odd),
+.server-details dt:nth-of-type(odd) + dd {
+    background-color: #f8fafc;
+}
+
+/* Color even rows differently */
+.server-details dt:nth-of-type(even),
+.server-details dt:nth-of-type(even) + dd {
+    background-color: #eef4f8;
+}
+
+/* Removes the bottom border of the very last row */
+.server-details dt:last-of-type,
+.server-details dt:last-of-type + dd {
+    border-bottom: 0;
 }
