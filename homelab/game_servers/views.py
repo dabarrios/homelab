@@ -15,14 +15,14 @@ def game_server_detail(request, slug):
     return render(request, 'game_server_detail.html', {'server': server})
 
 def game_server_edit_notes(request, slug):
-    server = get_object_or_404(GameServer, slug=slug)
+    server = get_object_or_404(GameServer, slug=slug)   # Clean Django shortcut to avoid typing out try/except block
 
     if request.method == "POST":
         form = GameServerNotesForm(request.POST, instance=server)
 
-        if form.is_valid():
-            form.save()
-            return redirect("game_server_detail", slug=server.slug)
+        if form.is_valid(): # Checking submitted data
+            form.save()     # Update database
+            return redirect("game_server_detail", slug=server.slug) # Sends user back to the detail page
     else:
         form = GameServerNotesForm(instance=server)
 

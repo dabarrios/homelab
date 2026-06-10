@@ -2,7 +2,7 @@ from django.db import models
 
 class GameServer(models.Model):
     game = models.CharField(max_length=255, db_column='GAME', verbose_name="Game")
-    name = models.CharField(unique=True, max_length=255, db_column='NAME', verbose_name="World Name")
+    world_name = models.CharField(unique=True, max_length=255, db_column='WORLD_NAME', verbose_name="World Name")
     slug = models.SlugField(unique=True, db_column='SLUG', verbose_name="Slug")
     container_name = models.CharField(unique=True, max_length=255, db_column='CONTAINER_NAME', verbose_name="Container Name")
     allocated_memory = models.PositiveSmallIntegerField(db_column='ALLOCATED_MEMORY', verbose_name="Allocated Memory (GB)")
@@ -13,7 +13,7 @@ class GameServer(models.Model):
 
     # Controls how GameServer objects are displayed by using the name field as its string representation.
     def __str__(self):
-        return self.name
+        return self.world_name
     
     class Meta:
         # Human-readable singular name. Django uses it for: Add game server, Change game server, etc.
