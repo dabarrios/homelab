@@ -24,3 +24,17 @@ body {
     outline: 3px solid #93c5fd;
     outline-offset: 3px;
 }
+
+.server-details {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 4px 1px;
+}
+
+.server-details dt {
+    font-weight: 700;
+}
+
+.server-details dd {
+    margin: 0;
+}
