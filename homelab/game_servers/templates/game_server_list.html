@@ -5,7 +5,7 @@
 
     {% for server in servers %}
     <section>
-        <h3><a href="{% url 'game_server_detail' server.slug %}">{{ server.name }}</a></h3>
+        <h3><a href="{% url 'game_server_detail' server.slug %}">{{ server.world_name }}</a></h3>
 
         <ul>
             <li><strong>Slug:</strong> {{ server.slug }}</li>
