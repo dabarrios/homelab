@@ -6,5 +6,5 @@ class GameServerNotesForm(forms.ModelForm):
     # Meta class is how Django knows which model this form is connected to
     class Meta:
         model = GameServer  # This form edits GameServer objects
-        fields = ["notes"]  # Form should only show the 'notes' field
+        fields = "__all__"  # Form shows all fields or optionally can set to ["desired", "fields"]
 

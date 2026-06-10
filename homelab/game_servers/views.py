@@ -8,19 +8,16 @@ def game_server_list(request):
     return render(request, 'game_server_list.html', {'servers': servers})
 
 def game_server_detail(request, slug):
-    try:
-        server = GameServer.objects.get(slug=slug)
-    except GameServer.DoesNotExist:
-        return HttpResponse('Server not found', status=404)
+    server = get_object_or_404(GameServer, slug=slug)   # Clean Django shortcut to avoid typing out try/except block
     return render(request, 'game_server_detail.html', {'server': server})
 
 def game_server_edit_notes(request, slug):
     server = get_object_or_404(GameServer, slug=slug)   # Clean Django shortcut to avoid typing out try/except block
 
-    if request.method == "POST":
-        form = GameServerNotesForm(request.POST, instance=server)
+    if request.method == "POST":    # Checking if form is submitted
+        form = GameServerNotesForm(request.POST, instance=server)   # Create form using submitted data and updates that specific server
 
-        if form.is_valid(): # Checking submitted data
+        if form.is_valid(): # Checking if submitted data is valid
             form.save()     # Update database
             return redirect("game_server_detail", slug=server.slug) # Sends user back to the detail page
     else:
