@@ -11,7 +11,7 @@ class GameServer(models.Model):
     is_active = models.BooleanField(default=False, db_column='IS_ACTIVE', verbose_name="Is Active?")
     notes = models.TextField(blank=True, db_column='NOTES', verbose_name="Notes")
 
-    # Controls how GameServer objects are displayed by using the name field as its string representation.
+    # Controls how GameServer objects are displayed in text, in this case: using the world_name field
     def __str__(self):
         return self.world_name
     

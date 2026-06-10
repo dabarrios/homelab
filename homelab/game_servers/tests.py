@@ -1,3 +1,22 @@
 from django.test import TestCase
+from .models import GameServer
 
-# Create your tests here.
+class GameServerModelTest(TestCase):
+    def setUp(self):
+        # Creating a GameServer object and storing it inside self.server
+        self.server = GameServer.objects.create(
+            game="Minecraft",
+            world_name="Test World",
+            slug="test-world",
+            container_name="test-container",
+            allocated_memory=4,
+            version="1.20",
+            port=25570,
+            is_active=True,
+            notes="Test notes",
+        )
+    
+    def test_str(self):
+        # GameServer has a __str__ method that makes GameServer objects be referenced as their world_name
+        self.assertEqual(str(self.server), "Test World")
+        
