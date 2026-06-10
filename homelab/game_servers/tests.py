@@ -28,4 +28,6 @@ class GameServerModelTest(TestCase):
         response = self.client.get(url)
         # Check if Django successfully returned that page AKA returned status code 200
         self.assertEqual(response.status_code, 200)
+        # Check if the correct server info was shown on the page
+        self.assertContains(response, "Test World")
         
