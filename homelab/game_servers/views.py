@@ -38,31 +38,30 @@ def update_server_notes(request, slug):
         "status": "success",
         "notes": server.notes,
     })
-@require_POST
 
+@require_POST
 def update_server_details(request, slug):
     server = get_object_or_404(GameServer, slug=slug)   # Set server equal to some existing GameServer object
-    server.game = request.POST.get("game", "")        # Grab the new updated notes when self.client.post is used
-    server.world_name = request.POST.get("world_name", "")
-    server.slug = request.POST.get("slug", "")
-    server.container_name = request.POST.get("container_name", "")
-    server.allocated_memory = request.POST.get("allocated_memory", "")
-    server.version = request.POST.get("version", "")
-    server.port = request.POST.get("port", "")
-    server.is_active = request.POST.get("is_active", "")
-    server.notes = request.POST.get("notes", "")
-    server.save() # Save changes
     
-    # Returns success and the new notes field value
+    form = GameServerNotesForm(request.POST, instance=server)   # Create form using submitted data and updates that specific server
+
+    if form.is_valid():         # Checking if submitted data is valid
+        server = form.save()    # Update database
+        # Returns success and the new notes field value
+        return JsonResponse({
+            "status": "success",
+            "game": server.game,
+            "world_name": server.world_name,
+            "slug": server.slug,
+            "container_name": server.container_name,
+            "allocated_memory": server.allocated_memory,
+            "version": server.version,
+            "port": server.port,
+            "is_active": server.is_active,
+            "notes": server.notes,
+        })
+        
     return JsonResponse({
-        "status": "success",
-        "game": server.game,
-        "world_name": server.world_name,
-        "slug": server.slug,
-        "container_name": server.container_name,
-        "allocated_memory": server.allocated_memory,
-        "version": server.version,
-        "port": server.port,
-        "is_active": server.is_active,
-        "notes": server.notes,
-    })
+        "status": "error",
+        "errors": form.errors,
+    }, status=400)
