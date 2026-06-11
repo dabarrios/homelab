@@ -32,19 +32,30 @@ class GameServerModelTest(TestCase):
         self.assertContains(response, "Test World")
         
     def test_server_list_page_loads(self):
-        url = reverse("game_server_list")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        url = reverse("game_server_list")   # Build game_server_list URL
+        response = self.client.get(url)     # Simulates user accessing that URL
+        self.assertEqual(response.status_code, 200) # Checks if reaching that URL was successful (POST)
         
     def test_bad_slug_loads(self):
-        url = reverse("game_server_detail", args=["does-not-exist"])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 404)
+        url = reverse("game_server_detail", args=["does-not-exist"])    # Build game_server_detail URL with invalid slug
+        response = self.client.get(url)                                 # Simulates user accessing that URL
+        self.assertEqual(response.status_code, 404)                     # Checks if reaching that URL was a failure (404)
         
     def test_edit_page_updates(self):
-        url = reverse("game_server_edit_detail", args=[self.server.slug])
-        self.server.notes = "Changed notes"
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Changed notes")
+        url = reverse("game_server_edit_detail", args=[self.server.slug])   # Build edit_detail URL
+        response = self.client.get(url, {                                   # Simulate user submitting form
+            "game": "Minecraft",                                            # The view itself will validate the form
+            "world_name": "Test World",
+            "slug": "test-world",
+            "container_name": "test-container",
+            "allocated_memory": 4,
+            "version": "1.20",
+            "port": 25570,
+            "is_active": "on",
+            "notes": "Changed notes",
+        })
+                         #
+        self.assertEqual(response.status_code, 302)     # Checks if reaching that URL was successful (POST)
+        self.server.refresh_from_db()  
+        self.assertEqual(self.server.notes, "Changed notes")     # Checks if reaching that URL was successful (POST)
         
