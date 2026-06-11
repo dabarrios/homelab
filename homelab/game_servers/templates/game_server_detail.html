@@ -13,25 +13,43 @@
         <form method="post" action="{% url 'update_server_details' server.slug %}">
             {% csrf_token %}
             <textarea name="slug">{{ server.slug }}</textarea>
-            <button type="submit">Save Notes Endpoint</button>
+            <button type="submit">Save</button>
         </form>
 
         <dt>Version</dt>
         <dd>{{ server.version }}</dd>
+        <form method="post" action="{% url 'update_server_details' server.slug %}">
+            {% csrf_token %}
+            <textarea name="version">{{ server.version }}</textarea>
+            <button type="submit">Save</button>
+        </form>
 
         <dt>Memory</dt>
         <dd>{{ server.allocated_memory }} GB</dd>
+        <form method="post" action="{% url 'update_server_details' server.slug %}">
+            {% csrf_token %}
+            <textarea name="allocated_memory">{{ server.allocated_memory }}</textarea>
+            <button type="submit">Save</button>
+        </form>
 
         <dt>Port</dt>
         <dd>{{ server.port }}</dd>
+        <form method="post" action="{% url 'update_server_details' server.slug %}">
+            {% csrf_token %}
+            <textarea name="port">{{ server.port }}</textarea>
+            <button type="submit">Save</button>
+        </form>
 
         <dt>Status</dt>
         <dd>{% if server.is_active %}Active{% else %}Stopped{% endif %}</dd>
+        <form method="post" action="{% url 'update_server_details' server.slug %}">
+            {% csrf_token %}
+            <textarea name="is_active">{{ server.is_active }}</textarea>
+            <button type="submit">Save</button>
+        </form>
 
         <dt>Notes</dt>
         <dd>{{ server.notes }}</dd>
-        
-        <!-- When this form is submitted, send data as POST request and sent to url... -->
         <form method="post" action="{% url 'update_server_notes' server.slug %}">
             {% csrf_token %}
             <textarea name="notes">{{ server.notes }}</textarea>
