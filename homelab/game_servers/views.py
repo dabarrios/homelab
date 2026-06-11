@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST, require_GET
 from .models import GameServer
 from .forms import GameServerNotesForm
 
@@ -25,3 +26,14 @@ def game_server_edit_detail(request, slug):
         form = GameServerNotesForm(instance=server)
 
     return render(request, "game_server_edit_detail.html", {"form": form, "server": server})
+
+@require_POST
+def update_server_notes(request, slug):
+    server = get_object_or_404(GameServer, slug=slug)
+    server.notes = request.POST.get("notes", "")
+    server.save()
+    
+    return JsonResponse({
+        "status": "success",
+        "notes": server.notes,
+    })
