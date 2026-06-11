@@ -31,3 +31,20 @@ class GameServerModelTest(TestCase):
         # Check if the correct server info was shown on the page
         self.assertContains(response, "Test World")
         
+    def test_server_list_page_loads(self):
+        url = reverse("game_server_list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        
+    def test_bad_slug_loads(self):
+        url = reverse("game_server_detail", args=["does-not-exist"])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+        
+    def test_edit_page_updates(self):
+        url = reverse("game_server_edit_detail", args=[self.server.slug])
+        self.server.notes = "Changed notes"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Changed notes")
+        
