@@ -66,20 +66,4 @@ def update_server_details(request, slug):
     if form.is_valid():         # Checking if submitted data is valid
         server = form.save()    # Update database
         # Returns success and the new notes field value
-        return JsonResponse({
-            "status": "success",
-            "game": server.game,
-            "world_name": server.world_name,
-            "slug": server.slug,
-            "container_name": server.container_name,
-            "allocated_memory": server.allocated_memory,
-            "version": server.version,
-            "port": server.port,
-            "is_active": server.is_active,
-            "notes": server.notes,
-        })
-        
-    return JsonResponse({
-        "status": "error",
-        "errors": form.errors,
-    }, status=400)
+        return redirect(server)

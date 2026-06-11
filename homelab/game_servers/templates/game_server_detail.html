@@ -50,7 +50,7 @@
 
         <dt>Notes</dt>
         <dd>{{ server.notes }}</dd>
-        <form method="post" action="{% url 'update_server_notes' server.slug %}">
+        <form method="post" action="{% url 'update_server_details' server.slug %}">
             {% csrf_token %}
             <textarea name="notes">{{ server.notes }}</textarea>
             <button type="submit">Save Notes Endpoint</button>
