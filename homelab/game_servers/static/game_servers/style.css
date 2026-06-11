@@ -18,6 +18,10 @@ This is the normal style for .button.
     font-weight: 600;
     box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25); /* Adds soft shadow so it feels like a button */
     transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; /* Makes hover/focus animate smoothly */
+    
+    border: 0;          /* Remove browser default button border */
+    font: inherit;      /* Makes the real <button> use the same font style as the rest of the page */ 
+    cursor: pointer;    /* Makes it behave visually like a clickable button/link */
 }
 
 /* Darkens the blue button, raises it, strengthens shadow */
