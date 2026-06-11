@@ -43,8 +43,10 @@ class GameServerModelTest(TestCase):
         
     def test_edit_page_updates(self):
         url = reverse("game_server_edit_detail", args=[self.server.slug])   # Build edit_detail URL
-        response = self.client.get(url, {                                   # Simulate user submitting form
-            "game": "Minecraft",                                            # The view itself will validate the form
+        # self.client.post simulates user submitting form
+        # The view itself will validate the form
+        response = self.client.post(url, {
+            "game": "Minecraft",                                            
             "world_name": "Test World",
             "slug": "test-world",
             "container_name": "test-container",
@@ -54,8 +56,14 @@ class GameServerModelTest(TestCase):
             "is_active": "on",
             "notes": "Changed notes",
         })
-                         #
-        self.assertEqual(response.status_code, 302)     # Checks if reaching that URL was successful (POST)
-        self.server.refresh_from_db()  
-        self.assertEqual(self.server.notes, "Changed notes")     # Checks if reaching that URL was successful (POST)
+        
+        # 302 redirects; After a successful form save, redirect(server)
+        # REMINDER: When we use redirect(server) Django will look at that object and look for a get_absolute_url()
+        self.assertEqual(response.status_code, 302) 
+        # Reload this object from DB so that we can see what the view saved
+        # We do not use self.server.save() because that would be US saving it.
+        # We are testing whether the form saved the change.
+        self.server.refresh_from_db()
+        # Check that this GameServer object's notes field = "Changed notes"
+        self.assertEqual(self.server.notes, "Changed notes")     
         
