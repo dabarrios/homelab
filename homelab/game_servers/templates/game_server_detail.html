@@ -4,60 +4,56 @@
 
 {% block content %}
     <section>
-        <!-- dl tag = description list, dt tag = description term -->
-        <h2>{{ server.world_name }} Details</h2>
-        <dl class="server-details">
-        <dt>Slug</dt>
-        <dd>{{ server.slug }}</dd>
-        <!-- When this form is submitted, send data as POST request and sent to url... -->
-        <form method="post" action="{% url 'update_server_details' server.slug %}">
-            {% csrf_token %}
-            <textarea name="slug">{{ server.slug }}</textarea>
-            <button type="submit">Save</button>
-        </form>
+        <h2>{{ server.slug }} Details</h2>
 
-        <dt>Version</dt>
-        <dd>{{ server.version }}</dd>
-        <form method="post" action="{% url 'update_server_details' server.slug %}">
-            {% csrf_token %}
-            <textarea name="version">{{ server.version }}</textarea>
-            <button type="submit">Save</button>
-        </form>
+        <div class="server-details">
+            <!-- Each form updates one field. The input already shows the current value. -->
+            <form class="server-detail-row" method="post" action="{% url 'update_server_details' server.slug %}">
+                {% csrf_token %}
+                <label for="slug">Slug</label>
+                <input id="slug" type="text" name="slug" value="{{ server.slug }}">
+                <button type="submit" class="button">Save</button>
+            </form>
 
-        <dt>Memory</dt>
-        <dd>{{ server.allocated_memory }} GB</dd>
-        <form method="post" action="{% url 'update_server_details' server.slug %}">
-            {% csrf_token %}
-            <textarea name="allocated_memory">{{ server.allocated_memory }}</textarea>
-            <button type="submit">Save</button>
-        </form>
+            <form class="server-detail-row" method="post" action="{% url 'update_server_details' server.slug %}">
+                {% csrf_token %}
+                <label for="version">Version</label>
+                <input id="version" type="text" name="version" value="{{ server.version }}">
+                <button type="submit" class="button">Save</button>
+            </form>
 
-        <dt>Port</dt>
-        <dd>{{ server.port }}</dd>
-        <form method="post" action="{% url 'update_server_details' server.slug %}">
-            {% csrf_token %}
-            <textarea name="port">{{ server.port }}</textarea>
-            <button type="submit">Save</button>
-        </form>
+            <form class="server-detail-row" method="post" action="{% url 'update_server_details' server.slug %}">
+                {% csrf_token %}
+                <label for="allocated_memory">Memory</label>
+                <input id="allocated_memory" type="number" name="allocated_memory" value="{{ server.allocated_memory }}">
+                <button type="submit" class="button">Save</button>
+            </form>
 
-        <dt>Status</dt>
-        <dd>{% if server.is_active %}Active{% else %}Stopped{% endif %}</dd>
-        <form method="post" action="{% url 'update_server_details' server.slug %}">
-            {% csrf_token %}
-            <textarea name="is_active">{{ server.is_active }}</textarea>
-            <button type="submit">Save</button>
-        </form>
+            <form class="server-detail-row" method="post" action="{% url 'update_server_details' server.slug %}">
+                {% csrf_token %}
+                <label for="port">Port</label>
+                <input id="port" type="number" name="port" value="{{ server.port }}">
+                <button type="submit" class="button">Save</button>
+            </form>
 
-        <dt>Notes</dt>
-        <dd>{{ server.notes }}</dd>
-        <form method="post" action="{% url 'update_server_details' server.slug %}">
-            {% csrf_token %}
-            <textarea name="notes">{{ server.notes }}</textarea>
-            <button type="submit">Save Notes Endpoint</button>
-        </form>
-    </dl>
+            <form class="server-detail-row" method="post" action="{% url 'update_server_details' server.slug %}">
+                {% csrf_token %}
+                <label for="is_active">Status</label>
+                <select id="is_active" name="is_active">
+                    <option value="True" {% if server.is_active %}selected{% endif %}>Active</option>
+                    <option value="False" {% if not server.is_active %}selected{% endif %}>Stopped</option>
+                </select>
+                <button type="submit" class="button">Save</button>
+            </form>
+
+            <form class="server-detail-row" method="post" action="{% url 'update_server_details' server.slug %}">
+                {% csrf_token %}
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes">{{ server.notes }}</textarea>
+                <button type="submit" class="button">Save</button>
+            </form>
+        </div>
     </section>
     
-    <p> <a href="{% url 'game_server_edit_detail' server.slug %}" class="button">Edit Server Details</a> </p>
     <p> <a href="{% url 'game_server_list' %}" class="button">Back to Game Server Status page</a> </p>
 {% endblock %}
