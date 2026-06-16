@@ -28,18 +28,6 @@ def game_server_form(request, slug):
     return render(request, "game_server_form.html", {"form": form, "server": server})
 
 @require_POST
-def update_server_notes(request, slug):
-    server = get_object_or_404(GameServer, slug=slug)   # Set server equal to some existing GameServer object
-    server.notes = request.POST.get("notes", "")        # Grab the new updated notes when self.client.post is used
-    server.save() # Save changes
-    
-    # Returns success and the new notes field value
-    return JsonResponse({
-        "status": "success",
-        "notes": server.notes,
-    })
-
-@require_POST
 def update_server_details(request, slug):
     server = get_object_or_404(GameServer, slug=slug)   # Set server equal to some existing GameServer object
     form = None
