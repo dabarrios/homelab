@@ -3,7 +3,32 @@
 {% block title %}{{ server.world_name }} Details{% endblock %}
 
 {% block content %}
+<script>
 
+function updateField(field, value) {
+    $.ajax({
+        url: "{% url 'update_server_details' server.slug %}",   // your Django or backend endpoint
+        method: 'POST',
+        data: {
+            field: field,
+            value: value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function (response) {
+            console.log(response)
+            console.log("Updated successfully");
+        },
+        error: function (xhr, status, error) {
+            console.log("XHR:", xhr);
+            console.log("Status:", status);
+            console.log("Error:", error);
+
+            alert("Error: " + xhr.responseText);
+
+        }
+    });
+}
+</script>
 
 <section>
     <h2>{{ server.slug }} Details</h2>
