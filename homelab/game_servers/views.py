@@ -12,21 +12,6 @@ def game_server_detail(request, slug):
     server = get_object_or_404(GameServer, slug=slug)   # Clean Django shortcut to avoid typing out try/except block
     return render(request, 'game_server_detail.html', {'server': server})
 
-def game_server_form(request, slug):
-    server = get_object_or_404(GameServer, slug=slug)   # Clean Django shortcut to avoid typing out try/except block
-
-    if request.method == "POST":    # Checking if form is submitted
-        form = GameServerNotesForm(request.POST, instance=server)   # Create form using submitted data and updates that specific server
-
-        if form.is_valid(): # Checking if submitted data is valid
-            form.save()     # Update database
-            # Django will check the server GameServer object for a get_absolute_url() and redirects
-            return redirect(server)
-    else:
-        form = GameServerNotesForm(instance=server)
-
-    return render(request, "game_server_form.html", {"form": form, "server": server})
-
 @require_POST
 def update_server_details(request, slug):
     server = get_object_or_404(GameServer, slug=slug)   # Set server equal to some existing GameServer object
