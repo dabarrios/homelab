@@ -61,6 +61,6 @@ def update_server_details(request, slug):
         })
     
     return JsonResponse({
-        "status": "success",
-        "slug": server.slug,
-    })
+        "status": "error",
+        "errors": form.errors,
+    }, status=400)
