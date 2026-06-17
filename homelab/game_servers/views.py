@@ -45,10 +45,20 @@ def update_server_details(request, slug):
         form = GameServerNotesForm(request.POST, instance=server)  # Create form using submitted data and updates that specific server
         updated_field = "notes"
 
+    if form is None:
+        return JsonResponse({
+            "status": "error",
+            "message": "No supported field was submitted.",
+        }, status=400)
+    
     if form.is_valid():         # Checking if submitted data is valid
         server = form.save()    # Update database
         # Returns success and the new notes field value
-        return redirect(server)
+        return JsonResponse({
+            "status": "success",
+            "field": updated_field,
+            "value": getattr(server, updated_field),
+        })
     
     return JsonResponse({
         "status": "success",
