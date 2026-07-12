@@ -1,18 +1,25 @@
-"""Synchronize Compose-managed game containers into Django."""
+"""Synchronize Compose-defined game servers and their live Docker state."""
 
 import json
 import re
 import subprocess
+from pathlib import Path
 
 from django.utils.text import slugify
 
 from .models import GameServer
 
 
+COMPOSE_FILE = Path(__file__).resolve().parents[2] / "game-stack" / "docker-compose.yml"
 PROJECT_LABEL = "com.docker.compose.project=game-stack"
 
 
-def _environment_map(container):
+def _run_json(command, timeout=5):
+    result = subprocess.run(command, capture_output=True, text=True, check=True, timeout=timeout)
+    return json.loads(result.stdout)
+
+
+def _container_environment(container):
     return {
         key: value
         for item in container.get("Config", {}).get("Env", [])
@@ -22,16 +29,25 @@ def _environment_map(container):
 
 
 def _memory_in_gb(value):
-    match = re.fullmatch(r"\s*(\d+)\s*([GMgm]?)\s*", value or "")
+    match = re.fullmatch(r"\s*(\d+)\s*([GMgm]?)\s*", str(value or ""))
     if not match:
         return 1
     amount, unit = int(match.group(1)), match.group(2).upper()
     return max(1, amount if unit != "M" else round(amount / 1024))
 
 
-def _minecraft_port(container):
-    bindings = container.get("HostConfig", {}).get("PortBindings", {})
-    published = bindings.get("25565/tcp") or []
+def _compose_port(service):
+    for port in service.get("ports") or []:
+        if int(port.get("target", 0)) == 25565 and port.get("protocol", "tcp") == "tcp":
+            try:
+                return int(port["published"])
+            except (KeyError, TypeError, ValueError):
+                return None
+    return None
+
+
+def _container_port(container):
+    published = container.get("HostConfig", {}).get("PortBindings", {}).get("25565/tcp") or []
     if not published:
         return None
     try:
@@ -50,67 +66,100 @@ def _unique_slug(name):
     return candidate
 
 
-def sync_docker_game_servers():
-    """Upsert game containers and return None, or an unavailable reason."""
+def _compose_inventory():
+    return _run_json([
+        "docker", "compose", "--profile", "*", "-f", str(COMPOSE_FILE),
+        "config", "--format", "json",
+    ])
+
+
+def _service_and_profile(container_name):
+    services = (_compose_inventory().get("services") or {})
+    for service_name, service in services.items():
+        if (service.get("container_name") or service_name) == container_name:
+            profiles = service.get("profiles") or []
+            profile = profiles[0] if profiles else service_name
+            profile_services = [
+                name for name, configured in services.items()
+                if profile in (configured.get("profiles") or [])
+            ]
+            return service_name, profile, profile_services
+    raise ValueError("This container is not an allowlisted game-stack service.")
+
+
+def _run_compose(arguments, timeout=120):
     try:
+        return subprocess.run(
+            ["docker", "compose", "--profile", arguments[0], "-f", str(COMPOSE_FILE), *arguments[1:]],
+            capture_output=True, text=True, check=True, timeout=timeout,
+        )
+    except subprocess.CalledProcessError as error:
+        raise RuntimeError(error.stderr.strip() or "Docker Compose command failed.") from error
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError("Docker Compose did not finish in time.") from error
+
+
+def set_server_power(container_name, action):
+    """Start or stop a configured game profile and its supporting services."""
+    if action not in {"start", "stop"}:
+        raise ValueError("Unsupported power action.")
+    _, profile, profile_services = _service_and_profile(container_name)
+    compose_action = ["up", "-d"] if action == "start" else ["stop"]
+    _run_compose([profile, *compose_action, *profile_services])
+
+
+def sync_docker_game_servers():
+    """Use Compose for inventory and Docker for current activity state."""
+    try:
+        compose = _compose_inventory()
         listed = subprocess.run(
             ["docker", "ps", "-a", "--filter", f"label={PROJECT_LABEL}", "--format", "{{.ID}}"],
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=3,
+            capture_output=True, text=True, check=True, timeout=3,
         )
         container_ids = listed.stdout.split()
-        if not container_ids:
-            return None
-
-        inspected = subprocess.run(
-            ["docker", "inspect", *container_ids],
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=5,
-        )
-        containers = json.loads(inspected.stdout)
+        containers = _run_json(["docker", "inspect", *container_ids]) if container_ids else []
     except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired, json.JSONDecodeError) as error:
         return str(error)
 
-    seen_names = set()
-    for container in containers:
-        labels = container.get("Config", {}).get("Labels") or {}
-        service = labels.get("com.docker.compose.service", "")
-        image = container.get("Config", {}).get("Image", "")
-        if service.endswith("-backup") or "mc-backup" in image:
+    containers_by_name = {
+        container.get("Name", "").lstrip("/"): container
+        for container in containers
+    }
+    configured_names = set()
+
+    for service_name, service in (compose.get("services") or {}).items():
+        image = service.get("image", "")
+        if service_name.endswith("-backup") or "mc-backup" in image:
             continue
 
-        name = container.get("Name", "").lstrip("/")
-        if not name:
-            continue
+        name = service.get("container_name") or service_name
+        configured_names.add(name)
+        container = containers_by_name.get(name)
+        environment = service.get("environment") or {}
+        if container:
+            environment = {**environment, **_container_environment(container)}
 
-        seen_names.add(name)
-        environment = _environment_map(container)
         defaults = {
-            "game": "Minecraft" if "minecraft" in image else service.replace("-", " ").title(),
+            "game": "Minecraft" if "minecraft" in image else service_name.replace("-", " ").title(),
             "allocated_memory": _memory_in_gb(environment.get("MEMORY")),
-            "version": environment.get("VERSION", ""),
-            "port": _minecraft_port(container),
-            "is_active": container.get("State", {}).get("Status") == "running",
+            "version": str(environment.get("VERSION", "")),
+            "port": _container_port(container) if container else _compose_port(service),
+            "is_active": bool(container and container.get("State", {}).get("Status") == "running"),
         }
         server = GameServer.objects.filter(container_name=name).first()
         if server is None:
-            defaults.update({"world_name": name.upper(), "slug": _unique_slug(name), "notes": ""})
-            GameServer.objects.create(container_name=name, **defaults)
+            GameServer.objects.create(
+                container_name=name,
+                world_name=name.upper(),
+                slug=_unique_slug(name),
+                notes="",
+                **defaults,
+            )
         else:
             for field, value in defaults.items():
                 setattr(server, field, value)
-            server.save(update_fields=[*defaults])
+            server.save(update_fields=list(defaults))
 
-    GameServer.objects.filter(container_name__in=seen_names).exclude(
-        container_name__in=[
-            container.get("Name", "").lstrip("/")
-            for container in containers
-            if container.get("State", {}).get("Status") == "running"
-        ]
-    ).update(is_active=False)
+    GameServer.objects.exclude(container_name__in=configured_names).delete()
     return None
 
