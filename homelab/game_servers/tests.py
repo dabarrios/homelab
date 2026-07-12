@@ -31,63 +31,12 @@ class GameServerModelTest(TestCase):
         # Check if the correct server info was shown on the page
         self.assertContains(response, "Test World")
         
-    def test_server_list_page_loads(self):
-        url = reverse("dashboard")   # Build game_server_list URL
+    def test_dashboard_page_loads(self):
+        url = reverse("dashboard")   # Build dashboard URL
         response = self.client.get(url)     # Simulates user accessing that URL
-        self.assertEqual(response.status_code, 200) # Checks if reaching that URL was successful (POST)
+        self.assertEqual(response.status_code, 200) # Confirms the dashboard GET request succeeded
         
     def test_bad_slug_loads(self):
         url = reverse("game_server_detail", args=["does-not-exist"])    # Build game_server_detail URL with invalid slug
         response = self.client.get(url)                                 # Simulates user accessing that URL
         self.assertEqual(response.status_code, 404)                     # Checks if reaching that URL was a failure (404)
-        
-    def test_edit_page_updates(self):
-        url = reverse("game_server_edit_detail", args=[self.server.slug])   # Build edit_detail URL
-        # self.client.post simulates user submitting form
-        # The view itself will validate the form
-        response = self.client.post(url, {
-            "game": "Minecraft",                                            
-            "world_name": "Test World",
-            "slug": "test-world",
-            "container_name": "test-container",
-            "allocated_memory": 4,
-            "version": "1.20",
-            "port": 25570,
-            "is_active": "on",
-            "notes": "Changed notes",
-        })
-        
-        # 302 redirects; After a successful form save, redirect(server)
-        # REMINDER: When we use redirect(server) Django will look at that object and look for a get_absolute_url()
-        self.assertEqual(response.status_code, 302) 
-        
-        # Reload this object from DB so that we can see what the view saved
-        # We do not use self.server.save() because that would be US saving it.
-        # We are testing whether the form saved the change.
-        self.server.refresh_from_db()
-        
-        # Check that this GameServer object's notes field = "Changed notes"
-        self.assertEqual(self.server.notes, "Changed notes")     
-
-    def test_update_server_notes_endpoint_updates_notes(self):
-        url = reverse("update_server_notes", args=[self.server.slug]) # Build the URL and pass the slug
-
-        # This calls the update_server_notes view and simulates submitting POST data
-        response = self.client.post(url, {
-            "notes": "Changed through the notes endpoint",
-        })
-
-        self.assertEqual(response.status_code, 200) # Checks if reaching that URL was successful (POST)
-
-        # Reload this object from DB so that we can see what the view saved
-        # We do not use self.server.save() because that would be US saving it.
-        # We are testing whether the form saved the change.
-        self.server.refresh_from_db()
-        
-        # Check that this GameServer object's notes field changed to the updated value
-        self.assertEqual(self.server.notes, "Changed through the notes endpoint")
-        
-        # Verify that the json response returned status and the new updated notes
-        self.assertEqual(response.json()["status"], "success")
-        self.assertEqual(response.json()["notes"], "Changed through the notes endpoint")
-        

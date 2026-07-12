@@ -19,7 +19,7 @@ def dashboard(request):
         'total_memory': servers.aggregate(total=Sum('allocated_memory'))['total'] or 0,
         'docker_error': docker_error,
     }
-    return render(request, 'game_server_list.html', context)
+    return render(request, 'dashboard.html', context)
 
 def game_server_detail(request, slug):
     server = get_object_or_404(GameServer, slug=slug)   # Clean Django shortcut to avoid typing out try/except block
