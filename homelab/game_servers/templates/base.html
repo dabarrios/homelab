@@ -1,22 +1,32 @@
 {% load static %}
-
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Homelab Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'game_servers/style.css' %}">
-
+    <meta name="theme-color" content="#121114">
+    <title>{% block title %}Homelab{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static "game_servers/style.css" %}">
 </head>
 <body>
-    <header>
-        <h1>Homelab Dashboard</h1>
+<div class="site-shell">
+    <header class="site-header">
+        <a class="brand" href="{% url "game_server_list" %}" aria-label="Homelab dashboard">
+            <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 8.5 12 5l5 3.5v7L12 19l-5-3.5v-7Z"/><path d="m7.2 8.7 4.8 3 4.8-3M12 11.7V19"/></svg></span>
+            <span>homelab<span class="brand-dot">.</span></span>
+        </a>
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="{% url "game_server_list" %}"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Dashboard</a>
+            <a class="nav-link" href="/admin/"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3A1.7 1.7 0 0 0 14 21v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>Admin</a>
+        </nav>
+        <div class="header-status"><span class="status-pulse"></span> Local network</div>
     </header>
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+    <main class="page-container">{% block content %}{% endblock %}</main>
+    <footer class="site-footer"><span>Homelab control center</span><span>/</span><span>Built with Django</span></footer>
+</div>
+{% block scripts %}{% endblock %}
 </body>
+</html>

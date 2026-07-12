@@ -10,14 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.RenameField(
             model_name='gameserver',
-            name='name',
+            old_name='name',
+            new_name='world_name',
         ),
-        migrations.AddField(
+        migrations.AlterField(
             model_name='gameserver',
             name='world_name',
-            field=models.CharField(db_column='WORLD_NAME', default='-', max_length=255, unique=True, verbose_name='World Name'),
-            preserve_default=False,
+            field=models.CharField(db_column='WORLD_NAME', max_length=255, unique=True, verbose_name='World Name'),
         ),
     ]
