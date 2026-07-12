@@ -37,7 +37,7 @@ class Command(BaseCommand):
             docker_status = get_docker_status(server.container_name)
 
             self.stdout.write(
-                f'Game: {server.game}, World name: {server.name}, Version: {server.version}, Memory: {server.allocated_memory}GB, '
+                f'Game: {server.game}, World name: {server.world_name}, Version: {server.version}, Memory: {server.allocated_memory}GB, '
                 f'Container name: {server.container_name}, Docker: {docker_status}, '
                 f'Port: {server.port}, Active: {active_status}'
             )

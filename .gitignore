@@ -3,6 +3,7 @@
 
 # Django-related directories
 homelab/db.sqlite3
+homelab/staticfiles/
 **/__pycache__/
 *.pyc
 
