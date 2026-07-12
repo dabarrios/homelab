@@ -4,5 +4,4 @@ from . import views
 urlpatterns = [
     path('overview/', views.game_server_list, name='game_server_list'),
     path('details/<str:slug>/', views.game_server_detail, name='game_server_detail'),
-    path('edit/details/<str:slug>', views.update_server_details, name='update_server_details'),
 ]

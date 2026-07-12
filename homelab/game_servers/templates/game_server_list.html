@@ -5,7 +5,7 @@
 {% block content %}
 <section class="page-heading">
     <div><p class="eyebrow">Infrastructure</p><h1>Good to see you.</h1><p class="page-intro">A quiet overview of the services running in your homelab.</p></div>
-    <div class="heading-actions"><p class="last-updated"><span class="status-pulse"></span> Status from database</p><a class="button button-primary" href="/admin/game_servers/gameserver/add/"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add server</a></div>
+    <div class="heading-actions"><p class="last-updated"><span class="status-pulse"></span> Live Docker status</p></div>
 </section>
 {% if docker_error %}<div class="sync-warning"><svg viewBox="0 0 24 24"><path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg><span><strong>Docker is unavailable.</strong> Showing the last synchronized server data.</span></div>{% endif %}
 <section class="stat-grid" aria-label="Server summary">
@@ -22,10 +22,10 @@
             <div class="server-card-top"><div class="server-avatar">{{ server.game|slice:":1"|upper }}</div><span class="status-badge {% if server.is_active %}status-online{% else %}status-offline{% endif %}"><span></span>{% if server.is_active %}Online{% else %}Stopped{% endif %}</span></div>
             <div class="server-card-body"><p class="server-game">{{ server.game }}</p><h3><a href="{% url "game_server_detail" server.slug %}">{{ server.world_name }}</a></h3><p class="server-container">{{ server.container_name }}</p></div>
             <dl class="server-meta"><div><dt>Version</dt><dd>{{ server.version|default:"—" }}</dd></div><div><dt>Memory</dt><dd>{{ server.allocated_memory }} GB</dd></div><div><dt>Port</dt><dd>{{ server.port|default:"—" }}</dd></div></dl>
-            <a class="card-link" href="{% url "game_server_detail" server.slug %}">Manage server<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="card-link" href="{% url "game_server_detail" server.slug %}">View server details<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </article>
     {% empty %}
-        <div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="6" rx="2"/><rect x="4" y="14" width="16" height="6" rx="2"/></svg></div><h3>No servers yet</h3><p>Add your first game server in Django admin and it will appear here.</p><a class="button button-primary" href="/admin/game_servers/gameserver/add/">Add a server</a></div>
+        <div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="6" rx="2"/><rect x="4" y="14" width="16" height="6" rx="2"/></svg></div><h3>No servers yet</h3><p>Add your first game server in Django admin and it will appear here.</p></div>
     {% endfor %}
     </div>
     <div class="empty-state is-hidden" id="search-empty"><h3>No matching servers</h3><p>Try a different name, game, or slug.</p></div>
