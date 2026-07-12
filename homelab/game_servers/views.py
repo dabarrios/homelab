@@ -3,7 +3,7 @@ from django.db.models import Sum
 from .models import GameServer
 from .docker_sync import sync_docker_game_servers
 
-def game_server_list(request):
+def dashboard(request):
     docker_error = sync_docker_game_servers()
     servers = GameServer.objects.all().order_by('-is_active', 'world_name')
     server_count = servers.count()

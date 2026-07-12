@@ -32,7 +32,7 @@ class GameServerModelTest(TestCase):
         self.assertContains(response, "Test World")
         
     def test_server_list_page_loads(self):
-        url = reverse("game_server_list")   # Build game_server_list URL
+        url = reverse("dashboard")   # Build game_server_list URL
         response = self.client.get(url)     # Simulates user accessing that URL
         self.assertEqual(response.status_code, 200) # Checks if reaching that URL was successful (POST)
         

@@ -2,10 +2,10 @@
 {% block title %}{{ server.world_name }} · Homelab{% endblock %}
 {% block nav_dashboard %}is-active{% endblock %}
 {% block content %}
-<nav class="breadcrumb" aria-label="Breadcrumb"><a href="{% url "game_server_list" %}">Dashboard</a><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg><span>{{ server.world_name }}</span></nav>
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="{% url "dashboard" %}">Dashboard</a><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg><span>{{ server.world_name }}</span></nav>
 <section class="detail-hero">
     <div class="detail-identity"><div class="server-avatar server-avatar-large">{{ server.game|slice:":1"|upper }}</div><div><div class="detail-title-line"><h1>{{ server.world_name }}</h1><span class="status-badge {% if server.is_active %}status-online{% else %}status-offline{% endif %}"><span></span>{% if server.is_active %}Online{% else %}Stopped{% endif %}</span></div><p>{{ server.game }} <span>·</span> {{ server.container_name }}</p></div></div>
-    <a class="button button-secondary" href="{% url "game_server_list" %}"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Back to dashboard</a>
+    <a class="button button-secondary" href="{% url "dashboard" %}"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Back to dashboard</a>
 </section>
 <div class="detail-layout detail-layout-readonly">
     <section class="panel">
