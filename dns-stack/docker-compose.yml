@@ -1,44 +1,44 @@
 name: dns-stack
 
 networks:
-    macvlan-net:
-        name: macvlan-net
-        driver: macvlan
-        driver_opts:
-            parent: ${PARENT_NETWORK_CARD}
-            macvlan_mode: bridge
-        ipam:
-            config:
-                - subnet: '${SUBNET}'
-                  gateway: '${GATEWAY}'
+  macvlan-net:
+    name: macvlan-net
+    driver: macvlan
+    driver_opts:
+      parent: ${PARENT_NETWORK_CARD}
+      macvlan_mode: bridge
+    ipam:
+      config:
+        - subnet: '${SUBNET}'
+          gateway: '${GATEWAY}'
 
-    home-net:
-        external: true
+  home-net:
+    external: true
 
 x-logging: &default-logging
-    driver: json-file
-    options:
-        max-size: "10m"
-        max-file: "3"
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
-    pihole:
-        image: pihole/pihole:latest
-        container_name: pihole
-        hostname: pihole
-        networks:
-            home-net: {}
-            macvlan-net:
-                ipv4_address: '${IPV4_ADDRESS}'
-        cap_add:
-            - CAP_SYS_TIME
-            - SYS_NICE
-        environment:
-            TZ: '${TZ}'
-            WEBPASSWORD: '${WEB_SERVER_PASSWORD}'
-            DNSMASQ_LISTENING: 'all'
-        volumes:
-            - ./pihole/etc/pihole:/etc/pihole
-            - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d
-        logging: *default-logging
-        restart: unless-stopped
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    hostname: pihole
+    networks:
+      home-net: {}
+      macvlan-net:
+        ipv4_address: '${IPV4_ADDRESS}'
+    cap_add:
+      - CAP_SYS_TIME
+      - SYS_NICE
+    environment:
+      TZ: '${TZ}'
+      WEBPASSWORD: '${WEB_SERVER_PASSWORD}'
+      DNSMASQ_LISTENING: 'all'
+    volumes:
+      - ./pihole/etc/pihole:/etc/pihole
+      - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d
+    logging: *default-logging
+    restart: unless-stopped

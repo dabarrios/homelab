@@ -1,33 +1,33 @@
 name: utilities-stack
 
 networks:
-    default:
-        name: home-net
-        external: true
+  default:
+    name: home-net
+    external: true
 
 x-logging: &default-logging
-    driver: json-file
-    options:
-        max-size: "10m"
-        max-file: "3"
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
-    bentopdf:
-        image: bentopdf/bentopdf:latest
-        container_name: bentopdf
-        volumes:
-            - ./bentopdf:/data
-        ports:
-            - "${BENTOPDF_HOST_PORT:-3001}:8080"
-        logging: *default-logging
-        restart: unless-stopped
+  bentopdf:
+    image: bentopdf/bentopdf:latest
+    container_name: bentopdf
+    volumes:
+      - ./bentopdf:/data
+    ports:
+      - "${BENTOPDF_HOST_PORT:-3001}:8080"
+    logging: *default-logging
+    restart: unless-stopped
 
-    omni-tools:
-        image: iib0011/omni-tools:latest
-        container_name: omni-tools
-        volumes:
-            - ./omni-tools:/data
-        ports:
-            - "${OMNI_TOOLS_HOST_PORT:-3002}:80"
-        logging: *default-logging
-        restart: unless-stopped
+  omni-tools:
+    image: iib0011/omni-tools:latest
+    container_name: omni-tools
+    volumes:
+      - ./omni-tools:/data
+    ports:
+      - "${OMNI_TOOLS_HOST_PORT:-3002}:80"
+    logging: *default-logging
+    restart: unless-stopped
