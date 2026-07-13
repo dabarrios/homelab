@@ -32,6 +32,6 @@ for stack in stacks:
         continue
 
     print(f"\n--- {stack} ---")
-    subprocess.run(["docker", "compose", "down"], cwd=path, check=True)
-    subprocess.run(["docker", "compose", "pull"], cwd=path, check=True)
-    subprocess.run(["docker", "compose", "up", "-d", "--remove-orphans"], cwd=path, check=True)
+    subprocess.run(["docker", "compose", "--env-file", str(repo / ".env"), "down"], cwd=path, check=True)
+    subprocess.run(["docker", "compose", "--env-file", str(repo / ".env"), "pull"], cwd=path, check=True)
+    subprocess.run(["docker", "compose", "--env-file", str(repo / ".env"), "up", "-d", "--remove-orphans"], cwd=path, check=True)

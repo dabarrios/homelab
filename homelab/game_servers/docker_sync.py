@@ -15,6 +15,10 @@ COMPOSE_FILE = Path(os.environ.get(
     "GAME_STACK_COMPOSE_FILE",
     Path(__file__).resolve().parents[2] / "game-stack" / "docker-compose.yml",
 ))
+COMPOSE_ENV_FILE = Path(os.environ.get(
+    "GAME_STACK_ENV_FILE",
+    Path(__file__).resolve().parents[2] / ".env",
+))
 PROJECT_LABEL = "com.docker.compose.project=game-stack"
 
 
@@ -72,7 +76,7 @@ def _unique_slug(name):
 
 def _compose_inventory():
     return _run_json([
-        "docker", "compose", "--profile", "*", "-f", str(COMPOSE_FILE),
+        "docker", "compose", "--env-file", str(COMPOSE_ENV_FILE), "--profile", "*", "-f", str(COMPOSE_FILE),
         "config", "--format", "json",
     ])
 
@@ -94,7 +98,7 @@ def _service_and_profile(container_name):
 def _run_compose(arguments, timeout=120):
     try:
         return subprocess.run(
-            ["docker", "compose", "--profile", arguments[0], "-f", str(COMPOSE_FILE), *arguments[1:]],
+            ["docker", "compose", "--env-file", str(COMPOSE_ENV_FILE), "--profile", arguments[0], "-f", str(COMPOSE_FILE), *arguments[1:]],
             capture_output=True, text=True, check=True, timeout=timeout,
         )
     except subprocess.CalledProcessError as error:
