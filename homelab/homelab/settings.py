@@ -60,6 +60,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+if not DEBUG:
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+
 DEBUG_TOOLBAR_AVAILABLE = DEBUG and importlib.util.find_spec("debug_toolbar") is not None
 if DEBUG_TOOLBAR_AVAILABLE:
     INSTALLED_APPS.append("debug_toolbar")
@@ -89,7 +92,7 @@ ASGI_APPLICATION = "homelab.asgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": Path(os.environ.get("DJANGO_DB_PATH", BASE_DIR / "db.sqlite3")),
         "OPTIONS": {"timeout": 20},
     }
 }
@@ -108,6 +111,16 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        )
+    },
+}
 
 LOGIN_URL = "/admin/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"

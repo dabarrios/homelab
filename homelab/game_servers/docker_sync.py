@@ -1,6 +1,7 @@
 """Synchronize Compose-defined game servers and their live Docker state."""
 
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -10,7 +11,10 @@ from django.utils.text import slugify
 from .models import GameServer
 
 
-COMPOSE_FILE = Path(__file__).resolve().parents[2] / "game-stack" / "docker-compose.yml"
+COMPOSE_FILE = Path(os.environ.get(
+    "GAME_STACK_COMPOSE_FILE",
+    Path(__file__).resolve().parents[2] / "game-stack" / "docker-compose.yml",
+))
 PROJECT_LABEL = "com.docker.compose.project=game-stack"
 
 
