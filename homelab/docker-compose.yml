@@ -6,6 +6,10 @@ x-logging: &default-logging
     max-size: "10m"
     max-file: "3"
 
+networks:
+  home-net:
+    external: true
+
 services:
   dashboard:
     build:
@@ -36,6 +40,8 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    networks:
+      - home-net
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "--header=Host: localhost", "http://127.0.0.1:8000/admin/login/"]
       interval: 30s
