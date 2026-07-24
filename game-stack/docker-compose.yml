@@ -183,12 +183,13 @@ services:
         ADMIN_PASSWORD: "${PALWORLD_ADMIN_PASSWORD:-adminPasswordHere}" # Optional but recommended
         COMMUNITY: false  # Enable this if you want your server to show up in the community servers tab, USE WITH SERVER_PASSWORD!
         SERVER_NAME: "The Boys Palworld Server"
-        SERVER_DESCRIPTION: "Palworld server powered by Docker."
+        SERVER_DESCRIPTION: "Docker-powered Palworld server."
         CROSSPLAY_PLATFORMS: "(Steam,Xbox,PS5,Mac)"
         BASE_CAMP_MAX_NUM_IN_GUILD: 8
         PAL_EGG_DEFAULT_HATCHING_TIME: 0.083333
     volumes:
       - ${PALWORLD_DATA_PATH}:/palworld
+      - ${PALWORLD_BACKUP_PATH}:/palworld/backups
     ports:
       - "${PALWORLD_HOST_PORT}:8211/udp"
       - "${PALWORLD_RCON_PORT}:25575/tcp"
