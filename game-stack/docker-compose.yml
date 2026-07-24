@@ -185,7 +185,8 @@ services:
         SERVER_NAME: "The Boys Palworld Server"
         SERVER_DESCRIPTION: "Palworld server powered by Docker."
         CROSSPLAY_PLATFORMS: "(Steam,Xbox,PS5,Mac)"
-        BASE_CAMP_MAX_NUM_IN_GUILD: 6
+        BASE_CAMP_MAX_NUM_IN_GUILD: 8
+        PAL_EGG_DEFAULT_HATCHING_TIME: 0.083333
     volumes:
       - ${PALWORLD_DATA_PATH}:/palworld
     ports:
