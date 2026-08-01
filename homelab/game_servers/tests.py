@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from unittest.mock import patch
+
+from .docker_sync import _compose_port, _container_port, _container_version, _game_port
 from .models import GameServer
 
 class GameServerModelTest(TestCase):
@@ -49,3 +52,21 @@ class GameServerModelTest(TestCase):
         url = reverse("game_server_detail", args=["does-not-exist"])    # Build game_server_detail URL with invalid slug
         response = self.client.get(url)                                 # Simulates user accessing that URL
         self.assertEqual(response.status_code, 404)                     # Checks if reaching that URL was a failure (404)
+
+
+class DockerMetadataTest(TestCase):
+    def test_palworld_udp_port(self):
+        service = {"ports": [{"target": 8211, "published": "8200", "protocol": "udp"}]}
+        container = {"HostConfig": {"PortBindings": {"8211/udp": [{"HostPort": "8200"}]}}}
+
+        self.assertEqual(_game_port({"PORT": "8211"}), 8211)
+        self.assertEqual(_compose_port(service, 8211), 8200)
+        self.assertEqual(_container_port(container, 8211), 8200)
+
+    @patch("game_servers.docker_sync.subprocess.run")
+    def test_container_version_command(self, run):
+        run.return_value.stdout = "v1.0.2.101103\n"
+
+        version = _container_version("palworld", {"DASHBOARD_VERSION_COMMAND": "get-version"})
+
+        self.assertEqual(version, "v1.0.2.101103")

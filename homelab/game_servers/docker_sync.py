@@ -36,6 +36,24 @@ def _container_environment(container):
     }
 
 
+def _first(environment, *keys):
+    return next((str(environment[key]) for key in keys if environment.get(key) not in (None, "")), "")
+
+
+def _container_version(container_name, environment):
+    command = environment.get("DASHBOARD_VERSION_COMMAND", "").replace("$$", "$")
+    if not command:
+        return _first(environment, "DASHBOARD_VERSION", "VERSION", "GAME_VERSION", "SERVER_VERSION")
+    try:
+        result = subprocess.run(
+            ["docker", "exec", container_name, "sh", "-lc", command],
+            capture_output=True, text=True, check=True, timeout=3,
+        )
+        return result.stdout.strip()
+    except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        return ""
+
+
 def _memory_in_gb(value):
     match = re.fullmatch(r"\s*(\d+)\s*([GMgm]?)\s*", str(value or ""))
     if not match:
@@ -44,9 +62,16 @@ def _memory_in_gb(value):
     return max(1, amount if unit != "M" else round(amount / 1024))
 
 
-def _compose_port(service):
+def _game_port(environment):
+    try:
+        return int(_first(environment, "DASHBOARD_PORT", "PORT", "GAME_PORT", "SERVER_PORT") or 25565)
+    except (TypeError, ValueError):
+        return 25565
+
+
+def _compose_port(service, game_port):
     for port in service.get("ports") or []:
-        if int(port.get("target", 0)) == 25565 and port.get("protocol", "tcp") == "tcp":
+        if int(port.get("target", 0)) == game_port:
             try:
                 return int(port["published"])
             except (KeyError, TypeError, ValueError):
@@ -54,8 +79,9 @@ def _compose_port(service):
     return None
 
 
-def _container_port(container):
-    published = container.get("HostConfig", {}).get("PortBindings", {}).get("25565/tcp") or []
+def _container_port(container, game_port):
+    bindings = container.get("HostConfig", {}).get("PortBindings", {})
+    published = bindings.get(f"{game_port}/tcp") or bindings.get(f"{game_port}/udp") or []
     if not published:
         return None
     try:
@@ -147,23 +173,29 @@ def sync_docker_game_servers():
         if container:
             environment = {**environment, **_container_environment(container)}
 
+        game_port = _game_port(environment)
         defaults = {
-            "game": "Minecraft" if "minecraft" in image else service_name.replace("-", " ").title(),
-            "allocated_memory": _memory_in_gb(environment.get("MEMORY")),
-            "version": str(environment.get("VERSION", "")),
-            "port": _container_port(container) if container else _compose_port(service),
+            "game": _first(environment, "DASHBOARD_GAME", "GAME") or service_name.replace("-", " ").title(),
+            "allocated_memory": _memory_in_gb(_first(environment, "DASHBOARD_MEMORY", "MEMORY")),
+            "version": _container_version(name, environment) if container else _first(
+                environment, "DASHBOARD_VERSION", "VERSION", "GAME_VERSION", "SERVER_VERSION"
+            ),
+            "port": _container_port(container, game_port) if container else _compose_port(service, game_port),
             "is_active": bool(container and container.get("State", {}).get("Status") == "running"),
         }
         server = GameServer.objects.filter(container_name=name).first()
         if server is None:
             GameServer.objects.create(
                 container_name=name,
-                world_name=name.upper(),
+                world_name=_first(environment, "DASHBOARD_NAME", "SERVER_NAME", "WORLD_NAME") or name.upper(),
                 slug=_unique_slug(name),
-                notes="",
+                notes=_first(environment, "DASHBOARD_DESCRIPTION", "SERVER_DESCRIPTION"),
                 **defaults,
             )
         else:
+            configured_name = _first(environment, "DASHBOARD_NAME", "SERVER_NAME", "WORLD_NAME")
+            if configured_name and server.world_name == name.upper():
+                defaults["world_name"] = configured_name
             for field, value in defaults.items():
                 setattr(server, field, value)
             server.save(update_fields=list(defaults))

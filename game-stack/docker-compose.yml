@@ -12,6 +12,7 @@ x-logging: &default-logging
     max-file: "3"
 
 x-minecraft-env: &minecraft-env
+  DASHBOARD_GAME: "Minecraft"
   EULA: "TRUE"
   TYPE: FABRIC
   ALLOW_FLIGHT: "TRUE"
@@ -184,6 +185,8 @@ services:
         COMMUNITY: false  # Enable this if you want your server to show up in the community servers tab, USE WITH SERVER_PASSWORD!
         SERVER_NAME: "The Boys Palworld Server"
         SERVER_DESCRIPTION: "Docker-powered Palworld server."
+        DASHBOARD_GAME: "Palworld"
+        DASHBOARD_VERSION_COMMAND: 'curl -fsS --user "admin:$$ADMIN_PASSWORD" http://127.0.0.1:$${REST_API_PORT:-8212}/v1/api/info | jq -r .version'
         CROSSPLAY_PLATFORMS: "(Steam,Xbox,PS5,Mac)"
         BASE_CAMP_MAX_NUM_IN_GUILD: 8
         PAL_EGG_DEFAULT_HATCHING_TIME: 0.083333
