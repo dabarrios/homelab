@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 
 class GameServer(models.Model):
+    memory_usage_mb: int | None
     game = models.CharField(max_length=255, db_column='GAME', verbose_name="Game")
     world_name = models.CharField(unique=True, max_length=255, db_column='WORLD_NAME', verbose_name="World Name")
     slug = models.SlugField(unique=True, db_column='SLUG', verbose_name="Slug")
