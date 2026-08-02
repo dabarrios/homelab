@@ -57,9 +57,41 @@ def _container_version(container_name, environment):
 def _memory_in_gb(value):
     match = re.fullmatch(r"\s*(\d+)\s*([GMgm]?)\s*", str(value or ""))
     if not match:
-        return 1
+        return None
     amount, unit = int(match.group(1)), match.group(2).upper()
-    return max(1, amount if unit != "M" else round(amount / 1024))
+    return max(1, amount if unit != "M" else round(amount / 1024)) if amount else None
+
+
+def _container_memory(container):
+    memory_bytes = (container or {}).get("HostConfig", {}).get("Memory", 0)
+    try:
+        memory_bytes = int(memory_bytes)
+    except (TypeError, ValueError):
+        return None
+    gibibyte = 1024 ** 3
+    return (memory_bytes + gibibyte - 1) // gibibyte if memory_bytes > 0 else None
+
+def _memory_usage_mb(value):
+    match = re.match(r"^([0-9.]+)([KMGTP]?i?B)", value or "", re.IGNORECASE)
+    if not match:
+        return None
+    amount, unit = float(match.group(1)), match.group(2).upper()
+    factors = {"B": 1 / 1024 ** 2, "KB": 1 / 1024, "KIB": 1 / 1024, "MB": 1, "MIB": 1, "GB": 1024, "GIB": 1024, "TB": 1024 ** 2, "TIB": 1024 ** 2}
+    return round(amount * factors[unit])
+
+
+def live_memory_usage(container_names):
+    if not container_names:
+        return {}
+    try:
+        result = subprocess.run(
+            ["docker", "stats", "--no-stream", "--format", "{{json .}}", *container_names],
+            capture_output=True, text=True, check=True, timeout=8,
+        )
+        stats = (json.loads(line) for line in result.stdout.splitlines() if line)
+        return {item["Name"]: _memory_usage_mb(item.get("MemUsage")) for item in stats}
+    except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired, json.JSONDecodeError):
+        return {}
 
 
 def _game_port(environment):
@@ -176,7 +208,9 @@ def sync_docker_game_servers():
         game_port = _game_port(environment)
         defaults = {
             "game": _first(environment, "DASHBOARD_GAME", "GAME") or service_name.replace("-", " ").title(),
-            "allocated_memory": _memory_in_gb(_first(environment, "DASHBOARD_MEMORY", "MEMORY")),
+            "allocated_memory": (
+                _memory_in_gb(_first(environment, "DASHBOARD_MEMORY", "MEMORY")) or _container_memory(container)
+            ),
             "version": _container_version(name, environment) if container else _first(
                 environment, "DASHBOARD_VERSION", "VERSION", "GAME_VERSION", "SERVER_VERSION"
             ),

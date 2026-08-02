@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from unittest.mock import patch
 
-from .docker_sync import _compose_port, _container_port, _container_version, _game_port
+from .docker_sync import _compose_port, _container_memory, _container_port, _container_version, _game_port, _memory_in_gb, _memory_usage_mb
 from .models import GameServer
 
 class GameServerModelTest(TestCase):
@@ -70,3 +70,12 @@ class DockerMetadataTest(TestCase):
         version = _container_version("palworld", {"DASHBOARD_VERSION_COMMAND": "get-version"})
 
         self.assertEqual(version, "v1.0.2.101103")
+
+    def test_memory_has_no_invented_fallback(self):
+        self.assertIsNone(_memory_in_gb(None))
+        self.assertIsNone(_container_memory({"HostConfig": {"Memory": 0}}))
+        self.assertEqual(_container_memory({"HostConfig": {"Memory": 4 * 1024 ** 3}}), 4)
+
+    def test_live_memory_parser(self):
+        self.assertEqual(_memory_usage_mb("2.15GiB / 31.2GiB"), 2202)
+        self.assertEqual(_memory_usage_mb("512MiB / 1GiB"), 512)

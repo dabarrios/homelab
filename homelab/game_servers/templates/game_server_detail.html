@@ -17,7 +17,8 @@
             <div><dt>Container</dt><dd><code>{{ server.container_name }}</code></dd></div>
             <div><dt>Docker status</dt><dd><span class="inline-state {% if server.is_active %}is-online{% endif %}">{% if server.is_active %}Running{% else %}Stopped{% endif %}</span></dd></div>
             <div><dt>Version</dt><dd>{{ server.version|default:"Not reported" }}</dd></div>
-            <div><dt>Allocated memory</dt><dd>{{ server.allocated_memory }} GB</dd></div>
+            <div><dt>Allocated memory</dt><dd>{% if server.allocated_memory is not None %}{{ server.allocated_memory }} GB{% else %}Not configured{% endif %}</dd></div>
+            <div><dt>Live memory usage</dt><dd>{% if server.memory_usage_mb is not None %}{{ server.memory_usage_mb }} MB{% elif server.is_active %}Unavailable{% else %}Not running{% endif %}</dd></div>
             <div><dt>Published port</dt><dd>{{ server.port|default:"Not published" }}</dd></div>
             <div><dt>Identifier</dt><dd><code>{{ server.slug }}</code></dd></div>
         </dl>

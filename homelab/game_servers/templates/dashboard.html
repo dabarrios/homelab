@@ -21,7 +21,7 @@
         <article class="server-card" data-server-card data-search="{{ server.world_name|lower }} {{ server.game|lower }} {{ server.slug|lower }}">
             <div class="server-card-top"><div class="server-avatar">{{ server.game|slice:":1"|upper }}</div><span class="status-badge {% if server.is_active %}status-online{% else %}status-offline{% endif %}"><span></span>{% if server.is_active %}Online{% else %}Stopped{% endif %}</span></div>
             <div class="server-card-body"><p class="server-game">{{ server.game }}</p><h3><a href="{% url "game_server_detail" server.slug %}">{{ server.world_name }}</a></h3><p class="server-container">{{ server.container_name }}</p></div>
-            <dl class="server-meta"><div><dt>Version</dt><dd>{{ server.version|default:"—" }}</dd></div><div><dt>Memory</dt><dd>{{ server.allocated_memory }} GB</dd></div><div><dt>Port</dt><dd>{{ server.port|default:"—" }}</dd></div></dl>
+            <dl class="server-meta"><div><dt>Version</dt><dd>{{ server.version|default:"—" }}</dd></div><div><dt>Memory</dt><dd>{% if server.memory_usage_mb is not None %}{{ server.memory_usage_mb }} MB used{% if server.allocated_memory is not None %} / {{ server.allocated_memory }} GB{% endif %}{% elif server.allocated_memory is not None %}{{ server.allocated_memory }} GB allocated{% else %}—{% endif %}</dd></div><div><dt>Port</dt><dd>{{ server.port|default:"—" }}</dd></div></dl>
             <a class="card-link" href="{% url "game_server_detail" server.slug %}">View server details<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </article>
     {% empty %}
