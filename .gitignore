@@ -62,6 +62,7 @@ homelab/data/
 
 # Exceptions
 !**/recyclarr/recyclarr.example.yml
+!**/recyclarr/recyclarr.yml
 
 # Editor
 .vscode/
