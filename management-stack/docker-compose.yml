@@ -1,41 +1,41 @@
 name: management-stack
 
 networks:
-    default:
-        name: home-net
-        external: true
+  default:
+    name: home-net
+    external: true
 
 x-logging: &default-logging
-    driver: json-file
-    options:
-        max-size: "10m"
-        max-file: "3"
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
 
-    homarr:
-        image: ghcr.io/homarr-labs/homarr:latest
-        container_name: homarr
-        environment:
-            TZ: ${TZ}
-            SECRET_ENCRYPTION_KEY: ${HOMARR_ENCRYPTION_KEY}
-        volumes:
-            - ./homarr:/appdata
-            - /var/run/docker.sock:/var/run/docker.sock
-        ports:
-            - "${HOMARR_HOST_PORT:-4001}:7575"
-        logging: *default-logging
-        restart: unless-stopped
-        
-    portainer:
-        image: portainer/portainer-ce:latest
-        container_name: portainer
-        environment:
-            TZ: ${TZ}
-        volumes:
-            - ./portainer:/data
-            - /var/run/docker.sock:/var/run/docker.sock
-        ports:
-            - "${PORTAINER_HOST_PORT:-4002}:9443"
-        logging: *default-logging
-        restart: unless-stopped
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr
+    environment:
+      TZ: ${TZ}
+      SECRET_ENCRYPTION_KEY: ${HOMARR_ENCRYPTION_KEY}
+    volumes:
+      - ./homarr:/appdata
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${HOMARR_HOST_PORT:-4001}:7575"
+    logging: *default-logging
+    restart: unless-stopped
+    
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ./portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${PORTAINER_HOST_PORT:-4002}:9443"
+    logging: *default-logging
+    restart: unless-stopped

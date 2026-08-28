@@ -4,12 +4,14 @@
 # Django-related directories
 homelab/db.sqlite3
 homelab/staticfiles/
+homelab/data/
 **/__pycache__/
 *.pyc
 
 # automation-stack
 **/bazarr/
 **/bazarr-anime/
+**/flaresolverr/
 **/prowlarr/
 **/radarr/
 **/radarr-anime/
@@ -61,6 +63,7 @@ homelab/staticfiles/
 
 # Exceptions
 !**/recyclarr/recyclarr.example.yml
+!**/recyclarr/recyclarr.yml
 
 # Editor
 .vscode/

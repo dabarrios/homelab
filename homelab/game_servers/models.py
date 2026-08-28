@@ -2,11 +2,12 @@ from django.db import models
 from django.urls import reverse
 
 class GameServer(models.Model):
+    memory_usage_mb: int | None
     game = models.CharField(max_length=255, db_column='GAME', verbose_name="Game")
     world_name = models.CharField(unique=True, max_length=255, db_column='WORLD_NAME', verbose_name="World Name")
     slug = models.SlugField(unique=True, db_column='SLUG', verbose_name="Slug")
     container_name = models.CharField(unique=True, max_length=255, db_column='CONTAINER_NAME', verbose_name="Container Name")
-    allocated_memory = models.PositiveSmallIntegerField(db_column='ALLOCATED_MEMORY', verbose_name="Allocated Memory (GB)")
+    allocated_memory = models.PositiveSmallIntegerField(null=True, blank=True, db_column='ALLOCATED_MEMORY', verbose_name="Allocated Memory (GB)")
     version = models.CharField(max_length=255, blank=True, db_column='VERSION', verbose_name="Version")
     port = models.PositiveSmallIntegerField(null=True, blank=True, db_column='PORT', verbose_name="Port")
     is_active = models.BooleanField(default=False, db_column='IS_ACTIVE', verbose_name="Is Active?")

@@ -33,6 +33,26 @@ Each folder is a separate stack and serves a different goal:
 - `scripts/` - helper scripts
 - `homelab/` - Django app for homelab/game server pages
 
+## Environment Configuration
+
+Most Compose stacks use one consolidated root `.env` file. Individual stack directories contain no environment files, and each stack keeps a single `docker-compose.yml`.
+
+For a new checkout:
+
+1. Copy `.env.example` to `.env`.
+2. Fill in the real secrets and host-specific values.
+3. Restrict it with `chmod 600 .env`.
+4. Transfer `.env` between trusted machines using an encrypted channel such as `scp`, `sftp`, or a password manager; never commit it.
+
+Because Docker Compose only auto-loads `.env` from the working directory, pass the shared root file when running a stack:
+
+```bash
+cd automation-stack
+docker compose --env-file ../.env up -d
+```
+
+`homelab`, `aspis`, and nested application-managed files such as `paperless-stack/paperless-ai/.env` remain independent.
+
 ## Django App
 
 The `homelab/` folder is a Django app I am building as part of this repo.

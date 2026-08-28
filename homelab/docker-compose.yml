@@ -1,0 +1,52 @@
+name: homelab-stack
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+networks:
+  home-net:
+    external: true
+
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: homelab-dashboard:local
+    container_name: homelab-dashboard
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: "false"
+      DJANGO_DB_PATH: /data/db.sqlite3
+      GAME_STACK_COMPOSE_FILE: /game-stack/docker-compose.yml
+      GAME_STACK_ENV_FILE: /shared.env
+    ports:
+      - "${HOMELAB_PORT:-7716}:8000"
+    volumes:
+      - ./data:/data
+      - ../game-stack/docker-compose.yml:/game-stack/docker-compose.yml:ro
+      - ../.env:/shared.env:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:?Set DOCKER_GID to the Docker socket group ID}"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - home-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "--header=Host: localhost", "http://127.0.0.1:8000/admin/login/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging: *default-logging
+    restart: unless-stopped

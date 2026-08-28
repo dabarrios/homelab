@@ -1,63 +1,63 @@
 name: vpn-stack
 
 networks:
-    home-net:
-        external: true
+  home-net:
+    external: true
 
 x-logging: &default-logging
-    driver: json-file
-    options:
-        max-size: "10m"
-        max-file: "3"
-        
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+    
 services:
-    gluetun:
-        image: qmcgaw/gluetun
-        container_name: gluetun
-        networks:
-            - home-net        
-        cap_add:
-            - NET_ADMIN
-        environment:
-            TZ: ${TZ}
-            UPDATER_PERIOD: 24h
-            VPN_SERVICE_PROVIDER: protonvpn
-            VPN_TYPE: wireguard
-            VPN_PORT_FORWARDING: on
-            PORT_FORWARD_ONLY: on
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    networks:
+      - home-net        
+    cap_add:
+      - NET_ADMIN
+    environment:
+      TZ: ${TZ}
+      UPDATER_PERIOD: 24h
+      VPN_SERVICE_PROVIDER: protonvpn
+      VPN_TYPE: wireguard
+      VPN_PORT_FORWARDING: on
+      PORT_FORWARD_ONLY: on
+   
+      # ProtonVPN Interface
+      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
+      SERVER_COUNTRIES: ${SERVER_COUNTRIES}
+   
+      # Port Mapping Automation Script
+      VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8181/api/v2/app/setPreferences 2>&1'
+    volumes:
+      - ./gluetun:/gluetun
+    ports:
+      - "${QBITTORRENT_HOST_PORT:-6101}:8181/tcp" # qBittorrent Web UI
+    devices:
+      - /dev/net/tun:/dev/net/tun  
+    logging: *default-logging
+    restart: unless-stopped
       
-            # ProtonVPN Interface
-            WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
-            SERVER_COUNTRIES: ${SERVER_COUNTRIES}
-      
-            # Port Mapping Automation Script
-            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8181/api/v2/app/setPreferences 2>&1'
-        volumes:
-            - ./gluetun:/gluetun
-        ports:
-            - "${QBITTORRENT_HOST_PORT:-6101}:8181/tcp" # qBittorrent Web UI
-        devices:
-            - /dev/net/tun:/dev/net/tun  
-        logging: *default-logging
-        restart: unless-stopped
-            
-    qbittorrent:
-        image: lscr.io/linuxserver/qbittorrent:5.1.4
-        container_name: qbittorrent
-        network_mode: "service:gluetun"
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
-        environment:
-            PUID: ${PUID}
-            PGID: ${PGID}
-            TZ: ${TZ}
-            WEBUI_PORT: 8181
-        volumes:
-            - ./qbittorrent/config:/config
-            - ${DOWNLOADS_PATH}:/downloads
-            - ${INCOMPLETE_DOWNLOADS_PATH}:/incomplete
-            - ${TORRENTS_PATH}:/torrents
-        logging: *default-logging
-        restart: unless-stopped
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:5.1.4
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      WEBUI_PORT: 8181
+    volumes:
+      - ./qbittorrent/config:/config
+      - ${DOWNLOADS_PATH}:/downloads
+      - ${INCOMPLETE_DOWNLOADS_PATH}:/incomplete
+      - ${TORRENTS_PATH}:/torrents
+    logging: *default-logging
+    restart: unless-stopped

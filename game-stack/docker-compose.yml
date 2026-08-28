@@ -1,164 +1,199 @@
 name: game-stack
-    
+  
 networks:
-    default:
-        name: home-net
-        external: true
+  default:
+    name: home-net
+    external: true
 
 x-logging: &default-logging
-    driver: json-file
-    options:
-        max-size: "10m"
-        max-file: "3"
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 x-minecraft-env: &minecraft-env
-    EULA: "TRUE"
-    TYPE: FABRIC
-    ALLOW_FLIGHT: "TRUE"
-    DIFFICULTY: HARD
-    SPAWN_PROTECTION: "0"
-    ENABLE_WHITELIST: "TRUE"
-    ENFORCE_WHITELIST: "TRUE"
-    
+  DASHBOARD_GAME: "Minecraft"
+  EULA: "TRUE"
+  TYPE: FABRIC
+  ALLOW_FLIGHT: "TRUE"
+  DIFFICULTY: HARD
+  SPAWN_PROTECTION: "0"
+  ENABLE_WHITELIST: "TRUE"
+  ENFORCE_WHITELIST: "TRUE"
+  
 x-minecraft: &x-minecraft
-    environment: *minecraft-env
-    logging: *default-logging
-    restart: unless-stopped
+  environment: *minecraft-env
+  logging: *default-logging
+  restart: unless-stopped
 
 x-backup-env: &backup-env
-    SRC_DIR: /data
-    BACKUP_METHOD: tar
-    BACKUP_INTERVAL: 1h
-    INITIAL_DELAY: "0"
-    BACKUP_ON_STARTUP: "TRUE"
-    DEST_DIR: /backups
-    PAUSE_IF_NO_PLAYERS: "TRUE"
-    PLAYERS_ONLINE_CHECK_INTERVAL: 30m
-    PRUNE_BACKUPS_DAYS: "7"
-    ENABLE_SAVE_ALL: "TRUE"
-    ENABLE_SYNC: "TRUE"
+  SRC_DIR: /data
+  BACKUP_METHOD: tar
+  BACKUP_INTERVAL: 1h
+  INITIAL_DELAY: "0"
+  BACKUP_ON_STARTUP: "TRUE"
+  DEST_DIR: /backups
+  PAUSE_IF_NO_PLAYERS: "TRUE"
+  PLAYERS_ONLINE_CHECK_INTERVAL: 30m
+  PRUNE_BACKUPS_DAYS: "7"
+  ENABLE_SAVE_ALL: "TRUE"
+  ENABLE_SYNC: "TRUE"
 
 x-backup: &x-backup
-    image: itzg/mc-backup
-    environment: *backup-env
-    volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - /etc/timezone:/etc/timezone:ro
-    logging: *default-logging
-    restart: unless-stopped
+  image: itzg/mc-backup
+  environment: *backup-env
+  volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
+  logging: *default-logging
+  restart: unless-stopped
 
 services:
-    mc1:
-        <<: *x-minecraft
-        image: itzg/minecraft-server:${MC1_IMAGE_TAG:-latest}
-        container_name: mc1
-        profiles:
-            - mc1
-        environment:
-            <<: *minecraft-env
-            VERSION: ${MC1_VERSION}
-            MEMORY: ${MC1_MEMORY_ALLOCATION}
-            WHITELIST: ${GROUP_WHITELIST}
-            OPS: ${DEFAULT_OPS}
-            MAX_PLAYERS: ${GROUP_MAX_PLAYERS}
-            RCON_PORT: ${MC1_RCON_PORT}
-            MOTD: ${MC1_MOTD}
-            TZ: ${TZ}
-        volumes:
-            - ${MC1_DATA_PATH}:/data
-        ports:
-            - "25565:25565" # Minecraft
-            - "24454:24454/udp" # Simple Voice Chat
-    mc1-backup:
-        <<: *x-backup
-        container_name: mc1-backup
-        profiles:
-            - mc1
-        environment:
-            <<: *backup-env
-            SERVER_PORT: ${BACKUP_SERVER_PORT}
-            RCON_PORT: ${MC1_RCON_PORT}
-            RCON_HOST: mc1
-            TZ: ${TZ}
-        depends_on:
-            mc1:
-                condition: service_healthy
-        volumes:
-            - ${MC1_DATA_PATH}:/data:ro
-            - ${MC1_BACKUP_PATH}:/backups
-    mc2:
-        <<: *x-minecraft
-        image: itzg/minecraft-server:${MC2_IMAGE_TAG:-latest}
-        container_name: mc2
-        profiles:
-            - mc2
-        environment:
-            <<: *minecraft-env
-            VERSION: ${MC2_VERSION}
-            MEMORY: ${MC2_MEMORY_ALLOCATION}
-            WHITELIST: ${PRIVATE_WHITELIST}
-            OPS: ${DEFAULT_OPS}
-            MAX_PLAYERS: ${PRIVATE_MAX_PLAYERS}
-            RCON_PORT: ${MC2_RCON_PORT}
-            MOTD: ${MC2_MOTD}
-            TZ: ${TZ}
-        volumes:
-            - ${MC2_DATA_PATH}:/data
-        ports:
-            - "25566:25565" # Minecraft
-            - "24455:24455/udp" # Simple Voice Chat
-    mc2-backup:
-        <<: *x-backup
-        container_name: mc2-backup
-        profiles:
-            - mc2
-        environment:
-            <<: *backup-env
-            SERVER_PORT: ${BACKUP_SERVER_PORT}
-            RCON_PORT: ${MC2_RCON_PORT}
-            RCON_HOST: mc2
-            TZ: ${TZ}
-        depends_on:
-            mc2:
-                condition: service_healthy
-        volumes:
-            - ${MC2_DATA_PATH}:/data:ro
-            - ${MC2_BACKUP_PATH}:/backups
-    mc3:
-        <<: *x-minecraft
-        image: itzg/minecraft-server:${MC3_IMAGE_TAG:-latest}
-        container_name: mc3
-        profiles:
-            - mc3
-        environment:
-            <<: *minecraft-env
-            VERSION: ${MC3_VERSION}
-            MEMORY: ${MC3_MEMORY_ALLOCATION}
-            WHITELIST: ${GROUP_WHITELIST}
-            OPS: ${DEFAULT_OPS}
-            MAX_PLAYERS: ${GROUP_MAX_PLAYERS}
-            RCON_PORT: ${MC3_RCON_PORT}
-            MOTD: ${MC3_MOTD}
-            TZ: ${TZ}
-        volumes:
-            - ${MC3_DATA_PATH}:/data
-        ports:
-            - "25567:25565" # Minecraft
-            - "24456:24456/udp" # Simple Voice Chat
-    mc3-backup:
-        <<: *x-backup
-        container_name: mc3-backup
-        profiles:
-            - mc3
-        environment:
-            <<: *backup-env
-            SERVER_PORT: ${BACKUP_SERVER_PORT}
-            RCON_PORT: ${MC3_RCON_PORT}
-            RCON_HOST: mc3
-            TZ: ${TZ}
-        depends_on:
-            mc3:
-                condition: service_healthy
-        volumes:
-            - ${MC3_DATA_PATH}:/data:ro
-            - ${MC3_BACKUP_PATH}:/backups
+  mc1:
+    <<: *x-minecraft
+    image: itzg/minecraft-server:${MC1_IMAGE_TAG:-latest}
+    container_name: mc1
+    profiles:
+      - mc1
+    environment:
+      <<: *minecraft-env
+      VERSION: ${MC1_VERSION}
+      MEMORY: ${MC1_MEMORY_ALLOCATION}
+      WHITELIST: ${GROUP_WHITELIST}
+      OPS: ${DEFAULT_OPS}
+      MAX_PLAYERS: ${GROUP_MAX_PLAYERS}
+      RCON_PORT: ${MC1_RCON_PORT}
+      MOTD: ${MC1_MOTD}
+      TZ: ${TZ}
+    volumes:
+      - ${MC1_DATA_PATH}:/data
+    ports:
+      - "25565:25565" # Minecraft
+      - "24454:24454/udp" # Simple Voice Chat
+  mc1-backup:
+    <<: *x-backup
+    container_name: mc1-backup
+    profiles:
+      - mc1
+    environment:
+      <<: *backup-env
+      SERVER_PORT: ${BACKUP_SERVER_PORT}
+      RCON_PORT: ${MC1_RCON_PORT}
+      RCON_HOST: mc1
+      TZ: ${TZ}
+    depends_on:
+      mc1:
+        condition: service_healthy
+    volumes:
+      - ${MC1_DATA_PATH}:/data:ro
+      - ${MC1_BACKUP_PATH}:/backups
+  mc2:
+    <<: *x-minecraft
+    image: itzg/minecraft-server:${MC2_IMAGE_TAG:-latest}
+    container_name: mc2
+    profiles:
+      - mc2
+    environment:
+      <<: *minecraft-env
+      VERSION: ${MC2_VERSION}
+      MEMORY: ${MC2_MEMORY_ALLOCATION}
+      WHITELIST: ${PRIVATE_WHITELIST}
+      OPS: ${DEFAULT_OPS}
+      MAX_PLAYERS: ${PRIVATE_MAX_PLAYERS}
+      RCON_PORT: ${MC2_RCON_PORT}
+      MOTD: ${MC2_MOTD}
+      TZ: ${TZ}
+    volumes:
+      - ${MC2_DATA_PATH}:/data
+    ports:
+      - "25566:25565" # Minecraft
+      - "24455:24455/udp" # Simple Voice Chat
+  mc2-backup:
+    <<: *x-backup
+    container_name: mc2-backup
+    profiles:
+      - mc2
+    environment:
+      <<: *backup-env
+      SERVER_PORT: ${BACKUP_SERVER_PORT}
+      RCON_PORT: ${MC2_RCON_PORT}
+      RCON_HOST: mc2
+      TZ: ${TZ}
+    depends_on:
+      mc2:
+        condition: service_healthy
+    volumes:
+      - ${MC2_DATA_PATH}:/data:ro
+      - ${MC2_BACKUP_PATH}:/backups
+  mc3:
+    <<: *x-minecraft
+    image: itzg/minecraft-server:${MC3_IMAGE_TAG:-latest}
+    container_name: mc3
+    profiles:
+      - mc3
+    environment:
+      <<: *minecraft-env
+      VERSION: ${MC3_VERSION}
+      MEMORY: ${MC3_MEMORY_ALLOCATION}
+      WHITELIST: ${GROUP_WHITELIST}
+      OPS: ${DEFAULT_OPS}
+      MAX_PLAYERS: ${GROUP_MAX_PLAYERS}
+      RCON_PORT: ${MC3_RCON_PORT}
+      MOTD: ${MC3_MOTD}
+      TZ: ${TZ}
+    volumes:
+      - ${MC3_DATA_PATH}:/data
+    ports:
+      - "25567:25565" # Minecraft
+      - "24456:24456/udp" # Simple Voice Chat
+  mc3-backup:
+    <<: *x-backup
+    container_name: mc3-backup
+    profiles:
+      - mc3
+    environment:
+      <<: *backup-env
+      SERVER_PORT: ${BACKUP_SERVER_PORT}
+      RCON_PORT: ${MC3_RCON_PORT}
+      RCON_HOST: mc3
+      TZ: ${TZ}
+    depends_on:
+      mc3:
+        condition: service_healthy
+    volumes:
+      - ${MC3_DATA_PATH}:/data:ro
+      - ${MC3_BACKUP_PATH}:/backups
+
+  palworld:
+    image: thijsvanloef/palworld-server-docker:latest
+    container_name: palworld
+    stop_grace_period: 30s # Set to however long you are willing to wait for the container to gracefully stop
+    environment:
+        PUID: ${PUID}
+        PGID: ${PGID}
+        PORT: 8211 # Optional but recommended
+        QUERY_PORT: 27015 # Optional but recommended
+        RCON_ENABLED: true
+        RCON_PORT: 25575 # Optional but recommended
+        PLAYERS: 10 # Optional but recommended
+        SERVER_PASSWORD: "${PALWORLD_SERVER_PASSWORD:-worldofpals}" # Optional but recommended
+        MULTITHREADING: true
+        REST_API_ENABLED: true
+        REST_API_PORT: 8212
+        TZ: "${TZ}"
+        ADMIN_PASSWORD: "${PALWORLD_ADMIN_PASSWORD:-adminPasswordHere}" # Optional but recommended
+        COMMUNITY: false  # Enable this if you want your server to show up in the community servers tab, USE WITH SERVER_PASSWORD!
+        SERVER_NAME: "The Boys Palworld Server"
+        SERVER_DESCRIPTION: "Docker-powered Palworld server."
+        DASHBOARD_GAME: "Palworld"
+        DASHBOARD_VERSION_COMMAND: 'curl -fsS --user "admin:$$ADMIN_PASSWORD" http://127.0.0.1:$${REST_API_PORT:-8212}/v1/api/info | jq -r .version'
+        CROSSPLAY_PLATFORMS: "(Steam,Xbox,PS5,Mac)"
+        BASE_CAMP_MAX_NUM_IN_GUILD: 8
+        PAL_EGG_DEFAULT_HATCHING_TIME: 0.083333
+    volumes:
+      - ${PALWORLD_DATA_PATH}:/palworld
+      - ${PALWORLD_BACKUP_PATH}:/palworld/backups
+    ports:
+      - "${PALWORLD_HOST_PORT}:8211/udp"
+      - "27015:27015/udp"
+    restart: unless-stopped

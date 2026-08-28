@@ -1,31 +1,31 @@
 name: database-stack
 
 networks:
-    default:
-        name: home-net
-        external: true
+  default:
+    name: home-net
+    external: true
 
 x-logging: &default-logging
-    driver: json-file
-    options:
-        max-size: "10m"
-        max-file: "3"
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:        
-    db:
-        image: mysql
-        container_name: mysql
-        environment:
-            MYSQL_USER: ${SQL_USER}
-            MYSQL_PASSWORD: ${SQL_PW}
-            MYSQL_ROOT_PASSWORD: ${SQL_ROOT_PW}
-            MYSQL_DATABASE: ${SQL_DB}
-        volumes:
-            - ./mysql:/var/lib/mysql
-        healthcheck:
-            test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD}"]
-            interval: 30s
-            timeout: 5s
-            retries: 5
-        logging: *default-logging
-        restart: unless-stopped
+  db:
+    image: mysql
+    container_name: mysql
+    environment:
+      MYSQL_USER: ${SQL_USER}
+      MYSQL_PASSWORD: ${SQL_PW}
+      MYSQL_ROOT_PASSWORD: ${SQL_ROOT_PW}
+      MYSQL_DATABASE: ${SQL_DB}
+    volumes:
+      - ./mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD}"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    restart: unless-stopped

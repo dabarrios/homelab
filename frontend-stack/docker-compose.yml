@@ -1,56 +1,56 @@
 name: frontend-stack
-    
+  
 networks:
-    default:
-        name: home-net
-        external: true
+  default:
+    name: home-net
+    external: true
 
 x-logging: &default-logging
-    driver: json-file
-    options:
-        max-size: "10m"
-        max-file: "3"
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
-    jellyfin:
-        image: lscr.io/linuxserver/jellyfin:latest
-        container_name: jellyfin
-        group_add:
-            - ${RENDER_GROUP}
-        environment:
-            PUID: ${PUID}
-            PGID: ${PGID}
-            TZ: ${TZ}
-            JELLYFIN_PublishedServerUrl: ${JELLYFIN_SERVER_URL}
-        volumes:
-            - ./jellyfin:/config
-            - ${SHOWS_PATH}:/shows
-            - ${MOVIES_PATH}:/movies
-            - ${ANIME_SERIES_PATH}:/anime_series
-            - ${ANIME_MOVIES_PATH}:/anime_movies
-        ports:
-            - "${JELLYFIN_HOST_PORT:-8001}:8096"         # http web ui
-        devices:
-            - /dev/dri:/dev/dri
-            - /dev/dri/renderD128:/dev/dri/renderD128
-        logging: *default-logging
-        restart: unless-stopped
-        
-    jellyseerr:
-        image: fallenbagel/jellyseerr:latest
-        container_name: jellyseerr
-        environment:
-            LOG_LEVEL: debug
-            TZ: ${TZ}
-        volumes:
-            - ./jellyseerr:/app/config
-        ports:
-            - "${JELLYSEERR_HOST_PORT:-8002}:5055"
-        healthcheck:
-            test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
-            start_period: 20s
-            timeout: 3s
-            interval: 15s
-            retries: 3
-        logging: *default-logging
-        restart: unless-stopped
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    group_add:
+      - ${RENDER_GROUP}
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      JELLYFIN_PublishedServerUrl: ${JELLYFIN_SERVER_URL}
+    volumes:
+      - ./jellyfin:/config
+      - ${SHOWS_PATH}:/shows
+      - ${MOVIES_PATH}:/movies
+      - ${ANIME_SERIES_PATH}:/anime_series
+      - ${ANIME_MOVIES_PATH}:/anime_movies
+    ports:
+      - "${JELLYFIN_HOST_PORT:-8001}:8096"         # http web ui
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    logging: *default-logging
+    restart: unless-stopped
+    
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      LOG_LEVEL: debug
+      TZ: ${TZ}
+    volumes:
+      - ./jellyseerr:/app/config
+    ports:
+      - "${JELLYSEERR_HOST_PORT:-8002}:5055"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    logging: *default-logging
+    restart: unless-stopped
