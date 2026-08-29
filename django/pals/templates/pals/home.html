@@ -1,0 +1,27 @@
+{% extends "pals/base.html" %}
+{% block title %}PALS{% endblock %}
+{% block content %}
+<section class="page-heading">
+    <p class="eyebrow">Palworld</p>
+    <h1>Analysis and logistics suite</h1>
+    <p class="lead">The Django home for Palworld planning tools. Core optimizer logic will be imported in focused service modules.</p>
+</section>
+<section class="module-grid">
+    {% for module in modules %}
+    <a class="module-card" href="{% url module.route %}">
+        <span>{{ module.title }}</span>
+        <p>{{ module.summary }}</p>
+    </a>
+    {% endfor %}
+</section>
+<section class="status-grid">
+    <article>
+        <h2>Data</h2>
+        <p>{{ data_status.message }}</p>
+    </article>
+    <article>
+        <h2>Sync</h2>
+        <p>{{ sync_status.message }}</p>
+    </article>
+</section>
+{% endblock %}

@@ -5,6 +5,7 @@
 django/.venv/
 django/.dev-logs/
 django/db.sqlite3
+django/local/
 django/staticfiles/
 django/data/
 **/__pycache__/

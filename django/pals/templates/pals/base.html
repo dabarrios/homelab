@@ -1,0 +1,37 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101417">
+    <title>{% block title %}PALS{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static "pals/css/pals.css" %}">
+</head>
+<body>
+<div class="pals-shell">
+    <header class="topbar">
+        <a class="brand" href="{% url "pals:home" %}" aria-label="PALS home">
+            <span class="brand-mark">P</span>
+            <span><strong>PALS</strong><small>Palworld Analysis and Logistics Suite</small></span>
+        </a>
+        <nav class="topnav" aria-label="PALS navigation">
+            <a class="{% if active == "breeding" %}is-active{% endif %}" href="{% url "pals:breeding" %}">Breeding</a>
+            <a class="{% if active == "ivs" %}is-active{% endif %}" href="{% url "pals:ivs" %}">IVs</a>
+            <a class="{% if active == "work" %}is-active{% endif %}" href="{% url "pals:work" %}">Work</a>
+            <a class="{% if active == "ranch" %}is-active{% endif %}" href="{% url "pals:ranch" %}">Ranch</a>
+            <a class="{% if active == "bases" %}is-active{% endif %}" href="{% url "pals:bases" %}">Bases</a>
+        </nav>
+        <a class="homelab-link" href="{% url "dashboard" %}">GSC</a>
+    </header>
+    <main class="page">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+<script src="{% static "pals/js/pals.js" %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
