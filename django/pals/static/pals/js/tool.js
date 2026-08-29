@@ -89,13 +89,6 @@ function passiveTone(passive) {
   return options.passiveMeta?.[passive]?.tone || 'neutral';
 }
 
-function passiveRank(tone) {
-  if (tone === 'negative') return 'v';
-  if (tone === 'gold') return '^^^';
-  if (tone === 'positive') return '^^^+';
-  return '^';
-}
-
 function speciesInitials(name) {
   return String(name || '?').split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase();
 }
@@ -132,7 +125,7 @@ function renderPassiveBars(node, isRoot = false) {
   const junk = new Set(displayJunk(node, isRoot));
   return `<div class="passive-list">${passives.map(passive => {
     const tone = passiveTone(passive);
-    return `<span class="passive-bar ${tone}"><span>${escapeHtml(passive)}</span>${junk.has(passive) ? '<em>Junk</em>' : ''}<b>${passiveRank(tone)}</b></span>`;
+    return `<span class="passive-bar ${tone}"><span>${escapeHtml(passive)}</span>${junk.has(passive) ? '<em>Junk</em>' : ''}</span>`;
   }).join('')}</div>`;
 }
 
@@ -158,7 +151,7 @@ function renderPalNode(node, isRoot = false) {
       ${renderPassiveBars(node, isRoot)}
       <div class="node-foot">
         <span class="role-badge ${roleClass}">${role}</span>
-        <span>IV ${escapeHtml(node.hpIv ?? '?')}/${escapeHtml(node.attackIv ?? '?')}/${escapeHtml(node.defenseIv ?? '?')}</span>
+        <span>IV ${formatIv(node.hpIv)}/${formatIv(node.attackIv)}/${formatIv(node.defenseIv)}</span>
         <span>${(node.desired || []).length}/${(node.desired || []).length + (node.missing || []).length} desired</span>
         <span>${junk.length} junk</span>
       </div>
@@ -191,6 +184,45 @@ function fillOptions() {
   setText('#palsMeta', `${options.rosterCount || 0} Pals loaded | breeding data ${options.dataVersion || 'unknown'}`);
 }
 
+function formatIv(value) {
+  if (value === null || value === undefined || value === '') return '?';
+  return String(Math.round(Number(value)));
+}
+
+function renderSuggestions(field) {
+  const type = field.dataset.suggest;
+  const input = field.querySelector('[data-suggest-input]');
+  const menu = field.querySelector('[data-suggest-menu]');
+  const query = String(input.value || '').trim().toLowerCase();
+  if (!query) {
+    menu.innerHTML = '';
+    menu.classList.remove('open');
+    return;
+  }
+  const values = type === 'species' ? options.species || [] : options.passives || [];
+  const matches = values
+    .filter(value => value.toLowerCase().includes(query))
+    .slice(0, 8);
+  menu.innerHTML = matches.map(value => `<button type="button" data-suggest-value="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join('');
+  menu.classList.toggle('open', matches.length > 0);
+}
+
+function initSuggestFields() {
+  $$('[data-suggest]').forEach(field => {
+    const input = field.querySelector('[data-suggest-input]');
+    input?.addEventListener('input', () => renderSuggestions(field));
+    input?.addEventListener('blur', () => {
+      window.setTimeout(() => field.querySelector('[data-suggest-menu]')?.classList.remove('open'), 120);
+    });
+    field.addEventListener('click', event => {
+      const value = event.target.closest('[data-suggest-value]')?.dataset.suggestValue;
+      if (!value) return;
+      input.value = value;
+      field.querySelector('[data-suggest-menu]').classList.remove('open');
+    });
+  });
+}
+
 function renderPassivePicker(picker) {
   const key = picker.dataset.picker;
   const chips = picker.querySelector('[data-passive-chips]');
@@ -199,7 +231,7 @@ function renderPassivePicker(picker) {
   hidden.value = selected.join(',');
   chips.innerHTML = selected.map(passive => {
     const tone = passiveTone(passive);
-    return `<button type="button" class="passive-chip ${tone}" data-remove-passive="${escapeHtml(passive)}">${escapeHtml(passive)} <span>${passiveRank(tone)}</span></button>`;
+    return `<button type="button" class="passive-chip ${tone}" data-remove-passive="${escapeHtml(passive)}">${escapeHtml(passive)}</button>`;
   }).join('');
 }
 
@@ -298,27 +330,28 @@ function renderJson(data) {
 function renderBreeding(data) {
   const groups = data.groups || [];
   if (!groups.length) return renderJson(data);
-  return groups.map(group => {
-    const routes = group.results || [];
-    const body = routes.length
-      ? routes.slice(0, 3).map((route, index) => `
+  const group = groups.find(item => (item.results || []).length) || groups[0];
+  const route = (group.results || [])[0];
+  if (!route) return '<div class="results-empty">No route found. Try fewer desired passives or upload a fresher save.</div>';
+  return `
+    <section class="result-group">
+      <div class="group-heading">
+        <h3>Recommended Route</h3>
+        <p>${escapeHtml(group.description || 'Best practical option from the current search.')}</p>
+      </div>
         <article class="route-card">
           <div class="route-header">
             <div>
-              <h3>Option ${index + 1}: ${escapeHtml(route.species)}</h3>
+              <h3>${escapeHtml(route.species)}</h3>
               <p>${escapeHtml(route.label || '')}</p>
             </div>
             <div class="badges">
-              <span>${escapeHtml(route.breedCount || route.steps || 0)} eggs</span>
-              <span>${escapeHtml(route.suggestedCakeType || 'Cake')} x${escapeHtml(route.suggestedCakes || 0)}</span>
               <span class="${(route.junk || []).length ? 'bad' : 'good'}">${(route.junk || []).length} junk</span>
             </div>
           </div>
           <div class="breed-tree">${renderBreedTree(route, true)}</div>
-        </article>`).join('')
-      : '<div class="results-empty">No option found for this category.</div>';
-    return `<section class="result-group"><div class="group-heading"><h3>${escapeHtml(group.title)}</h3><p>${escapeHtml(group.description || '')}</p></div>${body}</section>`;
-  }).join('');
+        </article>
+    </section>`;
 }
 
 function renderIvs(data) {
@@ -378,7 +411,7 @@ function renderResult(data) {
   $('#results').classList.remove('results-empty');
   $('#results').innerHTML = (renderers[moduleKey] || renderJson)(data);
   const count = data.total || data.totalItems || data.rosterCount || (data.groups || []).length || '';
-  setText('#resultCount', count ? `${count} result${count === 1 ? '' : 's'}` : '');
+  setText('#resultCount', moduleKey === 'breeding' ? 'Top route' : count ? `${count} result${count === 1 ? '' : 's'}` : '');
 }
 
 async function submitTool(event) {
@@ -485,6 +518,7 @@ async function init() {
     setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
   });
   $('#toolForm')?.addEventListener('submit', submitTool);
+  initSuggestFields();
   initPassivePickers();
   $('#reloadData')?.addEventListener('click', () => reloadOptions().catch(error => setText('#toolStatus', error.message)));
   $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setText('#liveStatus', error.message)));

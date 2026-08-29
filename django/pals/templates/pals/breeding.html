@@ -6,13 +6,16 @@
 </label>
 <label>
     Target Species
-    <input name="target" list="speciesList" autocomplete="off" required>
+    <span class="suggest-field" data-suggest="species">
+        <input name="target" data-suggest-input autocomplete="off" required>
+        <span class="suggest-menu" data-suggest-menu></span>
+    </span>
 </label>
 <label>
     Desired Passives
     <span class="passive-picker" data-picker="passives">
         <span class="passive-input-row">
-            <input data-passive-input list="passiveList" autocomplete="off" placeholder="Choose a passive">
+            <input data-passive-input autocomplete="off" placeholder="Choose a passive">
             <button type="button" data-passive-add>Add</button>
         </span>
         <span class="passive-chips" data-passive-chips></span>
