@@ -213,8 +213,11 @@ def upload_level(request):
 @csrf_exempt
 @require_POST
 def live_save_refresh(request):
-    result = optimizer.refresh_live_save(force=bool(json_payload(request).get("force")))
-    return JsonResponse(result, status=409 if result.get("refreshing") and not result.get("ok") else 200)
+    try:
+        result = optimizer.refresh_live_save(force=bool(json_payload(request).get("force")))
+        return JsonResponse(result, status=409 if result.get("refreshing") and not result.get("ok") else 200)
+    except Exception as exc:
+        return json_error(str(exc), status=500)
 
 
 @login_required

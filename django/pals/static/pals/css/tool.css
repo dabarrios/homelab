@@ -25,6 +25,18 @@
     align-items: center;
 }
 
+.tool-action-stack {
+    display: grid;
+    justify-items: end;
+    gap: 6px;
+}
+
+.data-status-line {
+    max-width: 360px;
+    margin: 0;
+    text-align: right;
+}
+
 .tool-actions button,
 .data-actions button,
 .file-button,

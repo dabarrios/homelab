@@ -2632,6 +2632,18 @@ def safe_upload_relative_path(name: str) -> Path:
     return Path(*parts) if parts else Path("upload.bin")
 
 
+def reset_directory(path: Path) -> None:
+    if path.exists():
+        def clear_readonly(func, target, _exc_info):
+            try:
+                os.chmod(target, 0o700)
+            except OSError:
+                pass
+            func(target)
+        shutil.rmtree(path, onerror=clear_readonly)
+    path.mkdir(parents=True, exist_ok=True)
+
+
 def multipart_files(content_type: str, body: bytes) -> list[tuple[str, bytes]]:
     match = re.search(r"boundary=(?:\"([^\"]+)\"|([^;]+))", content_type or "")
     if not match:
@@ -2651,19 +2663,25 @@ def multipart_files(content_type: str, body: bytes) -> list[tuple[str, bytes]]:
         if not filename_match:
             continue
         filename = filename_match.group(1).replace('\\"', '"')
-        files.append((filename, data.rstrip(b"\r\n")))
+        payload = data.rstrip(b"\r\n")
+        rel = safe_upload_relative_path(filename)
+        if not rel.suffix and not payload:
+            continue
+        files.append((filename, payload))
     return files
 
 
 def save_uploaded_files(files: list[tuple[str, bytes]], stamp: str) -> Path:
     upload_dir = UPLOADS / f"save-{stamp}"
-    if upload_dir.exists():
-        shutil.rmtree(upload_dir)
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    reset_directory(upload_dir)
     for filename, data in files:
         rel = safe_upload_relative_path(filename)
         dest = (upload_dir / rel).resolve()
         if not str(dest).startswith(str(upload_dir.resolve())):
+            continue
+        if dest.exists() and dest.is_dir():
+            continue
+        if not rel.suffix and not data:
             continue
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_bytes(data)
@@ -2672,9 +2690,7 @@ def save_uploaded_files(files: list[tuple[str, bytes]], stamp: str) -> Path:
 
 def expand_zip_upload(zip_path: Path, stamp: str) -> Path:
     extract_dir = UPLOADS / f"save-{stamp}-zip"
-    if extract_dir.exists():
-        shutil.rmtree(extract_dir)
-    extract_dir.mkdir(parents=True, exist_ok=True)
+    reset_directory(extract_dir)
     with zipfile.ZipFile(zip_path) as zf:
         for info in zf.infolist():
             if info.is_dir():
@@ -2696,9 +2712,7 @@ def shortest_file_match(root: Path, predicate) -> Path | None:
 
 
 def copy_full_save_to_workspace(source_dir: Path, include_dps: bool = True) -> dict:
-    if WORK.exists():
-        shutil.rmtree(WORK)
-    WORK.mkdir(parents=True, exist_ok=True)
+    reset_directory(WORK)
     if ANALYZER.exists():
         shutil.copy2(ANALYZER, WORK / "analyze_pal_breeding.py")
 

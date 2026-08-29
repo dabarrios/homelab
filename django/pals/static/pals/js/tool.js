@@ -30,7 +30,13 @@ function assetUrl(path) {
 
 async function api(path, fetchOptions = {}) {
   const response = await fetch(apiUrl(path), fetchOptions);
-  const payload = await response.json();
+  const text = await response.text();
+  let payload;
+  try {
+    payload = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(text.slice(0, 240).trim() || `${response.status} ${response.statusText}`);
+  }
   if (!response.ok || payload.error) throw new Error(payload.error || `${response.status} ${response.statusText}`);
   return payload;
 }
@@ -1159,7 +1165,13 @@ async function uploadSave(file) {
   form.append('files', file, file.webkitRelativePath || file.name);
   setText('#liveStatus', `Uploading ${file.name}...`);
   const response = await fetch(apiUrl('/upload-save'), {method: 'POST', body: form});
-  const result = await response.json();
+  const text = await response.text();
+  let result;
+  try {
+    result = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(text.slice(0, 240).trim() || `${response.status} ${response.statusText}`);
+  }
   if (!response.ok || !result.ok) throw new Error(result.error || 'Upload failed.');
   setText('#liveStatus', `Imported ${result.rosterCount || 0} rows.`);
   options = await api('/options');

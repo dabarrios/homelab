@@ -15,15 +15,17 @@
                 <p class="lead">{{ summary }}</p>
                 <p id="palsMeta" class="tool-meta">Loading local data...</p>
             </div>
-            <div class="tool-actions">
-                <button id="refreshLiveSave" type="button">Sync Save</button>
-                <label class="file-button">
-                    Upload Save
-                    <input id="saveUpload" type="file" accept=".zip,.sav" hidden>
-                </label>
+            <div class="tool-action-stack">
+                <div class="tool-actions">
+                    <button id="refreshLiveSave" type="button">Sync Save</button>
+                    <label class="file-button">
+                        Upload Save
+                        <input id="saveUpload" type="file" accept=".zip,.sav" hidden>
+                    </label>
+                </div>
+                <p id="liveStatus" class="status-line data-status-line">Live save sync is opt-in.</p>
             </div>
         </div>
-        <p id="liveStatus" class="status-line data-status-line">Live save sync is opt-in.</p>
 
         <div class="tool-grid">
             <form id="toolForm" class="tool-form">
