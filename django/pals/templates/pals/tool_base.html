@@ -16,10 +16,14 @@
                 <p id="palsMeta" class="tool-meta">Loading local data...</p>
             </div>
             <div class="tool-actions">
-                <button id="themeToggle" type="button">Dark</button>
-                <button id="reloadData" type="button">Reload</button>
+                <button id="refreshLiveSave" type="button">Sync Save</button>
+                <label class="file-button">
+                    Upload Save
+                    <input id="saveUpload" type="file" accept=".zip,.sav" hidden>
+                </label>
             </div>
         </div>
+        <p id="liveStatus" class="status-line data-status-line">Live save sync is opt-in.</p>
 
         <div class="tool-grid">
             <form id="toolForm" class="tool-form">
@@ -36,18 +40,6 @@
                 <div id="results" class="results-empty">Run the tool to see results.</div>
             </section>
         </div>
-
-        <details class="data-panel">
-            <summary>Local data</summary>
-            <div class="data-actions">
-                <button id="refreshLiveSave" type="button">Sync Save</button>
-                <label class="file-button">
-                    Upload Save
-                    <input id="saveUpload" type="file" accept=".zip,.sav" hidden>
-                </label>
-            </div>
-            <p id="liveStatus" class="status-line">Live save sync is opt-in.</p>
-        </details>
     </section>
 </section>
 

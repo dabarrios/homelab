@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -54,7 +56,8 @@ class PalsRouteTest(TestCase):
     def test_live_save_status_is_opt_in(self):
         self.client.force_login(self.user)
 
-        response = self.client.get(reverse("pals:api_live_save_status"))
+        with patch("pals.services.optimizer.LIVE_SAVE_DIR", None):
+            response = self.client.get(reverse("pals:api_live_save_status"))
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()

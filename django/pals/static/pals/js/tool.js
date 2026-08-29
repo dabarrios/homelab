@@ -71,7 +71,11 @@ function setTheme(theme) {
   document.documentElement.dataset.theme = next;
   localStorage.setItem('pals.theme', next);
   const button = $('#themeToggle');
-  if (button) button.textContent = next === 'dark' ? 'Light' : 'Dark';
+  if (button) {
+    button.textContent = next === 'dark' ? '☀' : '☾';
+    button.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    button.title = next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  }
 }
 
 function optionList(values) {
@@ -1164,16 +1168,12 @@ async function uploadSave(file) {
 
 async function init() {
   setTheme(localStorage.getItem('pals.theme') || 'dark');
-  $('#themeToggle')?.addEventListener('click', () => {
-    setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
-  });
   $('#toolForm')?.addEventListener('submit', submitTool);
   initSuggestFields();
   initPassivePickers();
   initPassiveTooltips();
   initProfiles();
   initImplantInventories();
-  $('#reloadData')?.addEventListener('click', () => reloadOptions().catch(error => setText('#toolStatus', error.message)));
   $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setText('#liveStatus', error.message)));
   $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setText('#liveStatus', error.message)));
   $('.js-base')?.addEventListener('change', updateBaseLabelField);

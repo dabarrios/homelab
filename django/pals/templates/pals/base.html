@@ -29,7 +29,10 @@
             <a class="{% if active == "ranch" %}is-active{% endif %}" href="{% url "pals:ranch" %}">Ranch</a>
             <a class="{% if active == "bases" %}is-active{% endif %}" href="{% url "pals:bases" %}">Bases</a>
         </nav>
-        <a class="homelab-link" href="{% url "dashboard" %}">GSC</a>
+        <div class="top-actions">
+            <button id="themeToggle" class="theme-icon-button" type="button" aria-label="Toggle theme">☾</button>
+            <a class="homelab-link" href="{% url "dashboard" %}">GSC</a>
+        </div>
     </header>
     <main class="page {% block page_class %}{% endblock %}">
         {% block content %}{% endblock %}
