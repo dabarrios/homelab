@@ -88,7 +88,7 @@ def ranch(request, item_slug: str = ""):
 
 @login_required
 def bases(request):
-    return render(request, "pals/bases.html", app_context("bases", "Bases", bases_service.module_status()["message"], "bases", "Plan Base"))
+    return render(request, "pals/bases.html", app_context("bases", "Bases", bases_service.module_status()["message"], "bases", "Build Best Team"))
 
 
 @login_required

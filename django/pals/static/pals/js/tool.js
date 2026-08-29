@@ -248,13 +248,14 @@ const EMPTY_STATES = {
     ],
   },
   bases: {
-    title: 'Plan a base team',
-    lead: 'Sync a save, select a base, then draft workers by role.',
-    hint: 'Choose a decoded base and planner mode, then plan base.',
+    title: 'Plan your perfect base team.',
+    lead: 'Set your team mode, configure your base sites, and choose the team size.',
+    hint: 'Configure your base and team settings, then build your best team.',
     features: [
-      ['Base Names', 'Save local names for decoded bases.'],
-      ['Work Demand', 'Uses detected base sites to shape worker needs.'],
-      ['Owned Mode', 'Can plan from current owned Pals only.'],
+      ['Optimal Team', 'The best Pal lineup for your base needs.'],
+      ['Role Coverage', 'See all work skills and how they are covered.'],
+      ['Alternatives', 'View other strong team compositions.'],
+      ['Breeding Path', 'Breed from here for any missing Pals.'],
     ],
   },
 };
@@ -289,6 +290,31 @@ function emptyStateHtml(key = moduleKey) {
         <div class="empty-work-divider empty-ranch-divider"><span></span><b>◇</b><span></span></div>
         <div class="empty-work-features empty-ranch-features">
           ${state.features.map(([title, text]) => `<div><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+        </div>
+        <p class="empty-hint">${escapeHtml(state.hint)}</p>
+      </div>
+    </div>` : key === 'bases' ? `
+    <div class="empty-hero empty-focused-hero empty-bases-hero">
+      <div class="empty-bases-state">
+        <div class="empty-bases-icon" aria-hidden="true">
+          <span class="base-tower"></span>
+          <span class="base-wall"></span>
+          <span class="base-gate"></span>
+        </div>
+        <h3>${escapeHtml(state.title)}</h3>
+        <p>${escapeHtml(state.lead)}</p>
+        <p>Then click Build Best Team to see the optimal lineup.</p>
+        <div class="empty-base-flow" aria-hidden="true">
+          <div class="empty-base-step empty-base-step-sites"><i></i><b>1. Detect Base Sites</b><span>Read your base structure and work sites.</span></div>
+          <em></em>
+          <div class="empty-base-step empty-base-step-rules"><i></i><b>2. Apply Constraints</b><span>Your team mode and worker count guide the build.</span></div>
+          <em></em>
+          <div class="empty-base-step empty-base-step-team"><i></i><b>3. Optimize Team</b><span>Analyze all Pals to find the best combination.</span></div>
+          <em></em>
+          <div class="empty-base-step empty-base-step-best"><i></i><b>4. Best Team</b><span>Get role coverage and breeding handoffs.</span></div>
+        </div>
+        <div class="empty-work-features empty-base-features empty-work-features-wide">
+          ${state.features.map(([title, text], index) => `<div><i class="empty-feature-icon empty-base-feature-icon-${index + 1}" aria-hidden="true"></i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
         </div>
         <p class="empty-hint">${escapeHtml(state.hint)}</p>
       </div>

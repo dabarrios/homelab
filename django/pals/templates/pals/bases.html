@@ -17,14 +17,15 @@
     <span class="field-hint" id="baseLabelHint">Save a local display name for the selected base.</span>
 </label>
 <label>
-    Planner Mode
+    Team Mode
     <select name="plannerMode">
-        <option value="ideal">Ideal targets</option>
+        <option value="ideal">Ideal targets based on base</option>
         <option value="right_now">Right now - owned only</option>
     </select>
 </label>
 <label>
-    Workers
+    Team Size
     <input name="maxWorkers" type="number" min="1" max="15" value="15">
+    <span class="field-help">Maximum Pals to place on this base team.</span>
 </label>
 {% endblock %}
