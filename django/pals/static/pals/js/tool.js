@@ -10,6 +10,7 @@ let customProfiles = [];
 let builtInProfileNames = {};
 let editingProfileId = '';
 let editingBuiltInProfile = '';
+let ranchDropsCache = null;
 
 const CUSTOM_PROFILES_KEY = 'pals.customProfiles.v1';
 const BUILT_IN_PROFILE_NAMES_KEY = 'pals.builtInProfileNames.v1';
@@ -202,6 +203,96 @@ function breedUrl(card, profile = 'manual') {
   const params = new URLSearchParams({target: card.name || ''});
   if (profile) params.set('profile', profile);
   return `/pals/breeding/?${params.toString()}`;
+}
+
+const EMPTY_STATES = {
+  breeding: {
+    title: 'Build a breeding plan',
+    lead: 'Choose a target Pal and the passives you want.',
+    hint: 'Select your target Pal and desired passives, then click Optimize.',
+    features: [
+      ['Optimized Path', 'Finds a practical route to collect your desired passives.'],
+      ['Resource Aware', 'Uses owned Pals and implant inventory when enabled.'],
+      ['Multiple Routes', 'Compares clean, fast, and practical breeding options.'],
+    ],
+  },
+  ivs: {
+    title: 'Find IV parents',
+    lead: 'Pick a target Pal and final passives to compare parent pairs.',
+    hint: 'Choose the final passives, then calculate IVs.',
+    features: [
+      ['Parent Coverage', 'Highlights pairs with the best HP, Attack, and Defense support.'],
+      ['Implant Aware', 'Ignores passives you plan to add later when enabled.'],
+      ['Junk Tracking', 'Keeps unwanted passives visible before you commit.'],
+    ],
+  },
+  work: {
+    title: 'Find the best worker',
+    lead: 'Choose a work skill to compare candidates.',
+    hint: 'Select a work skill, then find workers.',
+    features: [
+      ['Best Pick', 'Ranks practical recommendations first.'],
+      ['Dark Option', 'Separates the best Dark type for night uptime.'],
+      ['Condensed Levels', 'Shows base to fully condensed work suitability.'],
+    ],
+  },
+  ranch: {
+    title: 'Find ranch producers',
+    lead: 'Search for a ranch drop such as Milk, Wool, Honey, or Egg.',
+    hint: 'Start typing a drop name, choose a result, then find drops.',
+    features: [
+      ['Drop Search', 'Suggests matching ranch items as you type.'],
+      ['Top Producer', 'Shows the best Pal for the selected drop first.'],
+      ['Breed Links', 'Sends producers back to Breeding with ranch profile loaded.'],
+    ],
+  },
+  bases: {
+    title: 'Plan a base team',
+    lead: 'Sync a save, select a base, then draft workers by role.',
+    hint: 'Choose a decoded base and planner mode, then plan base.',
+    features: [
+      ['Base Names', 'Save local names for decoded bases.'],
+      ['Work Demand', 'Uses detected base sites to shape worker needs.'],
+      ['Owned Mode', 'Can plan from current owned Pals only.'],
+    ],
+  },
+};
+
+function emptyStateHtml(key = moduleKey) {
+  const state = EMPTY_STATES[key] || EMPTY_STATES.breeding;
+  return `
+    <div class="empty-hero">
+      <div class="empty-icon" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <h3>${escapeHtml(state.title)}</h3>
+      <p>${escapeHtml(state.lead)}</p>
+      <div class="empty-diagram">
+        <div class="empty-card">
+          <strong>${key === 'work' ? 'Candidate A' : key === 'ranch' ? 'Producer A' : 'Parent A'}</strong>
+          <i></i><i></i><i></i>
+        </div>
+        <div class="empty-plus">+</div>
+        <div class="empty-card">
+          <strong>${key === 'work' ? 'Candidate B' : key === 'ranch' ? 'Producer B' : 'Parent B'}</strong>
+          <i></i><i></i><i></i>
+        </div>
+        <div class="empty-arrow"></div>
+        <div class="empty-target"><strong>${key === 'bases' ? 'Base Team' : key === 'work' ? 'Best Pick' : key === 'ranch' ? 'Selected Drop' : 'Target Pal'}</strong><span>?</span></div>
+      </div>
+      <div class="empty-features">
+        ${state.features.map(([title, text]) => `<div><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+      </div>
+      <p class="empty-hint">${escapeHtml(state.hint)}</p>
+    </div>`;
+}
+
+function showEmptyState() {
+  const results = $('#results');
+  if (!results) return;
+  results.classList.add('results-empty');
+  results.innerHTML = emptyStateHtml(moduleKey);
+  setText('#resultCount', '');
 }
 
 function renderPalNode(node, isRoot = false) {
@@ -970,12 +1061,13 @@ function renderRanch(data) {
       </section>`;
   }
   if (!items.length) return '<div class="empty">No ranch drops match that search.</div>';
-  return `
-    <div class="owned-notice work-note">
-      <strong>Ranch Drops</strong>
-      <span>${escapeHtml(data.sourceNote || '')}</span>
-    </div>
-    <div class="ranch-item-grid">${items.map(renderRanchItemCard).join('')}</div>`;
+  if (!query) return emptyStateHtml('ranch');
+  if (items.length === 1) {
+    window.history.replaceState({}, '', `/pals/ranch/${slugify(items[0].name)}/`);
+    window.PALS_RANCH_ITEM_SLUG = slugify(items[0].name);
+    return renderRanch(data);
+  }
+  return `<div class="ranch-item-grid">${items.slice(0, 8).map(renderRanchItemCard).join('')}</div>`;
 }
 
 function renderBases(data) {
@@ -1018,6 +1110,63 @@ function renderResult(data) {
   $('#results').innerHTML = (renderers[moduleKey] || renderJson)(data);
   const count = data.total || data.totalItems || data.rosterCount || (data.groups || []).length || '';
   setText('#resultCount', moduleKey === 'breeding' ? 'Top route' : count ? `${count} result${count === 1 ? '' : 's'}` : '');
+}
+
+async function ranchDropsData() {
+  if (ranchDropsCache) return ranchDropsCache;
+  const owner = encodeURIComponent($('.js-owner')?.value || 'David');
+  ranchDropsCache = await api(`/ranch-drops?owner=${owner}`);
+  return ranchDropsCache;
+}
+
+async function renderRanchDropSuggestions(field) {
+  const input = field.querySelector('input[name="search"]');
+  const menu = field.querySelector('[data-ranch-drop-menu]');
+  const query = String(input?.value || '').trim().toLowerCase();
+  if (!query) {
+    menu.innerHTML = '';
+    menu.classList.remove('open');
+    return;
+  }
+  const data = await ranchDropsData();
+  const matches = (data.items || [])
+    .filter(item => item.name.toLowerCase().includes(query))
+    .slice(0, 8);
+  menu.innerHTML = matches.map(item => `<button type="button" data-ranch-drop="${escapeHtml(item.name)}"><span>${escapeHtml(item.name)}</span><em>${escapeHtml(item.count)} Pal${item.count === 1 ? '' : 's'}</em></button>`).join('');
+  menu.classList.toggle('open', matches.length > 0);
+}
+
+function initRanchDropSearch() {
+  const field = $('[data-ranch-drop-search]');
+  if (!field) return;
+  const input = field.querySelector('input[name="search"]');
+  input?.addEventListener('input', () => renderRanchDropSuggestions(field).catch(error => setText('#toolStatus', error.message)));
+  input?.addEventListener('keydown', async event => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    const data = await ranchDropsData();
+    const query = String(input.value || '').trim().toLowerCase();
+    const matches = (data.items || []).filter(item => item.name.toLowerCase().includes(query));
+    if (matches.length === 1) {
+      input.value = matches[0].name;
+      window.PALS_RANCH_ITEM_SLUG = slugify(matches[0].name);
+      window.history.replaceState({}, '', `/pals/ranch/${slugify(matches[0].name)}/`);
+      field.querySelector('[data-ranch-drop-menu]')?.classList.remove('open');
+      $('#toolForm')?.requestSubmit();
+    }
+  });
+  input?.addEventListener('blur', () => {
+    window.setTimeout(() => field.querySelector('[data-ranch-drop-menu]')?.classList.remove('open'), 120);
+  });
+  field.addEventListener('click', event => {
+    const drop = event.target.closest('[data-ranch-drop]')?.dataset.ranchDrop;
+    if (!drop) return;
+    input.value = drop;
+    window.PALS_RANCH_ITEM_SLUG = slugify(drop);
+    window.history.replaceState({}, '', `/pals/ranch/${slugify(drop)}/`);
+    field.querySelector('[data-ranch-drop-menu]')?.classList.remove('open');
+    $('#toolForm')?.requestSubmit();
+  });
 }
 
 async function submitTool(event) {
@@ -1168,6 +1317,7 @@ async function refreshLiveSave() {
   });
   setLiveStatus(result.ok ? `Synced ${result.rosterCount || 0} Pals` : result.error || 'Sync failed', result.ok ? 'good' : 'bad');
   options = await api('/options');
+  ranchDropsCache = null;
   fillOptions();
 }
 
@@ -1187,6 +1337,7 @@ async function uploadSave(file) {
   if (!response.ok || !result.ok) throw new Error(result.error || 'Upload failed.');
   setLiveStatus(`Imported ${result.rosterCount || 0} Pals`, 'good', file.name);
   options = await api('/options');
+  ranchDropsCache = null;
   fillOptions();
 }
 
@@ -1198,13 +1349,15 @@ async function init() {
   initPassiveTooltips();
   initProfiles();
   initImplantInventories();
+  initRanchDropSearch();
   $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setLiveStatus(error.message, 'bad')));
   $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setLiveStatus(error.message, 'bad')));
   $('.js-base')?.addEventListener('change', updateBaseLabelField);
   $('#saveBaseLabel')?.addEventListener('click', () => saveBaseLabel().catch(error => setText('#baseLabelHint', error.message)));
   options = await api('/options');
   fillOptions();
-  if (moduleKey === 'ranch') {
+  showEmptyState();
+  if (moduleKey === 'ranch' && window.PALS_RANCH_ITEM_SLUG) {
     $('#toolForm')?.requestSubmit();
   }
   loadLiveStatus().catch(() => {});
