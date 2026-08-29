@@ -118,7 +118,9 @@ function passiveId(passive) {
 }
 
 function formatPassiveDescription(passive) {
-  return passiveDescription(passive)
+  const desc = passiveDescription(passive).replace(/\s*\((?:ToSelf|None)\)/g, '');
+  if (/[.!?]$/.test(desc) || desc.length > 90) return [desc];
+  return desc
     .replace(/\s*\((?:ToSelf|None)\)/g, '')
     .split(/\s*,\s*/)
     .map(line => line.replace(/([+-]\d+(?:\.\d+)?)%/g, (_, value) => `${Number(value).toFixed(1)}%`))
@@ -127,12 +129,10 @@ function formatPassiveDescription(passive) {
 
 function passiveTooltipHtml(passive) {
   const tone = passiveTone(passive);
-  const id = passiveId(passive);
   return `
     <div class="passive-tooltip-card ${tone}" role="tooltip">
       <strong>${escapeHtml(passive)}</strong>
       ${formatPassiveDescription(passive).map(line => `<span>${escapeHtml(line)}</span>`).join('')}
-      ${id ? `<em>${escapeHtml(id)}</em>` : ''}
     </div>`;
 }
 
@@ -226,7 +226,7 @@ function fillOptions() {
     select.innerHTML = selectOptions(options.owners || ['David'], 'David');
   });
   $$('.js-work-type').forEach(select => {
-    select.innerHTML = '<option value="">Choose work skill</option>' + selectOptions(options.workTypes || [], 'mining');
+    select.innerHTML = '<option value="">Choose work skill</option>' + selectOptions(options.workTypes || [], '');
   });
   $$('.js-base').forEach(select => {
     const bases = options.baseSites?.bases || [];
@@ -236,6 +236,7 @@ function fillOptions() {
   });
   setText('#palsMeta', `${options.rosterCount || 0} Pals loaded | breeding data ${options.dataVersion || 'unknown'}`);
   renderProfileOptions();
+  renderImplantInventories();
   syncCustomSelects();
   applyUrlPrefill();
 }
@@ -595,6 +596,116 @@ function initPassivePickers() {
   });
 }
 
+function availableInventoryPassives() {
+  const inventory = options.implantInventory || {};
+  return Object.entries(inventory)
+    .filter(([, item]) => item?.infinite || Number(item?.count || 0) > 0)
+    .map(([passive]) => passive);
+}
+
+function selectedImplantPassives(finalPassives, includeImplants) {
+  if (!includeImplants) return [];
+  const available = new Set(availableInventoryPassives());
+  return finalPassives.filter(passive => available.has(passive));
+}
+
+function renderInventorySuggestions(panel) {
+  const input = panel.querySelector('[data-inventory-input]');
+  const menu = panel.querySelector('[data-inventory-menu]');
+  const query = String(input?.value || '').trim().toLowerCase();
+  if (!query) {
+    menu.innerHTML = '';
+    menu.classList.remove('open');
+    return;
+  }
+  const current = new Set(Object.keys(options.implantInventory || {}));
+  const matches = (options.passives || [])
+    .filter(passive => !current.has(passive))
+    .filter(passive => passive.toLowerCase().includes(query))
+    .slice(0, 8);
+  menu.innerHTML = matches.map(passive => `<button type="button" data-inventory-choice="${escapeHtml(passive)}">${escapeHtml(passive)}</button>`).join('');
+  menu.classList.toggle('open', matches.length > 0);
+}
+
+async function saveInventoryPassive(passive, patch) {
+  const response = await api('/implant-inventory', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({passive, ...patch}),
+  });
+  options.implantInventory = response.inventory || {};
+  renderImplantInventories();
+}
+
+function renderImplantInventories() {
+  $$('[data-implant-inventory]').forEach(panel => {
+    const list = panel.querySelector('[data-inventory-list]');
+    if (!list) return;
+    const entries = Object.entries(options.implantInventory || {}).sort(([a], [b]) => a.localeCompare(b));
+    list.innerHTML = entries.length ? entries.map(([passive, item]) => `
+      <div class="implant-row">
+        <span class="passive-chip ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}">${escapeHtml(passive)}</span>
+        <label class="inventory-toggle"><input type="checkbox" data-inventory-infinite="${escapeHtml(passive)}" ${item.infinite ? 'checked' : ''}> Infinite</label>
+        <input type="number" min="0" value="${escapeHtml(item.infinite ? 0 : item.count || 0)}" data-inventory-count="${escapeHtml(passive)}" ${item.infinite ? 'disabled' : ''}>
+        <button type="button" class="chip-remove" data-inventory-delete="${escapeHtml(passive)}" aria-label="Remove ${escapeHtml(passive)}">x</button>
+      </div>`).join('') : '<p class="field-hint">No implant passives inventoried yet.</p>';
+    const status = panel.querySelector('[data-inventory-status]');
+    if (status) status.textContent = entries.length ? `${entries.length} implant passive${entries.length === 1 ? '' : 's'} inventoried.` : '';
+  });
+}
+
+function initImplantInventories() {
+  $$('[data-implant-inventory]').forEach(panel => {
+    const input = panel.querySelector('[data-inventory-input]');
+    const status = panel.querySelector('[data-inventory-status]');
+    input?.addEventListener('input', () => renderInventorySuggestions(panel));
+    input?.addEventListener('blur', () => {
+      window.setTimeout(() => panel.querySelector('[data-inventory-menu]')?.classList.remove('open'), 120);
+    });
+    panel.querySelector('[data-inventory-add]')?.addEventListener('click', async () => {
+      const match = canonicalMatch(options.passives || [], input?.value || '');
+      if (!match.value) {
+        if (status) {
+          status.textContent = match.reason === 'ambiguous' ? `Matches: ${match.matches.join(', ')}. Keep typing.` : 'No known passive matches that text.';
+          status.className = 'field-hint invalid';
+        }
+        return;
+      }
+      await saveInventoryPassive(match.value, {infinite: true, count: 0});
+      input.value = '';
+      renderInventorySuggestions(panel);
+    });
+    panel.addEventListener('click', async event => {
+      const choice = event.target.closest('[data-inventory-choice]')?.dataset.inventoryChoice;
+      if (choice) {
+        input.value = choice;
+        await saveInventoryPassive(choice, {infinite: true, count: 0});
+        input.value = '';
+        panel.querySelector('[data-inventory-menu]')?.classList.remove('open');
+        return;
+      }
+      const deleted = event.target.closest('[data-inventory-delete]')?.dataset.inventoryDelete;
+      if (deleted) await saveInventoryPassive(deleted, {delete: true});
+    });
+    panel.addEventListener('change', async event => {
+      const passive = event.target.dataset.inventoryInfinite;
+      if (!passive) return;
+      const existing = options.implantInventory?.[passive] || {};
+      await saveInventoryPassive(passive, {infinite: event.target.checked, count: existing.count || 0});
+    });
+    panel.addEventListener('input', event => {
+      const passive = event.target.dataset.inventoryCount;
+      if (!passive) return;
+      window.clearTimeout(event.target._inventoryTimer);
+      event.target._inventoryTimer = window.setTimeout(() => {
+        saveInventoryPassive(passive, {infinite: false, count: event.target.value}).catch(error => {
+          if (status) status.textContent = error.message;
+        });
+      }, 350);
+    });
+  });
+}
+
 function resultCard(title, body, meta = '') {
   return `<article class="result-card"><h3>${escapeHtml(title)}</h3>${meta ? `<p class="result-meta">${escapeHtml(meta)}</p>` : ''}<div>${body}</div></article>`;
 }
@@ -619,7 +730,6 @@ function renderBreeding(data) {
           <div class="route-header">
             <div>
               <h3>${escapeHtml(route.species)}</h3>
-              <p>${escapeHtml(route.label || '')}</p>
             </div>
             <div class="badges">
               <span class="${(route.junk || []).length ? 'bad' : 'good'}">${(route.junk || []).length} junk</span>
@@ -827,27 +937,30 @@ async function submitTool(event) {
     let result;
     if (moduleKey === 'breeding') {
       const customProfile = customProfileByValue(data.breedingProfile);
+      const finalPassives = customProfile ? customProfile.passives : splitList(data.passives);
       result = await api('/optimize', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           owner: data.owner || 'David',
           target: data.target,
-          passives: customProfile ? customProfile.passives : splitList(data.passives),
+          passives: finalPassives,
+          implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
           genderPreference: data.genderPreference || 'any',
           breedingProfile: customProfile ? 'manual' : data.breedingProfile || 'manual',
           routePreference: 'best_overall',
         }),
       });
     } else if (moduleKey === 'ivs') {
+      const finalPassives = splitList(data.passives);
       result = await api('/improve-ivs', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           owner: data.owner || 'David',
           target: data.target,
-          passives: splitList(data.passives),
-          implantPassives: splitList(data.implantPassives),
+          passives: finalPassives,
+          implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
           genderPreference: data.genderPreference || 'any',
           ivGoal: 'perfect',
         }),
@@ -985,6 +1098,7 @@ async function init() {
   initPassivePickers();
   initPassiveTooltips();
   initProfiles();
+  initImplantInventories();
   $('#reloadData')?.addEventListener('click', () => reloadOptions().catch(error => setText('#toolStatus', error.message)));
   $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setText('#liveStatus', error.message)));
   $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setText('#liveStatus', error.message)));

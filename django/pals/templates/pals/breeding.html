@@ -24,6 +24,25 @@
         <span class="field-hint" data-passive-hint>Pick from known passives in your loaded roster.</span>
     </span>
 </label>
+<label class="check-row">
+    <input name="includeImplants" type="checkbox" value="1" checked>
+    Use implant inventory for passives you can add later
+</label>
+<div class="implant-inventory" data-implant-inventory>
+    <div class="inventory-head">
+        <strong>Implant Inventory</strong>
+        <span class="field-hint">Used only when implant inventory is enabled.</span>
+    </div>
+    <span class="passive-input-row">
+        <span class="suggest-field" data-inventory-suggest>
+            <input data-inventory-input autocomplete="off" placeholder="Choose a passive">
+            <span class="suggest-menu" data-inventory-menu></span>
+        </span>
+        <button type="button" data-inventory-add>Add</button>
+    </span>
+    <div class="implant-list" data-inventory-list></div>
+    <p class="field-hint" data-inventory-status></p>
+</div>
 <label>
     Gender
     <select name="genderPreference">

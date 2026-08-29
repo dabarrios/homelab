@@ -2145,8 +2145,10 @@ def build_plan(payload: dict) -> dict:
     target_key = STORE.name_to_key.get(target_name.lower())
     if not target_key:
         return {"error": f"Unknown target species: {target_name}"}
-    target = canonical_passives(payload.get("passives", []))
-    allowed = canonical_passives(payload.get("allowedExtras", []))
+    final_target = canonical_passives(payload.get("passives", []))
+    implant_passives = canonical_passives(payload.get("implantPassives", [])) & final_target
+    target = frozenset(final_target - implant_passives)
+    allowed = canonical_passives(payload.get("allowedExtras", [])) | implant_passives
     gender_preference = payload.get("genderPreference") or "any"
     iv_preference = "none"
     route_preference = payload.get("routePreference") or "best_overall"
@@ -2160,11 +2162,14 @@ def build_plan(payload: dict) -> dict:
             owned,
             target_key,
             gender_preference,
-            include_insomnia="Insomnia" in target,
+            include_insomnia="Insomnia" in final_target,
             priority_passive_groups=priority_passive_groups,
         )
         if work_speed_profile["selected"]:
-            target = frozenset(work_speed_profile["selected"])
+            final_target = frozenset(work_speed_profile["selected"])
+            implant_passives = implant_passives & final_target
+            target = frozenset(final_target - implant_passives)
+            allowed = allowed | implant_passives
             profile_route = work_speed_profile["route"]
     progressed = progress_species(owned, target, allowed)
 
@@ -2291,6 +2296,8 @@ def build_plan(payload: dict) -> dict:
         "target": STORE.pals[target_key].name,
         "owner": owner,
         "requestedPassives": sorted(target),
+        "finalPassives": sorted(final_target),
+        "implantPassives": sorted(implant_passives),
         "allowedExtras": sorted(allowed),
         "ownedCount": len(owned),
         "genderPreference": gender_preference,

@@ -826,6 +826,10 @@
 }
 
 .passive-tooltip-card strong {
+    display: block;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 7px;
+    margin-bottom: 3px;
     font-size: 13px;
 }
 
@@ -1241,6 +1245,63 @@
     color: var(--accent-dark);
 }
 
+.implant-inventory {
+    display: grid;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 12px;
+}
+
+.inventory-head {
+    display: grid;
+    gap: 2px;
+}
+
+.inventory-head strong {
+    color: var(--ink);
+}
+
+.implant-list {
+    display: grid;
+    gap: 8px;
+}
+
+.implant-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 74px auto;
+    gap: 8px;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.inventory-toggle {
+    display: inline-flex !important;
+    grid-template-columns: none !important;
+    align-items: center;
+    gap: 6px !important;
+    white-space: nowrap;
+    color: var(--ink) !important;
+    font-size: 12px !important;
+}
+
+.inventory-toggle input {
+    width: 14px !important;
+}
+
+.implant-row input[type="number"] {
+    width: 74px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+    padding: 7px 8px;
+    font: 700 13px "DM Sans", system-ui, sans-serif;
+}
+
 :root[data-theme="dark"] {
     --bg: #101316;
     --surface: #171b1f;
@@ -1270,6 +1331,8 @@
 :root[data-theme="dark"] .custom-select-menu,
 :root[data-theme="dark"] .custom-select-menu button,
 :root[data-theme="dark"] .owned-notice,
+:root[data-theme="dark"] .implant-inventory,
+:root[data-theme="dark"] .implant-row input[type="number"],
 :root[data-theme="dark"] .work-pal-card,
 :root[data-theme="dark"] .ranch-item-card,
 :root[data-theme="dark"] .route-card,

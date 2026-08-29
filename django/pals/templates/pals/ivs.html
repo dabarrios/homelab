@@ -24,19 +24,25 @@
         <span class="field-hint" data-passive-hint>Every selected passive is bred naturally unless added below.</span>
     </span>
 </label>
-<label>
-    Implant Passives
-    <span class="passive-picker" data-picker="implantPassives">
-        <span class="passive-input-row">
-            <input data-passive-input autocomplete="off" placeholder="Choose an implant passive">
-            <button type="button" data-passive-add>Add</button>
-            <button type="button" data-passive-clear>Clear</button>
-        </span>
-        <span class="passive-chips" data-passive-chips></span>
-        <input type="hidden" name="implantPassives">
-        <span class="field-hint" data-passive-hint>Optional. Must also be in Final Passives.</span>
-    </span>
+<label class="check-row">
+    <input name="includeImplants" type="checkbox" value="1" checked>
+    Use implant inventory for passives you can add later
 </label>
+<div class="implant-inventory" data-implant-inventory>
+    <div class="inventory-head">
+        <strong>Implant Inventory</strong>
+        <span class="field-hint">Used only when implant inventory is enabled.</span>
+    </div>
+    <span class="passive-input-row">
+        <span class="suggest-field" data-inventory-suggest>
+            <input data-inventory-input autocomplete="off" placeholder="Choose a passive">
+            <span class="suggest-menu" data-inventory-menu></span>
+        </span>
+        <button type="button" data-inventory-add>Add</button>
+    </span>
+    <div class="implant-list" data-inventory-list></div>
+    <p class="field-hint" data-inventory-status></p>
+</div>
 <label>
     Gender
     <select name="genderPreference">
