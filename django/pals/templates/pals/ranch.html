@@ -5,14 +5,15 @@
     <select class="js-owner" name="owner"></select>
 </label>
 <label>
-    Search Drops
+    Ranch Drop
     <span class="suggest-field" data-ranch-drop-search>
-        <input name="search" type="search" autocomplete="off" placeholder="Milk, Wool, Honey...">
+        <input name="search" type="search" autocomplete="off" placeholder="Choose ranch drop">
         <span class="suggest-menu" data-ranch-drop-menu></span>
     </span>
+    <span class="field-help">Select the item you want to ranch for.</span>
 </label>
 <label class="check-row">
-    <input name="includeInsomnia" type="checkbox">
-    Add Insomnia to the passive target
+    <input name="includeSelfBreeders" type="checkbox" checked>
+    Include self-breed-only Pals in recommendations
 </label>
 {% endblock %}

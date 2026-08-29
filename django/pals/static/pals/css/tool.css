@@ -104,6 +104,13 @@
     font-weight: 700;
 }
 
+.field-help {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
 .tool-form input,
 .tool-form select,
 .tool-form textarea {
@@ -465,6 +472,10 @@
     gap: 14px;
 }
 
+.empty-focused-hero {
+    width: min(920px, 100%);
+}
+
 .empty-tool-icon {
     width: 64px;
     height: 64px;
@@ -514,6 +525,21 @@
     transform: translate(17px, -12px) rotate(-45deg);
 }
 
+.empty-work-icon::before {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--accent);
+    border-right-color: transparent;
+    border-radius: 50%;
+    transform: rotate(-35deg);
+}
+
+.empty-work-icon::after {
+    width: 30px;
+    height: 6px;
+    transform: translate(-5px, 9px) rotate(-45deg);
+}
+
 .empty-work-state h3 {
     margin: 4px 0 0;
     color: var(--ink);
@@ -544,6 +570,39 @@
     font-weight: 400;
 }
 
+.empty-divider-work-mark {
+    position: relative;
+    display: block;
+    width: 26px;
+    height: 26px;
+    border: 1px solid rgba(117, 197, 170, .58);
+    border-radius: 50%;
+    background: rgba(117, 197, 170, .10);
+}
+
+.empty-divider-work-mark::before,
+.empty-divider-work-mark::after {
+    content: "";
+    position: absolute;
+    background: var(--accent);
+}
+
+.empty-divider-work-mark::before {
+    left: 7px;
+    top: 12px;
+    width: 12px;
+    height: 3px;
+    border-radius: 999px;
+}
+
+.empty-divider-work-mark::after {
+    left: 12px;
+    top: 7px;
+    width: 3px;
+    height: 12px;
+    border-radius: 999px;
+}
+
 .empty-work-features {
     width: 100%;
     display: grid;
@@ -553,11 +612,20 @@
     background: linear-gradient(145deg, rgba(255,255,255,.04), rgba(117,197,170,.06));
 }
 
+.empty-work-features-wide {
+    grid-template-columns: repeat(4, 1fr);
+}
+
 .empty-work-features div {
     display: grid;
     gap: 5px;
-    padding: 18px 22px;
+    padding: 18px 20px;
     text-align: left;
+}
+
+.empty-work-features-wide div {
+    grid-template-columns: auto 1fr;
+    align-items: start;
 }
 
 .empty-work-features div + div {
@@ -573,6 +641,206 @@
     color: var(--muted);
     font-size: 12px;
     line-height: 1.45;
+}
+
+.empty-work-features-wide span {
+    grid-column: 2;
+}
+
+.empty-feature-icon {
+    position: relative;
+    grid-row: span 2;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(117, 197, 170, .10);
+}
+
+.empty-feature-icon::before,
+.empty-feature-icon::after {
+    content: "";
+    position: absolute;
+}
+
+.empty-feature-icon-1::before {
+    left: 8px;
+    top: 7px;
+    width: 18px;
+    height: 18px;
+    background: var(--accent);
+    clip-path: polygon(50% 0, 61% 34%, 98% 34%, 68% 54%, 79% 90%, 50% 68%, 21% 90%, 32% 54%, 2% 34%, 39% 34%);
+}
+
+.empty-feature-icon-2::before {
+    left: 9px;
+    top: 7px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    box-shadow: -5px 3px 0 0 var(--accent);
+}
+
+.empty-feature-icon-3::before {
+    left: 8px;
+    right: 8px;
+    top: 9px;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 7px 0 var(--accent), 0 14px 0 var(--accent);
+}
+
+.empty-feature-icon-4::before {
+    left: 9px;
+    top: 16px;
+    width: 16px;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--accent);
+}
+
+.empty-feature-icon-4::after {
+    right: 8px;
+    top: 11px;
+    width: 10px;
+    height: 10px;
+    border-top: 3px solid var(--accent);
+    border-right: 3px solid var(--accent);
+    transform: rotate(45deg);
+}
+
+.empty-ranch-state {
+    width: min(840px, 100%);
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+}
+
+.empty-ranch-icon {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #8cc9b5;
+    border-radius: 50%;
+    background: radial-gradient(circle at 45% 35%, rgba(117, 197, 170, .18), rgba(117, 197, 170, .08));
+    color: var(--accent);
+}
+
+.empty-ranch-icon::before,
+.empty-ranch-icon::after {
+    content: "";
+    position: absolute;
+    background: currentColor;
+    opacity: .95;
+}
+
+.empty-ranch-icon::before {
+    width: 7px;
+    height: 7px;
+    right: 25px;
+    top: 26px;
+    clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+}
+
+.empty-ranch-icon::after {
+    width: 4px;
+    height: 4px;
+    right: 18px;
+    top: 35px;
+    border-radius: 50%;
+}
+
+.barn-roof {
+    position: absolute;
+    width: 38px;
+    height: 30px;
+    border: 3px solid currentColor;
+    border-bottom: 0;
+    transform: translateY(-10px) rotate(45deg);
+}
+
+.barn-body {
+    position: absolute;
+    width: 42px;
+    height: 34px;
+    bottom: 22px;
+    border: 3px solid currentColor;
+    border-top: 0;
+    border-radius: 0 0 4px 4px;
+}
+
+.barn-door {
+    position: absolute;
+    width: 15px;
+    height: 19px;
+    bottom: 25px;
+    border: 2px solid currentColor;
+    border-bottom: 0;
+}
+
+.barn-door::before,
+.barn-door::after {
+    content: "";
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    top: 8px;
+    border-top: 2px solid currentColor;
+}
+
+.barn-door::before { transform: rotate(42deg); }
+.barn-door::after { transform: rotate(-42deg); }
+
+.barn-fence {
+    position: absolute;
+    right: 19px;
+    bottom: 29px;
+    width: 20px;
+    height: 16px;
+    border-left: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+}
+
+.barn-fence::before,
+.barn-fence::after {
+    content: "";
+    position: absolute;
+    left: -3px;
+    right: -3px;
+    border-top: 2px solid currentColor;
+}
+
+.barn-fence::before { top: 4px; }
+.barn-fence::after { top: 11px; }
+
+.empty-ranch-state h3 {
+    margin: 10px 0 0;
+    color: var(--ink);
+    font: 800 22px Manrope, sans-serif;
+}
+
+.empty-ranch-state p {
+    max-width: 560px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.empty-ranch-divider b {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(117, 197, 170, .58);
+    border-radius: 50%;
+    background: rgba(117, 197, 170, .10);
+    color: var(--accent);
+    font-size: 17px;
+}
+
+.empty-ranch-features {
+    width: min(760px, 100%);
 }
 
 .empty-features {

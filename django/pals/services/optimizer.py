@@ -763,7 +763,7 @@ def ranch_drop_names_for_pal(pal: dict) -> set[str]:
     return found
 
 
-def ranch_drops_payload(owner: str = "") -> dict:
+def ranch_drops_payload(owner: str = "", include_self_breeders: bool = True) -> dict:
     counts = owned_species_counts(owner)
     items: dict[str, dict] = {}
     pal_count = 0
@@ -801,16 +801,19 @@ def ranch_drops_payload(owner: str = "") -> dict:
     results = []
     for item in items.values():
         pals = sorted(item["pals"], key=pal_sort_key)
+        pick_pool = pals if include_self_breeders else [card for card in pals if not card.get("requiresOwnedSeed")]
+        pick_pool = pick_pool or pals
         results.append({
             "name": item["name"],
             "count": len(pals),
-            "best": pals[0] if pals else None,
+            "best": pick_pool[0] if pick_pool else None,
             "pals": pals,
         })
     results.sort(key=lambda item: item["name"])
     return {
         "owner": owner,
         "items": results,
+        "includeSelfBreeders": include_self_breeders,
         "totalItems": len(results),
         "totalPals": pal_count,
         "sourceNote": "Ranch Drops uses Pals with Farming suitability and partner-skill text that mentions assignment to a Ranch. Item names are matched from the Pal's bundled drops only when the ranch text names or implies that item.",

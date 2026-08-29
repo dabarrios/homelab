@@ -81,7 +81,7 @@ def work(request):
 
 @login_required
 def ranch(request, item_slug: str = ""):
-    context = app_context("ranch", "Ranch", ranch_service.module_status()["message"], "ranch", "Find Drops")
+    context = app_context("ranch", "Ranch", ranch_service.module_status()["message"], "ranch", "Find Ranchers")
     context["ranch_item_slug"] = item_slug
     return render(request, "pals/ranch.html", context)
 
@@ -126,7 +126,10 @@ def work_suitability(request):
 @login_required
 @require_GET
 def ranch_drops(request):
-    return JsonResponse(optimizer.ranch_drops_payload(owner=request.GET.get("owner", "")))
+    return JsonResponse(optimizer.ranch_drops_payload(
+        owner=request.GET.get("owner", ""),
+        include_self_breeders=request.GET.get("includeSelfBreeders", "1") not in {"0", "false", "False"},
+    ))
 
 
 @login_required

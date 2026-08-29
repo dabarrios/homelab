@@ -227,23 +227,24 @@ const EMPTY_STATES = {
     ],
   },
   work: {
-    title: 'Find the best worker',
-    lead: 'Choose a work skill to compare candidates.',
-    hint: 'Select a work skill, then find workers.',
+    title: 'Pick a work skill to find the best worker.',
+    lead: 'We will analyze all Pals, show the top choices, and let you send any candidate to Breeding.',
+    hint: 'Select a work skill and click Find Workers to see the best Pal.',
     features: [
-      ['Best Pick', 'Ranks practical recommendations first.'],
-      ['Dark Option', 'Separates the best Dark type for night uptime.'],
+      ['Best Overall Pick', 'The strongest practical worker for the selected skill.'],
+      ['Best Dark-Type Pick', 'Top Dark-type option for night uptime.'],
       ['Condensed Levels', 'Shows base to fully condensed work suitability.'],
+      ['Breed From Here', 'Open Breeding with the worker and work-speed profile already selected.'],
     ],
   },
   ranch: {
-    title: 'Find ranch producers',
-    lead: 'Search for a ranch drop such as Milk, Wool, Honey, or Egg.',
-    hint: 'Start typing a drop name, choose a result, then find drops.',
+    title: 'Choose a ranch drop to get started.',
+    lead: 'We will find the best Pal to ranch this item, show every producer, and let you send any producer to Breeding.',
+    hint: 'Select a ranch drop and click Find Ranchers to see the best Pal.',
     features: [
-      ['Drop Search', 'Suggests matching ranch items as you type.'],
-      ['Top Producer', 'Shows the best Pal for the selected drop first.'],
-      ['Breed Links', 'Sends producers back to Breeding with ranch profile loaded.'],
+      ['Best Rancher', 'The strongest producer for the selected drop appears first.'],
+      ['All Drop Sources', 'See every Pal that can produce the item, including drop data.'],
+      ['Breed From Here', 'Open Breeding with the producer and ranch profile already selected.'],
     ],
   },
   bases: {
@@ -260,18 +261,40 @@ const EMPTY_STATES = {
 
 function emptyStateHtml(key = moduleKey) {
   const state = EMPTY_STATES[key] || EMPTY_STATES.breeding;
-  const diagram = key === 'work' ? `
+  const focusedState = key === 'work' ? `
+    <div class="empty-hero empty-focused-hero">
       <div class="empty-work-state">
-        <div class="empty-tool-icon" aria-hidden="true"><span></span></div>
-        <h3>Pick a work skill to find the best worker.</h3>
-        <p>We'll analyze all Pals and show you the top choice.</p>
-        <div class="empty-work-divider"><span></span><b>♨</b><span></span></div>
-        <div class="empty-work-features">
-          <div><b>Best Overall Pick</b><span>The Pal with the highest work suitability for this skill.</span></div>
-          <div><b>Best Dark-Type Pick</b><span>Top Dark-type option for night uptime.</span></div>
-          <div><b>Condensed Levels</b><span>See work suitability at base and fully condensed.</span></div>
+        <div class="empty-tool-icon empty-work-icon" aria-hidden="true">
+          <span></span>
         </div>
-      </div>` : key === 'ivs' ? `
+        <h3>${escapeHtml(state.title)}</h3>
+        <p>${escapeHtml(state.lead)}</p>
+        <div class="empty-work-divider"><span></span><b class="empty-divider-work-mark"></b><span></span></div>
+        <div class="empty-work-features empty-work-features-wide">
+          ${state.features.map(([title, text], index) => `<div><i class="empty-feature-icon empty-feature-icon-${index + 1}" aria-hidden="true"></i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+        </div>
+        <p class="empty-hint">${escapeHtml(state.hint)}</p>
+      </div>
+    </div>` : key === 'ranch' ? `
+    <div class="empty-hero empty-focused-hero">
+      <div class="empty-ranch-state">
+        <div class="empty-ranch-icon" aria-hidden="true">
+          <span class="barn-roof"></span>
+          <span class="barn-body"></span>
+          <span class="barn-door"></span>
+          <span class="barn-fence"></span>
+        </div>
+        <h3>${escapeHtml(state.title)}</h3>
+        <p>${escapeHtml(state.lead)}</p>
+        <div class="empty-work-divider empty-ranch-divider"><span></span><b>◇</b><span></span></div>
+        <div class="empty-work-features empty-ranch-features">
+          ${state.features.map(([title, text]) => `<div><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+        </div>
+        <p class="empty-hint">${escapeHtml(state.hint)}</p>
+      </div>
+    </div>` : '';
+  if (focusedState) return focusedState;
+  const diagram = key === 'ivs' ? `
       <div class="empty-diagram empty-diagram-ivs">
         <div class="empty-card iv-empty-card">
           <strong>Parent A</strong>
@@ -1250,7 +1273,8 @@ async function submitTool(event) {
       const includeSelf = data.includeSelfBreeders ? '1' : '0';
       result = await api(`/work-suitability?owner=${encodeURIComponent(data.owner || 'David')}&work=${encodeURIComponent(data.work || '')}&includeSelfBreeders=${includeSelf}`);
     } else if (moduleKey === 'ranch') {
-      result = await api(`/ranch-drops?owner=${encodeURIComponent(data.owner || 'David')}`);
+      const includeSelf = data.includeSelfBreeders ? '1' : '0';
+      result = await api(`/ranch-drops?owner=${encodeURIComponent(data.owner || 'David')}&includeSelfBreeders=${includeSelf}`);
     } else if (moduleKey === 'bases') {
       result = await api('/base-planner', {
         method: 'POST',
