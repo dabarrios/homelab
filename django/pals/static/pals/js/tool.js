@@ -46,6 +46,14 @@ function setText(selector, text) {
   if (element) element.textContent = text || '';
 }
 
+function setLiveStatus(text, tone = 'muted', title = '') {
+  const element = $('#liveStatus');
+  if (!element) return;
+  element.textContent = text || '';
+  element.dataset.tone = tone;
+  element.title = title || '';
+}
+
 function splitList(value) {
   return String(value || '')
     .split(/[\n,]+/)
@@ -1144,17 +1152,21 @@ function updateCustomSelect(select) {
 
 async function loadLiveStatus() {
   const status = await api('/live-save/status');
-  setText('#liveStatus', status.configured ? `Live save ${status.ok ? 'ready' : 'unavailable'}: ${status.path}` : 'PALWORLD_LIVE_SAVE_DIR is not configured.');
+  if (!status.configured) {
+    setLiveStatus('Live save not configured', 'muted');
+    return;
+  }
+  setLiveStatus(status.ok ? 'Live save ready' : 'Live save unavailable', status.ok ? 'good' : 'bad', status.path || '');
 }
 
 async function refreshLiveSave() {
-  setText('#liveStatus', 'Syncing...');
+  setLiveStatus('Syncing save...', 'active');
   const result = await api('/live-save/refresh', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({force: true}),
   });
-  setText('#liveStatus', result.ok ? `Synced ${result.rosterCount || 0} rows.` : result.error || 'Sync failed.');
+  setLiveStatus(result.ok ? `Synced ${result.rosterCount || 0} Pals` : result.error || 'Sync failed', result.ok ? 'good' : 'bad');
   options = await api('/options');
   fillOptions();
 }
@@ -1163,7 +1175,7 @@ async function uploadSave(file) {
   if (!file) return;
   const form = new FormData();
   form.append('files', file, file.webkitRelativePath || file.name);
-  setText('#liveStatus', `Uploading ${file.name}...`);
+  setLiveStatus('Uploading save...', 'active', file.name);
   const response = await fetch(apiUrl('/upload-save'), {method: 'POST', body: form});
   const text = await response.text();
   let result;
@@ -1173,7 +1185,7 @@ async function uploadSave(file) {
     throw new Error(text.slice(0, 240).trim() || `${response.status} ${response.statusText}`);
   }
   if (!response.ok || !result.ok) throw new Error(result.error || 'Upload failed.');
-  setText('#liveStatus', `Imported ${result.rosterCount || 0} rows.`);
+  setLiveStatus(`Imported ${result.rosterCount || 0} Pals`, 'good', file.name);
   options = await api('/options');
   fillOptions();
 }
@@ -1186,8 +1198,8 @@ async function init() {
   initPassiveTooltips();
   initProfiles();
   initImplantInventories();
-  $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setText('#liveStatus', error.message)));
-  $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setText('#liveStatus', error.message)));
+  $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setLiveStatus(error.message, 'bad')));
+  $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setLiveStatus(error.message, 'bad')));
   $('.js-base')?.addEventListener('change', updateBaseLabelField);
   $('#saveBaseLabel')?.addEventListener('click', () => saveBaseLabel().catch(error => setText('#baseLabelHint', error.message)));
   options = await api('/options');
