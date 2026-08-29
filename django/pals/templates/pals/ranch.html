@@ -1,7 +1,15 @@
-{% extends "pals/module.html" %}
-{% block title %}Ranch · PALS{% endblock %}
-{% block content %}
-{% with title="Ranch" summary="Plan ranch drop producers and passive targets for farming-focused Pals." %}
-{{ block.super }}
-{% endwith %}
+{% extends "pals/tool_base.html" %}
+{% block tool_form %}
+<label>
+    Owner
+    <select class="js-owner" name="owner"></select>
+</label>
+<label>
+    Search Drops
+    <input name="search" type="search" placeholder="Milk, Wool, Honey...">
+</label>
+<label class="check-row">
+    <input name="includeInsomnia" type="checkbox">
+    Add Insomnia to the passive target
+</label>
 {% endblock %}

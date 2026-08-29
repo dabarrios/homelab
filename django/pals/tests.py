@@ -29,6 +29,9 @@ class PalsRouteTest(TestCase):
                 response = self.client.get(reverse(route))
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, "window.PALS_API_BASE")
+                self.assertContains(response, "pals/js/tool.js")
+                self.assertNotContains(response, "module-rail")
+                self.assertNotContains(response, "modeBreed")
 
     def test_home_loads_as_module_hub(self):
         self.client.force_login(self.user)

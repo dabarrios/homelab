@@ -30,12 +30,13 @@ MODULES = [
 ]
 
 
-def app_context(active: str, title: str, summary: str, initial_mode: str = "breed") -> dict[str, str | list[dict[str, str]]]:
+def app_context(active: str, title: str, summary: str, module_key: str, action_label: str) -> dict[str, str | list[dict[str, str]]]:
     return {
         "active": active,
         "title": title,
         "summary": summary,
-        "initial_mode": initial_mode,
+        "module_key": module_key,
+        "action_label": action_label,
         "modules": MODULES,
     }
 
@@ -65,27 +66,27 @@ def home(request):
 
 @login_required
 def breeding(request):
-    return render(request, "pals/app.html", app_context("breeding", "Breeding", breeding_service.module_status()["message"], "breed"))
+    return render(request, "pals/breeding.html", app_context("breeding", "Breeding", breeding_service.module_status()["message"], "breeding", "Optimize"))
 
 
 @login_required
 def ivs(request):
-    return render(request, "pals/app.html", app_context("ivs", "IVs", ivs_service.module_status()["message"], "iv"))
+    return render(request, "pals/ivs.html", app_context("ivs", "IVs", ivs_service.module_status()["message"], "ivs", "Calculate IVs"))
 
 
 @login_required
 def work(request):
-    return render(request, "pals/app.html", app_context("work", "Work", work_service.module_status()["message"], "work"))
+    return render(request, "pals/work.html", app_context("work", "Work", work_service.module_status()["message"], "work", "Find Workers"))
 
 
 @login_required
 def ranch(request):
-    return render(request, "pals/app.html", app_context("ranch", "Ranch", ranch_service.module_status()["message"], "ranch"))
+    return render(request, "pals/ranch.html", app_context("ranch", "Ranch", ranch_service.module_status()["message"], "ranch", "Find Drops"))
 
 
 @login_required
 def bases(request):
-    return render(request, "pals/app.html", app_context("bases", "Bases", bases_service.module_status()["message"], "base"))
+    return render(request, "pals/bases.html", app_context("bases", "Bases", bases_service.module_status()["message"], "bases", "Plan Base"))
 
 
 @login_required

@@ -1,7 +1,22 @@
-{% extends "pals/module.html" %}
-{% block title %}Bases · PALS{% endblock %}
-{% block content %}
-{% with title="Bases" summary="Build target base teams from work sites, role caps, and owned candidates." %}
-{{ block.super }}
-{% endwith %}
+{% extends "pals/tool_base.html" %}
+{% block tool_form %}
+<label>
+    Owner
+    <select class="js-owner" name="owner"></select>
+</label>
+<label>
+    Base
+    <select class="js-base" name="baseId"></select>
+</label>
+<label>
+    Planner Mode
+    <select name="plannerMode">
+        <option value="ideal">Ideal targets</option>
+        <option value="right_now">Right now - owned only</option>
+    </select>
+</label>
+<label>
+    Workers
+    <input name="maxWorkers" type="number" min="1" max="15" value="15">
+</label>
 {% endblock %}
