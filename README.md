@@ -31,7 +31,7 @@ Each folder is a separate stack and serves a different goal:
 - `monitoring-stack/` - monitoring tools and configs
 - `utilities-stack/` - small helper services
 - `scripts/` - helper scripts
-- `homelab/` - Django app for homelab/game server pages
+- `django/` - Django project for homelab pages and tools
 
 ## Environment Configuration
 
@@ -51,11 +51,11 @@ cd automation-stack
 docker compose --env-file ../.env up -d
 ```
 
-`homelab`, `aspis`, and nested application-managed files such as `paperless-stack/paperless-ai/.env` remain independent.
+`django`, `aspis`, and nested application-managed files such as `paperless-stack/paperless-ai/.env` remain independent.
 
 ## Django App
 
-The `homelab/` folder is a Django app I am building as part of this repo.
+The `django/` folder is the Django project I am building as part of this repo.
 
 Right now it is focused on homelab and game server pages, but the goal is to keep expanding it into a more complete Django project. I am using it as a practical way to learn patterns that show up in large-scale Django applications.
 
