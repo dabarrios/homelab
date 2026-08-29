@@ -2382,6 +2382,23 @@
     color: var(--ink);
 }
 
+:root[data-theme="dark"] .badge,
+:root[data-theme="dark"] .role-badge,
+:root[data-theme="dark"] .work-skill-pill,
+:root[data-theme="dark"] .card-action {
+    background: #151a1e;
+    border-color: var(--line);
+    color: var(--muted);
+}
+
+:root[data-theme="dark"] .badge.good,
+:root[data-theme="dark"] .role-badge.owned,
+:root[data-theme="dark"] .work-skill-pill.selected-work {
+    background: var(--accent-soft);
+    border-color: #3b806b;
+    color: var(--accent);
+}
+
 :root[data-theme="dark"] body {
     background: var(--bg);
     color: var(--ink);
