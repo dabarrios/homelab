@@ -1015,14 +1015,14 @@ function renderWorkLevelValue(entry, selected = false) {
 }
 
 function renderWorkSkillPills(work = [], selectedWork = '') {
-  const secondaryWork = work.filter(entry => entry.key !== selectedWork);
-  if (!secondaryWork.length) return '';
-  return `<div class="work-skill-list">${secondaryWork.map(entry => {
+  if (!work.length) return '';
+  return `<div class="work-skill-list">${work.map(entry => {
+    const selected = entry.key === selectedWork;
     const verified = entry.fullyCondensedLevel !== null && entry.fullyCondensedLevel !== undefined;
     return `
-      <span class="work-skill-pill secondary-work ${verified ? 'verified' : 'projected'}">
+      <span class="work-skill-pill ${selected ? 'selected-work' : 'secondary-work'} ${verified ? 'verified' : 'projected'}">
         <span>${escapeHtml(entry.label)}</span>
-        <span>${renderWorkLevelValue(entry)}</span>
+        <span>${renderWorkLevelValue(entry, selected)}</span>
       </span>`;
   }).join('')}</div>`;
 }
@@ -1061,7 +1061,6 @@ function renderWorkCard(card, compact = false, recommendation = null, profile = 
       <div class="node-foot">
         ${owned}
         ${breedable}
-        <span>${escapeHtml(card.selectedWorkLabel || 'Work')} ${escapeHtml(card.selectedLevel || '')}${finalWorkLevel(card) && Number(finalWorkLevel(card)) !== Number(card.selectedLevel) ? ` -> ${escapeHtml(finalWorkLevel(card))}` : ''}</span>
       </div>
     </article>`;
 }
