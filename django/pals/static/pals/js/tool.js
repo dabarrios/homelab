@@ -260,7 +260,18 @@ const EMPTY_STATES = {
 
 function emptyStateHtml(key = moduleKey) {
   const state = EMPTY_STATES[key] || EMPTY_STATES.breeding;
-  const diagram = key === 'ivs' ? `
+  const diagram = key === 'work' ? `
+      <div class="empty-work-state">
+        <div class="empty-tool-icon" aria-hidden="true"><span></span></div>
+        <h3>Pick a work skill to find the best worker.</h3>
+        <p>We'll analyze all Pals and show you the top choice.</p>
+        <div class="empty-work-divider"><span></span><b>♨</b><span></span></div>
+        <div class="empty-work-features">
+          <div><b>Best Overall Pick</b><span>The Pal with the highest work suitability for this skill.</span></div>
+          <div><b>Best Dark-Type Pick</b><span>Top Dark-type option for night uptime.</span></div>
+          <div><b>Condensed Levels</b><span>See work suitability at base and fully condensed.</span></div>
+        </div>
+      </div>` : key === 'ivs' ? `
       <div class="empty-diagram empty-diagram-ivs">
         <div class="empty-card iv-empty-card">
           <strong>Parent A</strong>
