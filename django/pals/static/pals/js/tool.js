@@ -267,7 +267,6 @@ function emptyStateHtml(key = moduleKey) {
           <span>HP <em>-</em></span>
           <span>Attack <em>-</em></span>
           <span>Defense <em>-</em></span>
-          <span>Work Speed <em>-</em></span>
         </div>
         <div class="empty-plus">+</div>
         <div class="empty-card iv-empty-card">
@@ -275,7 +274,6 @@ function emptyStateHtml(key = moduleKey) {
           <span>HP <em>-</em></span>
           <span>Attack <em>-</em></span>
           <span>Defense <em>-</em></span>
-          <span>Work Speed <em>-</em></span>
         </div>
         <div class="empty-arrow"></div>
         <div class="empty-target iv-empty-target">
@@ -283,7 +281,6 @@ function emptyStateHtml(key = moduleKey) {
           <span>HP <em>-</em></span>
           <span>Attack <em>-</em></span>
           <span>Defense <em>-</em></span>
-          <span>Work Speed <em>-</em></span>
         </div>
         <div class="empty-goal-card">
           <strong>Goal</strong>
