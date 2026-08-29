@@ -230,10 +230,13 @@ function fillOptions() {
   });
   $$('.js-base').forEach(select => {
     const bases = options.baseSites?.bases || [];
+    const selected = select.value;
     select.innerHTML = bases.length
-      ? bases.map(base => `<option value="${escapeHtml(base.id)}">${escapeHtml(base.label || base.name || base.id)}</option>`).join('')
-      : '<option value="">No decoded bases found</option>';
+      ? bases.map(base => `<option value="${escapeHtml(base.id)}">${escapeHtml(base.displayName || base.customName || base.defaultName || base.label || base.name || base.id)}</option>`).join('')
+      : '<option value="">No bases found</option>';
+    if (selected && [...select.options].some(option => option.value === selected)) select.value = selected;
   });
+  updateBaseLabelField();
   setText('#palsMeta', `${options.rosterCount || 0} Pals loaded | breeding data ${options.dataVersion || 'unknown'}`);
   renderProfileOptions();
   renderImplantInventories();
@@ -418,7 +421,10 @@ function renderSuggestions(field) {
   const matches = values
     .filter(value => value.toLowerCase().includes(query))
     .slice(0, 8);
-  menu.innerHTML = matches.map(value => `<button type="button" data-suggest-value="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join('');
+  menu.innerHTML = matches.map(value => {
+    const tone = type === 'passives' || type === 'passive' ? passiveTone(value) : '';
+    return `<button type="button" data-suggest-value="${escapeHtml(value)}">${tone ? `<span class="passive-dot ${tone}"></span>` : ''}<span>${escapeHtml(value)}</span></button>`;
+  }).join('');
   menu.classList.toggle('open', matches.length > 0);
 }
 
@@ -527,7 +533,7 @@ function renderPassiveSuggestions(picker) {
     .slice(0, 8);
   list.innerHTML = matches.map(passive => {
     const tone = passiveTone(passive);
-    return `<button type="button" data-suggest-passive="${escapeHtml(passive)}"><span class="passive-dot ${tone}"></span>${escapeHtml(passive)}<em>${escapeHtml(tone)}</em></button>`;
+    return `<button type="button" data-suggest-passive="${escapeHtml(passive)}"><span class="passive-dot ${tone}"></span><span>${escapeHtml(passive)}</span></button>`;
   }).join('');
   list.classList.toggle('open', matches.length > 0);
 }
@@ -626,7 +632,7 @@ function renderInventorySuggestions(panel) {
     .filter(passive => !current.has(passive))
     .filter(passive => passive.toLowerCase().includes(query))
     .slice(0, 8);
-  menu.innerHTML = matches.map(passive => `<button type="button" data-inventory-choice="${escapeHtml(passive)}">${escapeHtml(passive)}</button>`).join('');
+  menu.innerHTML = matches.map(passive => `<button type="button" data-inventory-choice="${escapeHtml(passive)}"><span class="passive-dot ${passiveTone(passive)}"></span><span>${escapeHtml(passive)}</span></button>`).join('');
   menu.classList.toggle('open', matches.length > 0);
 }
 
@@ -666,7 +672,7 @@ function renderImplantInventories() {
   const availableCount = entries.filter(([, item]) => item?.infinite || Number(item?.count || 0) > 0).length;
   $$('[data-inventory-summary]').forEach(summary => {
     summary.textContent = entries.length
-      ? `${availableCount}/${entries.length} implant passive${entries.length === 1 ? '' : 's'} available.`
+      ? `${entries.length} implant passive${entries.length === 1 ? '' : 's'} tracked.`
       : 'No implant passives inventoried yet.';
   });
   $$('[data-implant-inventory]').forEach(panel => {
@@ -959,6 +965,35 @@ function renderBases(data) {
   return renderJson(data);
 }
 
+function selectedBaseOption() {
+  const selectedId = document.querySelector('.js-base')?.value || '';
+  return (options.baseSites?.bases || []).find(base => base.id === selectedId) || null;
+}
+
+function updateBaseLabelField() {
+  const input = $('#baseLabel');
+  if (!input) return;
+  const base = selectedBaseOption();
+  input.value = base?.customName || '';
+  input.disabled = !base;
+  $('#saveBaseLabel')?.toggleAttribute('disabled', !base);
+  setText('#baseLabelHint', base ? 'Save a local display name for the selected base.' : 'Sync a save with bases before naming them.');
+}
+
+async function saveBaseLabel() {
+  const base = selectedBaseOption();
+  if (!base) return;
+  const label = ($('#baseLabel')?.value || '').trim();
+  const result = await api('/base-labels', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({baseId: base.id, label}),
+  });
+  options.baseSites = await api('/base-work-sites');
+  fillOptions();
+  setText('#baseLabelHint', result.ok ? 'Base name saved.' : 'Base name was not saved.');
+}
+
 function renderResult(data) {
   const renderers = {breeding: renderBreeding, ivs: renderIvs, work: renderWork, ranch: renderRanch, bases: renderBases};
   $('#results').classList.remove('results-empty');
@@ -1141,9 +1176,11 @@ async function init() {
   $('#reloadData')?.addEventListener('click', () => reloadOptions().catch(error => setText('#toolStatus', error.message)));
   $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setText('#liveStatus', error.message)));
   $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setText('#liveStatus', error.message)));
+  $('.js-base')?.addEventListener('change', updateBaseLabelField);
+  $('#saveBaseLabel')?.addEventListener('click', () => saveBaseLabel().catch(error => setText('#baseLabelHint', error.message)));
   options = await api('/options');
   fillOptions();
-  if (moduleKey === 'ranch' && window.PALS_RANCH_ITEM_SLUG) {
+  if (moduleKey === 'ranch') {
     $('#toolForm')?.requestSubmit();
   }
   loadLiveStatus().catch(() => {});

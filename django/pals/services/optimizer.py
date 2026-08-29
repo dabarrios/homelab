@@ -65,9 +65,11 @@ GOLD_PASSIVES = {
     "Ferocious",
     "Flame Emperor",
     "Ice Emperor",
-    "Impatient",
     "Lord of Lightning",
     "Lord of the Sea",
+    "Logging Foreman",
+    "Mine Foreman",
+    "Mining Foreman",
     "Musclehead",
     "Otherworldly Cells",
     "Philanthropist",
@@ -75,6 +77,7 @@ GOLD_PASSIVES = {
     "Service-Minded",
     "Spirit Emperor",
     "Vampiric",
+    "Workaholic",
 }
 
 NEGATIVE_PASSIVES = {
@@ -85,6 +88,7 @@ NEGATIVE_PASSIVES = {
     "Destructive",
     "Downtrodden",
     "Glutton",
+    "Mercy Hit",
     "Pacifist",
     "Slacker",
     "Unstable",
@@ -108,7 +112,6 @@ BLUE_PASSIVES = {
     "Ranch Master",
     "Skymarcher",
     "Lucky",
-    "Nimble",
     "Runner",
     "Swift",
 }
@@ -116,7 +119,9 @@ BLUE_PASSIVES = {
 NORMAL_PASSIVES = {
     "Conceited",
     "Fit as a Fiddle",
+    "Impatient",
     "Insomnia",
+    "Nimble",
     "Work Slave",
 }
 
@@ -229,12 +234,14 @@ def passive_tone(name: str, passive_id: str = "", desc: str = "") -> str:
         return "positive"
     if name in NEGATIVE_PASSIVES or pid.endswith("_down1") or pid.endswith("_down2") or pid.endswith("_down3"):
         return "negative"
+    if name in GOLD_PASSIVES:
+        return "gold"
     positive_terms = ("+", " up", "increase", "immune", "work suitability")
     has_positive = any(term in lowered for term in positive_terms)
     has_negative = " -" in lowered or "down" in lowered or "decrease" in lowered
     if has_negative and not has_positive:
         return "negative"
-    if name in GOLD_PASSIVES or pid.endswith("_up2") or "work suitability +1" in lowered:
+    if pid.endswith("_up2") or "work suitability +1" in lowered:
         return "gold"
     if name in BLUE_PASSIVES:
         return "positive"

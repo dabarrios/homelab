@@ -2,6 +2,10 @@
     min-height: 560px;
 }
 
+.tool-layout {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .page.tool-page,
 .page:has(.pals-tool) {
     width: min(1680px, calc(100% - 40px));
@@ -912,7 +916,13 @@
 }
 
 .passive-suggestions button {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
+}
+
+.suggest-field[data-inventory-suggest] .suggest-menu button,
+.suggest-field[data-suggest="passive"] .suggest-menu button,
+.suggest-field[data-suggest="passives"] .suggest-menu button {
+    grid-template-columns: auto 1fr;
 }
 
 .suggest-menu button:last-child,
@@ -1333,6 +1343,30 @@
     font: 700 13px "DM Sans", system-ui, sans-serif;
 }
 
+.base-name-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+}
+
+.base-name-row button {
+    min-height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+    padding: 8px 12px;
+    font: 800 13px "DM Sans", system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.base-name-row button:hover,
+.base-name-row button:focus-visible {
+    border-color: #a9d0c3;
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+}
+
 :root[data-theme="dark"] {
     --bg: #101316;
     --surface: #171b1f;
@@ -1366,6 +1400,7 @@
 :root[data-theme="dark"] .inventory-summary button,
 :root[data-theme="dark"] .implant-inventory [data-inventory-add],
 :root[data-theme="dark"] .implant-row input[type="number"],
+:root[data-theme="dark"] .base-name-row button,
 :root[data-theme="dark"] .work-pal-card,
 :root[data-theme="dark"] .ranch-item-card,
 :root[data-theme="dark"] .route-card,

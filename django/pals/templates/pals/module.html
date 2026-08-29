@@ -2,11 +2,6 @@
 {% block title %}{{ title }} · PALS{% endblock %}
 {% block content %}
 <section class="tool-layout">
-    <aside class="tool-nav">
-        {% for module in modules %}
-        <a class="{% if active == module.key %}is-active{% endif %}" href="{% url module.route %}">{{ module.title }}</a>
-        {% endfor %}
-    </aside>
     <section class="tool-panel">
         <p class="eyebrow">PALS</p>
         <h1>{{ title }}</h1>

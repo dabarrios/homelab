@@ -7,12 +7,6 @@
 {% block page_class %}tool-page{% endblock %}
 {% block content %}
 <section class="tool-layout pals-tool" data-module="{{ module_key }}">
-    <aside class="tool-nav">
-        {% for module in modules %}
-        <a class="{% if active == module.key %}is-active{% endif %}" href="{% url module.route %}">{{ module.title }}</a>
-        {% endfor %}
-    </aside>
-
     <section class="tool-panel">
         <div class="tool-heading">
             <div>
