@@ -547,6 +547,7 @@ function addPassive(picker) {
     hint.textContent = `${match.value} is already selected.`;
     hint.className = 'field-hint';
     input.value = '';
+    input.focus();
     return;
   }
   if (selected.length >= 4) {
@@ -559,6 +560,8 @@ function addPassive(picker) {
   hint.textContent = `${match.value} added.`;
   hint.className = 'field-hint valid';
   renderPassivePicker(picker);
+  renderPassiveSuggestions(picker);
+  input.focus();
 }
 
 function initPassivePickers() {
@@ -627,6 +630,27 @@ function renderInventorySuggestions(panel) {
   menu.classList.toggle('open', matches.length > 0);
 }
 
+async function addInventoryPassive(panel) {
+  const input = panel.querySelector('[data-inventory-input]');
+  const status = panel.querySelector('[data-inventory-status]');
+  const match = canonicalMatch(options.passives || [], input?.value || '');
+  if (!match.value) {
+    if (status) {
+      status.textContent = match.reason === 'ambiguous' ? `Matches: ${match.matches.join(', ')}. Keep typing.` : 'No known passive matches that text.';
+      status.className = 'field-hint invalid';
+    }
+    return;
+  }
+  await saveInventoryPassive(match.value, {infinite: true, count: 0});
+  input.value = '';
+  renderInventorySuggestions(panel);
+  if (status) {
+    status.textContent = `${match.value} added.`;
+    status.className = 'field-hint valid';
+  }
+  input.focus();
+}
+
 async function saveInventoryPassive(passive, patch) {
   const response = await api('/implant-inventory', {
     method: 'POST',
@@ -675,21 +699,19 @@ function initImplantInventories() {
     const input = panel.querySelector('[data-inventory-input]');
     const status = panel.querySelector('[data-inventory-status]');
     input?.addEventListener('input', () => renderInventorySuggestions(panel));
+    input?.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addInventoryPassive(panel).catch(error => {
+          if (status) status.textContent = error.message;
+        });
+      }
+    });
     input?.addEventListener('blur', () => {
       window.setTimeout(() => panel.querySelector('[data-inventory-menu]')?.classList.remove('open'), 120);
     });
     panel.querySelector('[data-inventory-add]')?.addEventListener('click', async () => {
-      const match = canonicalMatch(options.passives || [], input?.value || '');
-      if (!match.value) {
-        if (status) {
-          status.textContent = match.reason === 'ambiguous' ? `Matches: ${match.matches.join(', ')}. Keep typing.` : 'No known passive matches that text.';
-          status.className = 'field-hint invalid';
-        }
-        return;
-      }
-      await saveInventoryPassive(match.value, {infinite: true, count: 0});
-      input.value = '';
-      renderInventorySuggestions(panel);
+      await addInventoryPassive(panel);
     });
     panel.addEventListener('click', async event => {
       const choice = event.target.closest('[data-inventory-choice]')?.dataset.inventoryChoice;
@@ -698,6 +720,7 @@ function initImplantInventories() {
         await saveInventoryPassive(choice, {infinite: true, count: 0});
         input.value = '';
         panel.querySelector('[data-inventory-menu]')?.classList.remove('open');
+        input.focus();
         return;
       }
       const deleted = event.target.closest('[data-inventory-delete]')?.dataset.inventoryDelete;
