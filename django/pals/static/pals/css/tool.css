@@ -246,8 +246,6 @@
     min-height: 420px;
     place-items: center;
     color: var(--muted);
-    border: 1px dashed var(--line);
-    border-radius: 8px;
 }
 
 .empty-hero {
@@ -393,6 +391,69 @@
     color: var(--ink);
     font-size: 26px;
     font-weight: 900;
+}
+
+.empty-diagram-ivs {
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas:
+        "a plus b"
+        "arrow arrow arrow"
+        "target target goal";
+    width: min(720px, 100%);
+}
+
+.iv-empty-card,
+.iv-empty-target,
+.empty-goal-card {
+    min-width: 220px;
+}
+
+.iv-empty-card span,
+.iv-empty-target span,
+.empty-goal-card span {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.iv-empty-card span em,
+.iv-empty-target span em {
+    color: var(--muted);
+    font-style: normal;
+}
+
+.iv-empty-target {
+    grid-area: target;
+    text-align: left;
+}
+
+.iv-empty-target strong {
+    margin-bottom: 4px;
+}
+
+.empty-goal-card {
+    grid-area: goal;
+    display: grid;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: linear-gradient(145deg, rgba(255,255,255,.04), rgba(117,197,170,.08));
+    padding: 16px;
+    text-align: left;
+}
+
+.empty-goal-card strong {
+    color: var(--accent);
+    font-size: 13px;
+}
+
+.empty-goal-card i {
+    color: var(--muted);
+    font-style: normal;
+    letter-spacing: 1px;
 }
 
 .empty-features {
@@ -1798,6 +1859,16 @@
             "b"
             "arrow"
             "target";
+    }
+
+    .empty-diagram-ivs {
+        grid-template-areas:
+            "a"
+            "plus"
+            "b"
+            "arrow"
+            "target"
+            "goal";
     }
 
     .empty-arrow {

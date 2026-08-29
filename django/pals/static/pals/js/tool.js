@@ -260,13 +260,37 @@ const EMPTY_STATES = {
 
 function emptyStateHtml(key = moduleKey) {
   const state = EMPTY_STATES[key] || EMPTY_STATES.breeding;
-  return `
-    <div class="empty-hero">
-      <div class="empty-icon" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-      <h3>${escapeHtml(state.title)}</h3>
-      <p>${escapeHtml(state.lead)}</p>
+  const diagram = key === 'ivs' ? `
+      <div class="empty-diagram empty-diagram-ivs">
+        <div class="empty-card iv-empty-card">
+          <strong>Parent A</strong>
+          <span>HP <em>-</em></span>
+          <span>Attack <em>-</em></span>
+          <span>Defense <em>-</em></span>
+          <span>Work Speed <em>-</em></span>
+        </div>
+        <div class="empty-plus">+</div>
+        <div class="empty-card iv-empty-card">
+          <strong>Parent B</strong>
+          <span>HP <em>-</em></span>
+          <span>Attack <em>-</em></span>
+          <span>Defense <em>-</em></span>
+          <span>Work Speed <em>-</em></span>
+        </div>
+        <div class="empty-arrow"></div>
+        <div class="empty-target iv-empty-target">
+          <strong>Target Pal</strong>
+          <span>HP <em>-</em></span>
+          <span>Attack <em>-</em></span>
+          <span>Defense <em>-</em></span>
+          <span>Work Speed <em>-</em></span>
+        </div>
+        <div class="empty-goal-card">
+          <strong>Goal</strong>
+          <span>Max IVs in selected stats</span>
+          <i>☆ ☆ ☆ ☆ ☆</i>
+        </div>
+      </div>` : `
       <div class="empty-diagram">
         <div class="empty-card">
           <strong>${key === 'work' ? 'Candidate A' : key === 'ranch' ? 'Producer A' : 'Parent A'}</strong>
@@ -279,7 +303,15 @@ function emptyStateHtml(key = moduleKey) {
         </div>
         <div class="empty-arrow"></div>
         <div class="empty-target"><strong>${key === 'bases' ? 'Base Team' : key === 'work' ? 'Best Pick' : key === 'ranch' ? 'Selected Drop' : 'Target Pal'}</strong><span>?</span></div>
+      </div>`;
+  return `
+    <div class="empty-hero">
+      <div class="empty-icon" aria-hidden="true">
+        <span></span><span></span><span></span>
       </div>
+      <h3>${escapeHtml(state.title)}</h3>
+      <p>${escapeHtml(state.lead)}</p>
+      ${diagram}
       <div class="empty-features">
         ${state.features.map(([title, text]) => `<div><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
       </div>
