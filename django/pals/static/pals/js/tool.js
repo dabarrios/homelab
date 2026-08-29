@@ -638,10 +638,16 @@ async function saveInventoryPassive(passive, patch) {
 }
 
 function renderImplantInventories() {
+  const entries = Object.entries(options.implantInventory || {}).sort(([a], [b]) => a.localeCompare(b));
+  const availableCount = entries.filter(([, item]) => item?.infinite || Number(item?.count || 0) > 0).length;
+  $$('[data-inventory-summary]').forEach(summary => {
+    summary.textContent = entries.length
+      ? `${availableCount}/${entries.length} implant passive${entries.length === 1 ? '' : 's'} available.`
+      : 'No implant passives inventoried yet.';
+  });
   $$('[data-implant-inventory]').forEach(panel => {
     const list = panel.querySelector('[data-inventory-list]');
     if (!list) return;
-    const entries = Object.entries(options.implantInventory || {}).sort(([a], [b]) => a.localeCompare(b));
     list.innerHTML = entries.length ? entries.map(([passive, item]) => `
       <div class="implant-row">
         <span class="passive-chip ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}">${escapeHtml(passive)}</span>
@@ -655,6 +661,16 @@ function renderImplantInventories() {
 }
 
 function initImplantInventories() {
+  $$('[data-open-implant-inventory]').forEach(button => {
+    button.addEventListener('click', () => {
+      $('#implantInventoryModal')?.classList.remove('hidden');
+      $('#implantInventoryModal [data-inventory-input]')?.focus();
+    });
+  });
+  $('#closeImplantInventory')?.addEventListener('click', () => $('#implantInventoryModal')?.classList.add('hidden'));
+  $('#implantInventoryModal')?.addEventListener('click', event => {
+    if (event.target === $('#implantInventoryModal')) $('#implantInventoryModal')?.classList.add('hidden');
+  });
   $$('[data-implant-inventory]').forEach(panel => {
     const input = panel.querySelector('[data-inventory-input]');
     const status = panel.querySelector('[data-inventory-status]');

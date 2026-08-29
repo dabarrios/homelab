@@ -1248,24 +1248,50 @@
 .implant-inventory {
     display: grid;
     gap: 10px;
+}
+
+.inventory-summary {
+    display: grid;
+    gap: 7px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fff;
-    padding: 12px;
+    padding: 10px;
 }
 
-.inventory-head {
-    display: grid;
-    gap: 2px;
-}
-
-.inventory-head strong {
+.inventory-summary button,
+.implant-inventory [data-inventory-add] {
+    min-height: 34px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
     color: var(--ink);
+    padding: 8px 12px;
+    font: 800 13px "DM Sans", system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.inventory-summary button:hover,
+.inventory-summary button:focus-visible,
+.implant-inventory [data-inventory-add]:hover,
+.implant-inventory [data-inventory-add]:focus-visible {
+    border-color: #a9d0c3;
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+}
+
+.implant-modal-panel {
+    width: min(720px, 100%);
+    max-height: min(760px, calc(100vh - 48px));
+    align-content: start;
 }
 
 .implant-list {
     display: grid;
     gap: 8px;
+    max-height: min(460px, 52vh);
+    overflow: auto;
+    padding-right: 4px;
 }
 
 .implant-row {
@@ -1331,7 +1357,9 @@
 :root[data-theme="dark"] .custom-select-menu,
 :root[data-theme="dark"] .custom-select-menu button,
 :root[data-theme="dark"] .owned-notice,
-:root[data-theme="dark"] .implant-inventory,
+:root[data-theme="dark"] .inventory-summary,
+:root[data-theme="dark"] .inventory-summary button,
+:root[data-theme="dark"] .implant-inventory [data-inventory-add],
 :root[data-theme="dark"] .implant-row input[type="number"],
 :root[data-theme="dark"] .work-pal-card,
 :root[data-theme="dark"] .ranch-item-card,

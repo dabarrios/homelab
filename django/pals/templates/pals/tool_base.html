@@ -92,6 +92,26 @@
         </div>
     </div>
 </div>
+<div id="implantInventoryModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="implantInventoryTitle">
+    <div class="modal-panel implant-modal-panel" data-implant-inventory>
+        <div class="modal-head">
+            <div>
+                <h2 id="implantInventoryTitle">Implant Inventory</h2>
+                <p class="status-line">Track passives you can add later at the surgery table.</p>
+            </div>
+            <button type="button" id="closeImplantInventory" aria-label="Close implant inventory">x</button>
+        </div>
+        <span class="passive-input-row">
+            <span class="suggest-field" data-inventory-suggest>
+                <input data-inventory-input autocomplete="off" placeholder="Choose a passive">
+                <span class="suggest-menu" data-inventory-menu></span>
+            </span>
+            <button type="button" data-inventory-add>Add</button>
+        </span>
+        <div class="implant-list" data-inventory-list></div>
+        <p class="field-hint" data-inventory-status></p>
+    </div>
+</div>
 <div id="passiveTooltip" class="floating-passive-tooltip hidden"></div>
 {% endblock %}
 {% block scripts %}
