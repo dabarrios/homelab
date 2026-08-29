@@ -11,11 +11,33 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
+from .services import bases as bases_service
+from .services import breeding as breeding_service
+from .services import data as data_service
+from .services import ivs as ivs_service
 from .services import optimizer
+from .services import ranch as ranch_service
+from .services import saves as saves_service
+from .services import work as work_service
 
 
-def app_context(initial_mode: str = "breed") -> dict[str, str]:
-    return {"initial_mode": initial_mode}
+MODULES = [
+    {"key": "breeding", "title": "Breeding", "route": "pals:breeding", "summary": "Plan clean passive routes from owned Pals."},
+    {"key": "ivs", "title": "IVs", "route": "pals:ivs", "summary": "Compare target lines for stat inheritance."},
+    {"key": "work", "title": "Work", "route": "pals:work", "summary": "Rank candidates by work suitability."},
+    {"key": "ranch", "title": "Ranch", "route": "pals:ranch", "summary": "Find ranch drops and passive priorities."},
+    {"key": "bases", "title": "Bases", "route": "pals:bases", "summary": "Draft base worker teams by role."},
+]
+
+
+def app_context(active: str, title: str, summary: str, initial_mode: str = "breed") -> dict[str, str | list[dict[str, str]]]:
+    return {
+        "active": active,
+        "title": title,
+        "summary": summary,
+        "initial_mode": initial_mode,
+        "modules": MODULES,
+    }
 
 
 def json_payload(request) -> dict:
@@ -30,32 +52,40 @@ def json_error(message: str, status: int = 400) -> JsonResponse:
 
 @login_required
 def home(request):
-    return render(request, "pals/app.html", app_context("breed"))
+    return render(
+        request,
+        "pals/home.html",
+        {
+            "modules": MODULES,
+            "data_status": data_service.module_status(),
+            "sync_status": saves_service.module_status(),
+        },
+    )
 
 
 @login_required
 def breeding(request):
-    return render(request, "pals/app.html", app_context("breed"))
+    return render(request, "pals/app.html", app_context("breeding", "Breeding", breeding_service.module_status()["message"], "breed"))
 
 
 @login_required
 def ivs(request):
-    return render(request, "pals/app.html", app_context("iv"))
+    return render(request, "pals/app.html", app_context("ivs", "IVs", ivs_service.module_status()["message"], "iv"))
 
 
 @login_required
 def work(request):
-    return render(request, "pals/app.html", app_context("work"))
+    return render(request, "pals/app.html", app_context("work", "Work", work_service.module_status()["message"], "work"))
 
 
 @login_required
 def ranch(request):
-    return render(request, "pals/app.html", app_context("ranch"))
+    return render(request, "pals/app.html", app_context("ranch", "Ranch", ranch_service.module_status()["message"], "ranch"))
 
 
 @login_required
 def bases(request):
-    return render(request, "pals/app.html", app_context("base"))
+    return render(request, "pals/app.html", app_context("bases", "Bases", bases_service.module_status()["message"], "base"))
 
 
 @login_required

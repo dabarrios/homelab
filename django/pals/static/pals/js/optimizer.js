@@ -58,6 +58,7 @@ function assetUrl(path) {
 function applyTheme(theme) {
   const nextTheme = theme === 'light' ? 'light' : 'dark';
   document.documentElement.dataset.theme = nextTheme;
+  document.querySelector('.optimizer-embed')?.setAttribute('data-theme', nextTheme);
   localStorage.setItem(THEME_KEY, nextTheme);
   const button = $('themeToggle');
   if (button) {
@@ -72,6 +73,16 @@ function initTheme() {
   $('themeToggle')?.addEventListener('click', () => {
     applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
   });
+}
+
+function navigateToMode(mode) {
+  const url = window.PALS_ROUTE_BY_MODE?.[mode];
+  if (url && window.location.pathname !== new URL(url, window.location.origin).pathname) {
+    window.location.href = url;
+    return true;
+  }
+  activateMode(mode);
+  return false;
 }
 
 function setStatus(el, message, kind = '') {
@@ -2911,18 +2922,18 @@ $('baseWorkerCount').onchange = () => {
   updateActiveForm();
 };
 $('saveBaseLabel').onclick = () => saveBaseLabel().catch(err => showToast(`Base name failed: ${err.message}`, 'bad'));
-$('modeBreed').onclick = () => activateMode('breed');
-$('modeIv').onclick = () => activateMode('iv');
+$('modeBreed').onclick = () => navigateToMode('breed');
+$('modeIv').onclick = () => navigateToMode('iv');
 $('modeWork').onclick = () => {
-  activateMode('work');
+  if (navigateToMode('work')) return;
   if (!state.plansByMode.work) loadWorkSuitability().catch(err => { $('summary').textContent = `Work browser failed: ${err.message}`; });
 };
 $('modeRanch').onclick = () => {
-  activateMode('ranch');
+  if (navigateToMode('ranch')) return;
   if (!state.plansByMode.ranch) loadRanchDrops().catch(err => { $('summary').textContent = `Ranch browser failed: ${err.message}`; });
 };
 $('modeBase').onclick = () => {
-  activateMode('base');
+  if (navigateToMode('base')) return;
   if (!state.baseSites?.ok) loadBasePlanner().catch(err => { $('summary').textContent = `Base planner failed: ${err.message}`; });
 };
 $('navBack').onclick = () => navigateModeHistory('back');

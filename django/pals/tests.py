@@ -17,7 +17,6 @@ class PalsRouteTest(TestCase):
         self.client.force_login(self.user)
 
         routes = [
-            "pals:home",
             "pals:breeding",
             "pals:ivs",
             "pals:work",
@@ -30,6 +29,15 @@ class PalsRouteTest(TestCase):
                 response = self.client.get(reverse(route))
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, "window.PALS_API_BASE")
+
+    def test_home_loads_as_module_hub(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("pals:home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Palworld Analysis and Logistics Suite")
+        self.assertNotContains(response, "window.PALS_API_BASE")
 
     def test_options_api_loads_for_authenticated_user(self):
         self.client.force_login(self.user)

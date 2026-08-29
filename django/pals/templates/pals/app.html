@@ -1,29 +1,30 @@
+{% extends "pals/base.html" %}
 {% load static %}
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Palworld Breeding Optimizer</title>
-  <link rel="stylesheet" href="{% static "pals/css/optimizer.css" %}">
-</head>
-<body>
-  <header class="topbar">
-    <div class="topbar-left">
-      <div class="history-nav" aria-label="Navigation history">
-        <button id="navBack" type="button" title="Back" aria-label="Back" disabled>‹</button>
-        <button id="navForward" type="button" title="Forward" aria-label="Forward" disabled>›</button>
-      </div>
+{% block title %}{{ title }} · PALS{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static "pals/css/optimizer.css" %}">
+{% endblock %}
+{% block content %}
+<section class="tool-layout">
+  <aside class="tool-nav">
+    {% for module in modules %}
+    <a class="{% if active == module.key %}is-active{% endif %}" href="{% url module.route %}">{{ module.title }}</a>
+    {% endfor %}
+  </aside>
+  <section class="tool-panel pals-tool-panel">
+    <div class="pals-module-head">
       <div>
-        <h1>Palworld Breeding Optimizer</h1>
-        <p id="meta">Loading roster...</p>
+        <p class="eyebrow">PALS</p>
+        <h1>{{ title }}</h1>
+        <p class="lead">{{ summary }}</p>
+        <p id="meta" class="module-meta">Loading roster...</p>
+      </div>
+      <div class="top-actions">
+        <button id="themeToggle" type="button" class="theme-toggle" title="Toggle theme" aria-pressed="false">Light</button>
+        <button id="reloadBtn" title="Reload CSV data">Reload</button>
       </div>
     </div>
-    <div class="top-actions">
-      <button id="themeToggle" type="button" class="theme-toggle" title="Toggle theme" aria-pressed="false">Light</button>
-      <button id="reloadBtn" title="Reload CSV data">Reload</button>
-    </div>
-  </header>
+    <div class="optimizer-embed">
 
   <main class="app-shell">
     <nav class="module-rail" aria-label="Modules">
@@ -288,12 +289,24 @@
     </div>
   </main>
 
+    </div>
+  </section>
+</section>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+{% endblock %}
+{% block scripts %}
   <script>
     window.PALS_API_BASE = "{% url 'pals:home' %}api";
     window.PALS_ASSET_BASE = "{% url 'pals:home' %}assets/pals";
     window.PALS_INITIAL_MODE = "{{ initial_mode|default:'breed' }}";
+    window.PALS_ROUTE_BY_MODE = {
+      breed: "{% url 'pals:breeding' %}",
+      iv: "{% url 'pals:ivs' %}",
+      work: "{% url 'pals:work' %}",
+      ranch: "{% url 'pals:ranch' %}",
+      base: "{% url 'pals:bases' %}"
+    };
   </script>
   <script src="{% static "pals/js/optimizer.js" %}"></script>
-</body>
-</html>
+{% endblock %}

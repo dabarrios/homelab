@@ -3076,3 +3076,144 @@ button:focus-visible {
   border-color: rgba(196, 181, 253, 0.62);
   color: #d8ccff;
 }
+
+.pals-shell > .topbar {
+  height: 74px;
+  padding: 0 clamp(18px, 4vw, 56px);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: rgba(255, 255, 255, .9);
+  border-bottom: 1px solid #dfe6e2;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(14px);
+}
+
+.pals-shell .brand,
+.pals-shell .homelab-link,
+.pals-shell .tool-nav a,
+.pals-shell .topnav a {
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+.pals-shell .brand-mark {
+  color: #fff;
+  background: #185646;
+}
+
+.pals-shell .brand small,
+.pals-shell .topnav a,
+.pals-shell .tool-nav a {
+  color: #6f7773;
+}
+
+.pals-shell .topnav {
+  background: #f9fbfa;
+  border: 1px solid #dfe6e2;
+}
+
+.pals-shell .topnav a:hover,
+.pals-shell .topnav a.is-active {
+  color: #121715;
+  background: #fff;
+}
+
+.pals-shell .homelab-link {
+  color: #28745f;
+  background: #e6f3ee;
+}
+
+.pals-shell .tool-panel {
+  background: #ffffff;
+  border: 1px solid #dfe6e2;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(18, 23, 21, .04);
+}
+
+.pals-tool-panel {
+  padding: 30px;
+}
+
+.pals-module-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+
+.module-meta {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.optimizer-embed {
+  --bg: #0b0c10;
+  --panel: #111318;
+  --panel-2: #151820;
+  --surface: #0f1117;
+  --surface-2: #181b23;
+  --border: #252936;
+  --border-strong: #343947;
+  --text: #eef0f5;
+  --muted: #9aa1af;
+  --accent: #a78bfa;
+  --accent-2: #c4b5fd;
+  --purple: #a78bfa;
+  --purple-soft: rgba(167, 139, 250, 0.16);
+  --success: #65d68a;
+  --bad: #ff7d72;
+  --warn: #e8c96a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.optimizer-embed[data-theme="light"] {
+  --bg: #f5f7f8;
+  --panel: #ffffff;
+  --panel-2: #eef3f6;
+  --surface: #ffffff;
+  --surface-2: #eaf0f4;
+  --border: #d2dbe2;
+  --border-strong: #aebbc6;
+  --text: #17202a;
+  --muted: #5d6874;
+  --accent: #4169e1;
+  --accent-2: #3354bd;
+  --purple: #4169e1;
+  --purple-soft: rgba(65, 105, 225, 0.14);
+  --success: #207a44;
+  --bad: #b42336;
+  --warn: #8a6100;
+}
+
+.optimizer-embed .app-shell {
+  display: block;
+  min-height: 0;
+}
+
+.optimizer-embed .module-rail,
+.optimizer-embed .history-nav {
+  display: none;
+}
+
+.optimizer-embed .layout {
+  min-height: 620px;
+}
+
+@media (max-width: 860px) {
+  .pals-shell > .topbar {
+    height: auto;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .pals-module-head {
+    flex-direction: column;
+  }
+}
