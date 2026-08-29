@@ -203,6 +203,33 @@ function renderPassivePicker(picker) {
   }).join('');
 }
 
+function renderPassiveSuggestions(picker) {
+  let list = picker.querySelector('[data-passive-suggestions]');
+  if (!list) {
+    list = document.createElement('span');
+    list.className = 'passive-suggestions';
+    list.dataset.passiveSuggestions = '';
+    picker.querySelector('.passive-input-row')?.after(list);
+  }
+  const input = picker.querySelector('[data-passive-input]');
+  const query = String(input.value || '').trim().toLowerCase();
+  if (!query) {
+    list.innerHTML = '';
+    list.classList.remove('open');
+    return;
+  }
+  const selected = new Set(passiveSelections[picker.dataset.picker] || []);
+  const matches = (options.passives || [])
+    .filter(passive => !selected.has(passive))
+    .filter(passive => passive.toLowerCase().includes(query))
+    .slice(0, 8);
+  list.innerHTML = matches.map(passive => {
+    const tone = passiveTone(passive);
+    return `<button type="button" data-suggest-passive="${escapeHtml(passive)}"><span class="passive-dot ${tone}"></span>${escapeHtml(passive)}<em>${escapeHtml(tone)}</em></button>`;
+  }).join('');
+  list.classList.toggle('open', matches.length > 0);
+}
+
 function addPassive(picker) {
   const key = picker.dataset.picker;
   const input = picker.querySelector('[data-passive-input]');
@@ -241,7 +268,15 @@ function initPassivePickers() {
         addPassive(picker);
       }
     });
+    picker.querySelector('[data-passive-input]')?.addEventListener('input', () => renderPassiveSuggestions(picker));
     picker.addEventListener('click', event => {
+      const suggested = event.target.closest('[data-suggest-passive]')?.dataset.suggestPassive;
+      if (suggested) {
+        picker.querySelector('[data-passive-input]').value = suggested;
+        addPassive(picker);
+        renderPassiveSuggestions(picker);
+        return;
+      }
       const passive = event.target.closest('[data-remove-passive]')?.dataset.removePassive;
       if (!passive) return;
       const key = picker.dataset.picker;

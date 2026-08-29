@@ -103,6 +103,8 @@
 .result-panel {
     min-height: 420px;
     padding: 18px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .result-head {
@@ -163,6 +165,7 @@
     background: #fff;
     padding: 16px;
     margin-bottom: 14px;
+    overflow: hidden;
 }
 
 .route-header {
@@ -187,6 +190,7 @@
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 6px;
+    min-width: 210px;
 }
 
 .badges span,
@@ -214,65 +218,117 @@
 
 .breed-tree {
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding: 10px 4px 10px;
+    scrollbar-gutter: stable;
 }
 
 .tree-node {
-    display: grid;
-    gap: 12px;
-    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 280px;
 }
 
 .branch {
-    margin-left: 20px;
-    padding-left: 18px;
+    position: relative;
+    width: 100%;
+    padding-top: 32px;
+}
+
+.branch::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 32px;
     border-left: 2px solid var(--line);
 }
 
 .children {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(260px, 1fr));
-    gap: 12px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 34px;
+    min-width: max-content;
+}
+
+.children::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 140px;
+    right: 140px;
+    border-top: 2px solid var(--line);
+}
+
+.children > .tree-node {
+    position: relative;
+    padding-top: 24px;
+}
+
+.children > .tree-node::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 24px;
+    border-left: 2px solid var(--line);
 }
 
 .pal-node {
-    border: 1px solid var(--line);
-    border-left-width: 4px;
+    width: 280px;
+    min-height: 172px;
+    border: 2px solid var(--line);
     border-radius: 8px;
     background: #fbfcfc;
-    padding: 12px;
+    padding: 13px;
+    box-shadow: 0 10px 24px rgba(18, 23, 21, .08);
 }
 
 .pal-node.target {
-    border-left-color: #d4a72c;
+    border-color: #d4a72c;
 }
 
 .pal-node.breed {
-    border-left-color: #4169e1;
+    border-color: #4169e1;
 }
 
 .pal-node.owned {
-    border-left-color: var(--accent-dark);
+    border-color: var(--accent-dark);
 }
 
 .pal-main {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .pal-avatar {
-    width: 52px;
-    height: 52px;
-    flex: 0 0 52px;
+    width: 54px;
+    height: 54px;
     display: grid;
     place-items: center;
     overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: 8px;
+    border: 2px solid var(--line);
+    border-radius: 50%;
     background: #edf3f7;
     color: var(--accent-dark);
     font-weight: 900;
+}
+
+.pal-node.target .pal-avatar {
+    border-color: #d4a72c;
+}
+
+.pal-node.breed .pal-avatar {
+    border-color: #4169e1;
+}
+
+.pal-node.owned .pal-avatar {
+    border-color: var(--accent-dark);
 }
 
 .pal-avatar img {
@@ -284,6 +340,8 @@
 .pal-copy h4 {
     margin: 0 0 3px;
     font: 800 16px Manrope, sans-serif;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
 }
 
 .pal-copy p {
@@ -435,6 +493,61 @@
     color: var(--accent-dark);
 }
 
+.passive-suggestions {
+    display: none;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(18, 23, 21, .08);
+}
+
+.passive-suggestions.open {
+    display: grid;
+}
+
+.passive-suggestions button {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    align-items: center;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    padding: 8px 10px;
+    text-align: left;
+    font: 700 13px "DM Sans", system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.passive-suggestions button:last-child {
+    border-bottom: 0;
+}
+
+.passive-suggestions button:hover,
+.passive-suggestions button:focus-visible {
+    background: var(--accent-soft);
+}
+
+.passive-suggestions em {
+    color: var(--muted);
+    font-size: 11px;
+    font-style: normal;
+    text-transform: capitalize;
+}
+
+.passive-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--muted);
+}
+
+.passive-dot.positive { background: #3578d4; }
+.passive-dot.gold { background: #c9941f; }
+.passive-dot.negative { background: #b42336; }
+
 .compact-list {
     display: grid;
     gap: 8px;
@@ -516,7 +629,9 @@
 :root[data-theme="dark"] .pal-node,
 :root[data-theme="dark"] .passive-input-row button,
 :root[data-theme="dark"] .passive-bar,
-:root[data-theme="dark"] .passive-chip {
+:root[data-theme="dark"] .passive-chip,
+:root[data-theme="dark"] .passive-suggestions,
+:root[data-theme="dark"] .passive-suggestions button {
     background: var(--surface);
     color: var(--ink);
 }
