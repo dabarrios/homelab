@@ -62,6 +62,7 @@
 {% block scripts %}
 <script>
     window.PALS_API_BASE = "{% url 'pals:home' %}api";
+    window.PALS_ASSET_BASE = "{% url 'pals:home' %}assets/pals";
     window.PALS_INITIAL_MODULE = "{{ module_key }}";
 </script>
 <script src="{% static "pals/js/tool.js" %}"></script>

@@ -10,11 +10,27 @@
 </label>
 <label>
     Final Passives
-    <textarea name="passives" rows="4" placeholder="Every selected passive is bred naturally unless listed below."></textarea>
+    <span class="passive-picker" data-picker="passives">
+        <span class="passive-input-row">
+            <input data-passive-input list="passiveList" autocomplete="off" placeholder="Choose a passive">
+            <button type="button" data-passive-add>Add</button>
+        </span>
+        <span class="passive-chips" data-passive-chips></span>
+        <input type="hidden" name="passives">
+        <span class="field-hint" data-passive-hint>Every selected passive is bred naturally unless added below.</span>
+    </span>
 </label>
 <label>
     Implant Passives
-    <textarea name="implantPassives" rows="3" placeholder="Optional. Must also be in Final Passives."></textarea>
+    <span class="passive-picker" data-picker="implantPassives">
+        <span class="passive-input-row">
+            <input data-passive-input list="passiveList" autocomplete="off" placeholder="Choose an implant passive">
+            <button type="button" data-passive-add>Add</button>
+        </span>
+        <span class="passive-chips" data-passive-chips></span>
+        <input type="hidden" name="implantPassives">
+        <span class="field-hint" data-passive-hint>Optional. Must also be in Final Passives.</span>
+    </span>
 </label>
 <label>
     Gender

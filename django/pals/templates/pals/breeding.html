@@ -10,7 +10,15 @@
 </label>
 <label>
     Desired Passives
-    <textarea name="passives" rows="4" placeholder="One per line, or comma-separated"></textarea>
+    <span class="passive-picker" data-picker="passives">
+        <span class="passive-input-row">
+            <input data-passive-input list="passiveList" autocomplete="off" placeholder="Choose a passive">
+            <button type="button" data-passive-add>Add</button>
+        </span>
+        <span class="passive-chips" data-passive-chips></span>
+        <input type="hidden" name="passives">
+        <span class="field-hint" data-passive-hint>Pick from known passives in your loaded roster.</span>
+    </span>
 </label>
 <label>
     Gender
