@@ -29,5 +29,23 @@ class PalsRouteTest(TestCase):
             with self.subTest(route=route):
                 response = self.client.get(reverse(route))
                 self.assertEqual(response.status_code, 200)
+                self.assertContains(response, "window.PALS_API_BASE")
 
-# Create your tests here.
+    def test_options_api_loads_for_authenticated_user(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("pals:api_options"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("species", response.json())
+        self.assertIn("owners", response.json())
+
+    def test_live_save_status_is_opt_in(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("pals:api_live_save_status"))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIs(payload["configured"], False)
+        self.assertEqual(payload["path"], "")
