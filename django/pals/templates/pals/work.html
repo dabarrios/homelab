@@ -8,15 +8,8 @@
     Work Skill
     <select class="js-work-type" name="work" required></select>
 </label>
-<label>
-    Display
-    <select name="display">
-        <option value="all">All candidates</option>
-        <option value="owned">Owned only</option>
-    </select>
-</label>
 <label class="check-row">
-    <input name="includeInsomnia" type="checkbox">
-    Add Insomnia to the passive target
+    <input name="includeSelfBreeders" type="checkbox" value="1" checked>
+    Include self-breed-only Pals in recommendations
 </label>
 {% endblock %}

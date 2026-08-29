@@ -581,10 +581,11 @@ def requires_owned_seed_for_breeding(species_key: str) -> bool:
     return bool(pairs) and all(a == species_key and b == species_key for a, b in pairs)
 
 
-def work_recommendations(cards: list[dict], selected_work: str) -> list[dict]:
+def work_recommendations(cards: list[dict], selected_work: str, include_self_breeders: bool = True) -> list[dict]:
     if not cards:
         return []
-    pick_pool = [card for card in cards if not card.get("unavailableReason")] or cards
+    pick_pool = cards if include_self_breeders else [card for card in cards if not card.get("requiresOwnedSeed")]
+    pick_pool = pick_pool or cards
 
     def best(sort_key):
         return sorted(pick_pool, key=sort_key)[0]
@@ -608,9 +609,18 @@ def work_recommendations(cards: list[dict], selected_work: str) -> list[dict]:
             SIZE_ORDER.get(card.get("size"), 99),
             card.get("name", ""),
         ))[0] if pool else None
+    dark_pool = [card for card in pick_pool if any("dark" == str(type_name).lower() for type_name in card.get("types", []))]
 
     specs = [
         ("recommended", "Recommended", "Common practical choice for this work skill." if popular else "Best practical mix of final level, footprint, focus, and ownership.", practical),
+        ("dark", "Best Dark", "Best dark-type option for this work skill; dark Pals do not need Insomnia for night uptime.", sorted(dark_pool, key=lambda card: (
+            -card_final_level(card),
+            -as_int(card.get("selectedLevel")),
+            0 if card.get("size") in {"S", "M"} else 1 if card.get("size") in {"XS", "L"} else 2,
+            card.get("workCount", 99),
+            0 if card.get("ownedCount") else 1,
+            card.get("name", ""),
+        ))[0] if dark_pool else None),
         ("xl", "Best XL", "Highest selected work level among XL Pals.", best_for_sizes({"XL"})),
         ("large", "Best L", "Highest selected work level among L Pals.", best_for_sizes({"L"})),
         ("medium", "Best Medium", "Highest selected work level among Medium (M) Pals.", best_for_sizes({"M"})),
@@ -633,7 +643,7 @@ def work_recommendations(cards: list[dict], selected_work: str) -> list[dict]:
     return recommendations
 
 
-def work_suitability_payload(owner: str = "", selected_work: str = "") -> dict:
+def work_suitability_payload(owner: str = "", selected_work: str = "", include_self_breeders: bool = True) -> dict:
     if selected_work not in WORK_LABELS:
         return {
             "error": "Choose a work skill.",
@@ -681,8 +691,10 @@ def work_suitability_payload(owner: str = "", selected_work: str = "") -> dict:
             "breedable": bool(pal.get("breedable", True)),
             "uniqueOnly": bool(pal.get("uniqueOnly", False)),
             "requiresOwnedSeed": requires_seed,
-            "unavailableReason": "This Pal can only be bred from existing copies. You do not own one yet." if requires_seed and not owned_count else "",
+            "unavailableReason": f"It looks like you need to tame or capture {name} first. Once you own one, come back and self-breed it." if requires_seed and not owned_count else "",
         })
+    if not include_self_breeders:
+        cards = [card for card in cards if not card["requiresOwnedSeed"]]
     cards.sort(key=lambda item: (
         SIZE_ORDER.get(item["size"], 99),
         -card_final_level(item),
@@ -706,7 +718,8 @@ def work_suitability_payload(owner: str = "", selected_work: str = "") -> dict:
         "selectedWorkLabel": WORK_LABELS[selected_work],
         "owner": owner,
         "groups": groups,
-        "recommendations": work_recommendations(cards, selected_work),
+        "recommendations": work_recommendations(cards, selected_work, include_self_breeders=include_self_breeders),
+        "includeSelfBreeders": include_self_breeders,
         "total": len(cards),
         "knownSizeCount": sum(1 for card in cards if card["sizeKnown"]),
         "verifiedCondensationCount": sum(1 for card in cards if card["workCondensationSource"] == "verified"),

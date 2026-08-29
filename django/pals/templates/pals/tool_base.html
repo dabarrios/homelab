@@ -59,12 +59,47 @@
 
 <datalist id="speciesList"></datalist>
 <datalist id="passiveList"></datalist>
+<div id="profileModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="profileEditorTitle">
+    <div class="modal-panel">
+        <div class="modal-head">
+            <h2 id="profileEditorTitle">Passive Profile</h2>
+            <button type="button" id="closeProfileEditor" aria-label="Close passive profile editor">x</button>
+        </div>
+        <label>
+            Profile Name
+            <input id="profileName" autocomplete="off">
+        </label>
+        <p id="profileLockedNotice" class="locked-notice hidden">This profile uses built-in selection rules. You can rename it here, but its passive logic stays managed by the app.</p>
+        <div id="profilePassiveFields">
+            <label>
+                Profile Passives
+                <span class="passive-picker" data-picker="profilePassives">
+                    <span class="passive-input-row">
+                        <input data-passive-input autocomplete="off" placeholder="Choose a passive">
+                        <button type="button" data-passive-add>Add</button>
+                        <button type="button" data-passive-clear>Clear</button>
+                    </span>
+                    <span class="passive-chips" data-passive-chips></span>
+                    <input type="hidden" name="profilePassives">
+                    <span class="field-hint" data-passive-hint>Add up to 4 passives.</span>
+                </span>
+            </label>
+        </div>
+        <p id="profileStatus" class="status-line"></p>
+        <div class="modal-actions">
+            <button type="button" id="deleteProfile">Delete</button>
+            <button type="button" id="saveProfile" class="primary-action">Save</button>
+        </div>
+    </div>
+</div>
+<div id="passiveTooltip" class="floating-passive-tooltip hidden"></div>
 {% endblock %}
 {% block scripts %}
 <script>
     window.PALS_API_BASE = "{% url 'pals:home' %}api";
     window.PALS_ASSET_BASE = "{% url 'pals:home' %}assets/pals";
     window.PALS_INITIAL_MODULE = "{{ module_key }}";
+    window.PALS_RANCH_ITEM_SLUG = "{{ ranch_item_slug|default:'' }}";
 </script>
 <script src="{% static "pals/js/tool.js" %}"></script>
 {% endblock %}

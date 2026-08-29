@@ -80,8 +80,10 @@ def work(request):
 
 
 @login_required
-def ranch(request):
-    return render(request, "pals/ranch.html", app_context("ranch", "Ranch", ranch_service.module_status()["message"], "ranch", "Find Drops"))
+def ranch(request, item_slug: str = ""):
+    context = app_context("ranch", "Ranch", ranch_service.module_status()["message"], "ranch", "Find Drops")
+    context["ranch_item_slug"] = item_slug
+    return render(request, "pals/ranch.html", context)
 
 
 @login_required
@@ -117,6 +119,7 @@ def work_suitability(request):
     return JsonResponse(optimizer.work_suitability_payload(
         owner=request.GET.get("owner", ""),
         selected_work=request.GET.get("work", ""),
+        include_self_breeders=request.GET.get("includeSelfBreeders", "1") not in {"0", "false", "False"},
     ))
 
 

@@ -5,7 +5,19 @@ const $ = selector => document.querySelector(selector);
 const $$ = selector => Array.from(document.querySelectorAll(selector));
 
 let options = {};
-const passiveSelections = {passives: [], implantPassives: []};
+const passiveSelections = {passives: [], implantPassives: [], profilePassives: []};
+let customProfiles = [];
+let builtInProfileNames = {};
+let editingProfileId = '';
+let editingBuiltInProfile = '';
+
+const CUSTOM_PROFILES_KEY = 'pals.customProfiles.v1';
+const BUILT_IN_PROFILE_NAMES_KEY = 'pals.builtInProfileNames.v1';
+const BUILT_IN_PROFILES = [
+  {value: 'manual', label: 'Manual passives', locked: false},
+  {value: 'work_speed', label: 'Best work speed', locked: true},
+  {value: 'ranch_drops_focus', label: 'Ranch drops focus', locked: true},
+];
 
 function apiUrl(path) {
   return `${apiBase}${path.startsWith('/') ? path : `/${path}`}`;
@@ -75,6 +87,14 @@ function selectOptions(values, selected = '') {
     .join('');
 }
 
+function slugify(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({
     '&': '&amp;',
@@ -87,6 +107,33 @@ function escapeHtml(value) {
 
 function passiveTone(passive) {
   return options.passiveMeta?.[passive]?.tone || 'neutral';
+}
+
+function passiveDescription(passive) {
+  return options.passiveMeta?.[passive]?.desc || 'No description available.';
+}
+
+function passiveId(passive) {
+  return options.passiveMeta?.[passive]?.id || '';
+}
+
+function formatPassiveDescription(passive) {
+  return passiveDescription(passive)
+    .replace(/\s*\((?:ToSelf|None)\)/g, '')
+    .split(/\s*,\s*/)
+    .map(line => line.replace(/([+-]\d+(?:\.\d+)?)%/g, (_, value) => `${Number(value).toFixed(1)}%`))
+    .filter(Boolean);
+}
+
+function passiveTooltipHtml(passive) {
+  const tone = passiveTone(passive);
+  const id = passiveId(passive);
+  return `
+    <div class="passive-tooltip-card ${tone}" role="tooltip">
+      <strong>${escapeHtml(passive)}</strong>
+      ${formatPassiveDescription(passive).map(line => `<span>${escapeHtml(line)}</span>`).join('')}
+      ${id ? `<em>${escapeHtml(id)}</em>` : ''}
+    </div>`;
 }
 
 function speciesInitials(name) {
@@ -125,12 +172,18 @@ function renderPassiveBars(node, isRoot = false) {
   const junk = new Set(displayJunk(node, isRoot));
   return `<div class="passive-list">${passives.map(passive => {
     const tone = passiveTone(passive);
-    return `<span class="passive-bar ${tone}"><span>${escapeHtml(passive)}</span>${junk.has(passive) ? '<em>Junk</em>' : ''}</span>`;
+    return `<span class="passive-bar ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${junk.has(passive) ? '<em>Junk</em>' : ''}</span>`;
   }).join('')}</div>`;
 }
 
 function renderTypeChips(types = []) {
   return types.length ? `<div class="type-row">${types.map(type => `<span>${escapeHtml(type)}</span>`).join('')}</div>` : '';
+}
+
+function breedUrl(card, profile = 'manual') {
+  const params = new URLSearchParams({target: card.name || ''});
+  if (profile) params.set('profile', profile);
+  return `/pals/breeding/?${params.toString()}`;
 }
 
 function renderPalNode(node, isRoot = false) {
@@ -182,6 +235,167 @@ function fillOptions() {
       : '<option value="">No decoded bases found</option>';
   });
   setText('#palsMeta', `${options.rosterCount || 0} Pals loaded | breeding data ${options.dataVersion || 'unknown'}`);
+  renderProfileOptions();
+  syncCustomSelects();
+  applyUrlPrefill();
+}
+
+function loadProfiles() {
+  try {
+    customProfiles = JSON.parse(localStorage.getItem(CUSTOM_PROFILES_KEY) || '[]');
+    if (!Array.isArray(customProfiles)) customProfiles = [];
+  } catch {
+    customProfiles = [];
+  }
+  try {
+    builtInProfileNames = JSON.parse(localStorage.getItem(BUILT_IN_PROFILE_NAMES_KEY) || '{}');
+    if (!builtInProfileNames || typeof builtInProfileNames !== 'object') builtInProfileNames = {};
+  } catch {
+    builtInProfileNames = {};
+  }
+}
+
+function saveProfiles() {
+  localStorage.setItem(CUSTOM_PROFILES_KEY, JSON.stringify(customProfiles));
+  localStorage.setItem(BUILT_IN_PROFILE_NAMES_KEY, JSON.stringify(builtInProfileNames));
+}
+
+function profileLabel(profile) {
+  return builtInProfileNames[profile.value] || profile.label;
+}
+
+function selectedProfileValue() {
+  return $('#breedingProfile')?.value || 'manual';
+}
+
+function customProfileByValue(value) {
+  const id = String(value || '').replace(/^custom:/, '');
+  return customProfiles.find(profile => profile.id === id) || null;
+}
+
+function builtInProfileByValue(value) {
+  return BUILT_IN_PROFILES.find(profile => profile.value === value) || null;
+}
+
+function renderProfileOptions(selected = selectedProfileValue()) {
+  const select = $('#breedingProfile');
+  if (!select) return;
+  const optionsHtml = [
+    ...BUILT_IN_PROFILES.map(profile => `<option value="${escapeHtml(profile.value)}">${escapeHtml(profileLabel(profile))}</option>`),
+    ...customProfiles.map(profile => `<option value="custom:${escapeHtml(profile.id)}">${escapeHtml(profile.name)}</option>`),
+  ].join('');
+  select.innerHTML = optionsHtml;
+  select.value = [...select.options].some(option => option.value === selected) ? selected : 'manual';
+  updateProfileHint();
+  syncCustomSelects();
+}
+
+function updateProfileHint() {
+  const value = selectedProfileValue();
+  const hint = $('#profileHint');
+  if (!hint) return;
+  const custom = customProfileByValue(value);
+  const builtIn = builtInProfileByValue(value);
+  if (custom) {
+    hint.textContent = `Uses saved passives: ${custom.passives.join(', ') || 'none selected yet'}.`;
+  } else if (builtIn?.locked) {
+    hint.textContent = 'Built-in profile: the app chooses passives with built-in logic. You can rename this profile, but the selection rules stay managed by the app.';
+  } else {
+    hint.textContent = 'Manual passives lets you choose each passive yourself.';
+  }
+}
+
+function applySelectedProfile() {
+  const custom = customProfileByValue(selectedProfileValue());
+  if (!custom) {
+    updateProfileHint();
+    return;
+  }
+  passiveSelections.passives = [...custom.passives].slice(0, 4);
+  document.querySelectorAll('[data-picker="passives"]').forEach(renderPassivePicker);
+  updateProfileHint();
+}
+
+function openProfileEditor(profileValue = selectedProfileValue()) {
+  const modal = $('#profileModal');
+  if (!modal) return;
+  const custom = customProfileByValue(profileValue);
+  const builtIn = builtInProfileByValue(profileValue);
+  editingProfileId = custom?.id || '';
+  editingBuiltInProfile = builtIn?.locked ? builtIn.value : '';
+  $('#profileEditorTitle').textContent = custom || editingBuiltInProfile ? 'Edit Passive Profile' : 'Add Passive Profile';
+  $('#profileName').value = custom?.name || (builtIn ? profileLabel(builtIn) : '');
+  passiveSelections.profilePassives = custom ? [...custom.passives] : [...passiveSelections.passives];
+  const locked = Boolean(editingBuiltInProfile);
+  $('#profileLockedNotice')?.classList.toggle('hidden', !locked);
+  $('#profilePassiveFields')?.classList.toggle('hidden', locked);
+  $('#deleteProfile').hidden = !custom;
+  setText('#profileStatus', locked ? 'This is a built-in profile. Rename it if you want a friendlier label; the app-managed rules stay unchanged.' : 'Choose up to 4 passives for this profile.');
+  document.querySelectorAll('[data-picker="profilePassives"]').forEach(renderPassivePicker);
+  modal.classList.remove('hidden');
+  $('#profileName')?.focus();
+}
+
+function closeProfileEditor() {
+  $('#profileModal')?.classList.add('hidden');
+  editingProfileId = '';
+  editingBuiltInProfile = '';
+}
+
+function saveProfile() {
+  const name = ($('#profileName')?.value || '').trim();
+  if (!name) {
+    setText('#profileStatus', 'Name this passive profile before saving.');
+    return;
+  }
+  if (editingBuiltInProfile) {
+    builtInProfileNames[editingBuiltInProfile] = name.slice(0, 60);
+    saveProfiles();
+    renderProfileOptions(editingBuiltInProfile);
+    closeProfileEditor();
+    return;
+  }
+  const passives = [...new Set(passiveSelections.profilePassives)].slice(0, 4);
+  if (!passives.length) {
+    setText('#profileStatus', 'Add at least one passive before saving.');
+    return;
+  }
+  let profile = customProfiles.find(item => item.id === editingProfileId);
+  if (profile) {
+    profile.name = name.slice(0, 60);
+    profile.passives = passives;
+  } else {
+    profile = {id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, name: name.slice(0, 60), passives};
+    customProfiles.push(profile);
+  }
+  passiveSelections.passives = [...passives];
+  saveProfiles();
+  renderProfileOptions(`custom:${profile.id}`);
+  document.querySelectorAll('[data-picker="passives"]').forEach(renderPassivePicker);
+  closeProfileEditor();
+}
+
+function deleteProfile() {
+  const profile = customProfiles.find(item => item.id === editingProfileId);
+  if (!profile) return;
+  customProfiles = customProfiles.filter(item => item.id !== profile.id);
+  saveProfiles();
+  renderProfileOptions('manual');
+  closeProfileEditor();
+}
+
+function initProfiles() {
+  loadProfiles();
+  renderProfileOptions();
+  $('#breedingProfile')?.addEventListener('change', applySelectedProfile);
+  $('#addProfile')?.addEventListener('click', () => openProfileEditor('manual'));
+  $('#editProfile')?.addEventListener('click', () => openProfileEditor(selectedProfileValue()));
+  $('#saveProfile')?.addEventListener('click', saveProfile);
+  $('#deleteProfile')?.addEventListener('click', deleteProfile);
+  $('#closeProfileEditor')?.addEventListener('click', closeProfileEditor);
+  $('#profileModal')?.addEventListener('click', event => {
+    if (event.target === $('#profileModal')) closeProfileEditor();
+  });
 }
 
 function formatIv(value) {
@@ -231,8 +445,63 @@ function renderPassivePicker(picker) {
   hidden.value = selected.join(',');
   chips.innerHTML = selected.map(passive => {
     const tone = passiveTone(passive);
-    return `<button type="button" class="passive-chip ${tone}" data-remove-passive="${escapeHtml(passive)}">${escapeHtml(passive)}</button>`;
+    return `
+      <span class="passive-chip ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}">
+        <span>${escapeHtml(passive)}</span>
+        <button type="button" class="chip-remove" data-remove-passive="${escapeHtml(passive)}" aria-label="Remove ${escapeHtml(passive)}">x</button>
+      </span>`;
   }).join('');
+  const clear = picker.querySelector('[data-passive-clear]');
+  if (clear) clear.hidden = selected.length === 0;
+}
+
+function positionPassiveTooltip(anchor) {
+  const tooltip = $('#passiveTooltip');
+  if (!tooltip || tooltip.classList.contains('hidden')) return;
+  const rect = anchor.getBoundingClientRect();
+  const tip = tooltip.getBoundingClientRect();
+  const gap = 10;
+  let left = rect.left;
+  let top = rect.top - tip.height - gap;
+  if (top < 8) top = rect.bottom + gap;
+  if (left + tip.width > window.innerWidth - 8) left = window.innerWidth - tip.width - 8;
+  if (left < 8) left = 8;
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+}
+
+function showPassiveTooltip(anchor) {
+  const passive = anchor.dataset.passiveTooltip;
+  const tooltip = $('#passiveTooltip');
+  if (!passive || !tooltip) return;
+  tooltip.innerHTML = passiveTooltipHtml(passive);
+  tooltip.className = `floating-passive-tooltip ${passiveTone(passive)}`;
+  positionPassiveTooltip(anchor);
+}
+
+function hidePassiveTooltip() {
+  const tooltip = $('#passiveTooltip');
+  if (tooltip) tooltip.className = 'floating-passive-tooltip hidden';
+}
+
+function initPassiveTooltips() {
+  document.addEventListener('pointerover', event => {
+    const anchor = event.target.closest('[data-passive-tooltip]');
+    if (anchor) showPassiveTooltip(anchor);
+  });
+  document.addEventListener('pointerout', event => {
+    const anchor = event.target.closest('[data-passive-tooltip]');
+    if (anchor && !anchor.contains(event.relatedTarget)) hidePassiveTooltip();
+  });
+  document.addEventListener('focusin', event => {
+    const anchor = event.target.closest('[data-passive-tooltip]');
+    if (anchor) showPassiveTooltip(anchor);
+  });
+  document.addEventListener('focusout', event => {
+    if (event.target.closest('[data-passive-tooltip]')) hidePassiveTooltip();
+  });
+  window.addEventListener('scroll', hidePassiveTooltip, true);
+  window.addEventListener('resize', hidePassiveTooltip);
 }
 
 function renderPassiveSuggestions(picker) {
@@ -294,6 +563,12 @@ function addPassive(picker) {
 function initPassivePickers() {
   $$('[data-picker]').forEach(picker => {
     picker.querySelector('[data-passive-add]')?.addEventListener('click', () => addPassive(picker));
+    picker.querySelector('[data-passive-clear]')?.addEventListener('click', () => {
+      passiveSelections[picker.dataset.picker] = [];
+      picker.querySelector('[data-passive-hint]').textContent = 'Selected passives cleared.';
+      picker.querySelector('[data-passive-hint]').className = 'field-hint';
+      renderPassivePicker(picker);
+    });
     picker.querySelector('[data-passive-input]')?.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -311,6 +586,7 @@ function initPassivePickers() {
       }
       const passive = event.target.closest('[data-remove-passive]')?.dataset.removePassive;
       if (!passive) return;
+      event.stopPropagation();
       const key = picker.dataset.picker;
       passiveSelections[key] = (passiveSelections[key] || []).filter(item => item !== passive);
       renderPassivePicker(picker);
@@ -375,30 +651,158 @@ function renderIvs(data) {
     </article>`).join('');
 }
 
-function renderWork(data) {
-  const cards = (data.groups || []).flatMap(group => (group.cards || []).map(card => ({...card, group: group.title})));
-  if (!cards.length) return renderJson(data);
-  return cards.slice(0, 24).map(card => resultCard(
-    card.name,
-    `<div class="pal-main">
-      <div class="pal-avatar">${card.icon ? `<img src="${escapeHtml(assetUrl(card.icon))}" alt="">` : escapeHtml(speciesInitials(card.name))}</div>
-      <div class="pal-copy">
-        ${renderTypeChips(card.types || [])}
-        <dl class="stat-grid"><dt>Work</dt><dd>${escapeHtml(card.selectedWorkLabel)} ${escapeHtml(card.selectedLevel)}</dd><dt>Size</dt><dd>${escapeHtml(card.sizeGroup || card.size)}</dd><dt>Owned</dt><dd>${escapeHtml(card.ownedCount || 0)}</dd></dl>
+function finalWorkLevel(card) {
+  return card?.selectedFullyCondensedLevel || card?.selectedProjectedFullyCondensedLevel || card?.selectedLevel || '';
+}
+
+function renderWorkLevelValue(entry, selected = false) {
+  const finalLevel = entry.fullyCondensedLevel || entry.projectedFullyCondensedLevel || entry.level || '';
+  const finalText = finalLevel && Number(finalLevel) !== Number(entry.level) ? `${entry.level} -> ${finalLevel}` : `${entry.level}`;
+  return selected ? `<strong>${escapeHtml(finalText)}</strong>` : escapeHtml(finalText);
+}
+
+function renderWorkSkillPills(work = [], selectedWork = '') {
+  if (!work.length) return '';
+  return `<div class="work-skill-list">${work.map(entry => {
+    const selected = entry.key === selectedWork;
+    const verified = entry.fullyCondensedLevel !== null && entry.fullyCondensedLevel !== undefined;
+    return `
+      <span class="work-skill-pill ${selected ? 'selected-work' : 'secondary-work'} ${verified ? 'verified' : 'projected'}">
+        <span>${escapeHtml(entry.label)}</span>
+        <span>${renderWorkLevelValue(entry, selected)}</span>
+      </span>`;
+  }).join('')}</div>`;
+}
+
+function renderBreedAction(card, profile) {
+  return `<a class="card-action breed-corner-action" href="${escapeHtml(breedUrl(card, profile))}">Breed</a>`;
+}
+
+function renderWorkCard(card, compact = false, recommendation = null, profile = 'work_speed') {
+  const owned = card.ownedCount ? `<span class="role-badge owned">Own: ${escapeHtml(card.ownedCount)}</span>` : '<span class="role-badge">Not owned</span>';
+  const breedable = card.requiresOwnedSeed
+    ? '<span class="badge self-breed">Self-Breed Only</span>'
+    : card.breedable ? '<span class="badge good">Breedable</span>' : '<span class="badge bad">Not breedable</span>';
+  const size = card.sizeKnown ? `${card.sizeGroup} (${card.size})` : 'Unknown size';
+  const unavailable = card.unavailableReason ? `<p class="work-seed-warning">${escapeHtml(card.unavailableReason)}</p>` : '';
+  const recHead = recommendation ? `
+    <div class="work-rec-head">
+      <div>
+        <div class="work-rec-kicker">${escapeHtml(recommendation.title)}</div>
+        <div class="work-rec-reason">${escapeHtml(recommendation.reason || '')}</div>
       </div>
-    </div>`,
-    card.group,
-  )).join('');
+      ${renderBreedAction(card, profile)}
+    </div>` : renderBreedAction(card, profile);
+  return `
+    <article class="work-pal-card ${compact ? 'compact' : ''} ${recommendation ? 'work-rec-card' : ''}">
+      ${recHead}
+      <div class="pal-main">
+        <div class="pal-avatar">${card.icon ? `<img src="${escapeHtml(assetUrl(card.icon))}" alt="">` : escapeHtml(speciesInitials(card.name))}</div>
+        <div class="pal-copy">
+          <h3>${escapeHtml(card.name)}</h3>
+          <p>${escapeHtml(size)}</p>
+          ${renderTypeChips(card.types || [])}
+        </div>
+      </div>
+      ${renderWorkSkillPills(card.work || [], card.selectedWork)}
+      ${unavailable}
+      <div class="node-foot">
+        ${owned}
+        ${breedable}
+        <span>${escapeHtml(card.selectedWorkLabel || 'Work')} ${escapeHtml(card.selectedLevel || '')}${finalWorkLevel(card) && Number(finalWorkLevel(card)) !== Number(card.selectedLevel) ? ` -> ${escapeHtml(finalWorkLevel(card))}` : ''}</span>
+      </div>
+    </article>`;
+}
+
+function recommendationByRole(data, role, fallbackTitle = '') {
+  const rec = (data.recommendations || []).find(item => item.role === role || item.title === fallbackTitle);
+  return rec?.card ? rec : null;
+}
+
+function renderWork(data) {
+  const groups = data.groups || [];
+  const cards = groups.flatMap(group => group.cards || []);
+  if (!cards.length) return data.error ? resultCard('No work results', escapeHtml(data.error)) : renderJson(data);
+  const primary = [recommendationByRole(data, 'recommended', 'Recommended'), recommendationByRole(data, 'dark', 'Best Dark')].filter(Boolean);
+  return `
+    <div class="owned-notice work-note">
+      <strong>${escapeHtml(data.selectedWorkLabel || 'Work')} Suitability Browser</strong>
+      <span>${escapeHtml(data.condensationNote || '')}</span>
+    </div>
+    ${primary.length ? `
+      <section class="work-rec-section">
+        <div class="group-heading"><h3>Top Picks</h3></div>
+        <div class="work-rec-grid primary-picks">${primary.map(rec => renderWorkCard(rec.card, true, rec, 'work_speed')).join('')}</div>
+      </section>` : ''}
+    ${groups.map(group => `
+      <details class="result-group work-group">
+        <summary class="group-heading"><h3><span class="disclosure-icon" aria-hidden="true"></span>${escapeHtml(group.title)} (${(group.cards || []).length})</h3></summary>
+        <div class="work-card-grid">${(group.cards || []).map(card => renderWorkCard(card, false, null, 'work_speed')).join('')}</div>
+      </details>`).join('')}`;
+}
+
+function selectedRanchItem(data) {
+  const slug = window.PALS_RANCH_ITEM_SLUG || '';
+  if (slug) return (data.items || []).find(item => slugify(item.name) === slug) || null;
+  const params = new URLSearchParams(window.location.search);
+  const itemName = params.get('item') || '';
+  return itemName ? (data.items || []).find(item => item.name.toLowerCase() === itemName.toLowerCase()) : null;
+}
+
+function ranchDropMeta(card, itemName = '') {
+  const selected = (card.ranchDrops || []).find(drop => drop.name === itemName) || (card.ranchDrops || [])[0];
+  if (!selected) return '';
+  const amount = selected.min === selected.max ? selected.min : `${selected.min}-${selected.max}`;
+  return `<span class="ranch-drop-meta">${escapeHtml(amount)} each · ${escapeHtml(selected.rate)}%</span>`;
+}
+
+function renderRanchPalCard(card, itemName = '') {
+  const drops = (card.ranchDrops || []).map(drop => `<span class="ranch-drop-chip ${drop.name === itemName ? 'active' : ''}">${escapeHtml(drop.name)}</span>`).join('');
+  const partner = card.partnerSkill?.name ? `<span class="ranch-skill-name">${escapeHtml(card.partnerSkill.name)}</span>` : '';
+  return renderWorkCard(card, true, null, 'ranch_drops_focus').replace('</article>', `
+      <div class="ranch-drop-row">${drops}${ranchDropMeta(card, itemName)}</div>
+      ${partner}
+    </article>`);
+}
+
+function renderRanchItemCard(item) {
+  const best = item.best;
+  const icon = best?.icon ? `<img src="${escapeHtml(assetUrl(best.icon))}" alt="">` : escapeHtml(speciesInitials(best?.name || item.name));
+  const owned = (item.pals || []).reduce((sum, card) => sum + Number(card.ownedCount || 0), 0);
+  return `
+    <a class="ranch-item-card" href="/pals/ranch/${escapeHtml(slugify(item.name))}/">
+      <span class="ranch-item-icon">${icon}</span>
+      <span class="ranch-item-copy">
+        <strong>${escapeHtml(item.name)}</strong>
+        <span>${escapeHtml(item.count)} ranch Pal${item.count === 1 ? '' : 's'} · ${owned ? `Own: ${owned}` : 'Not owned'}</span>
+      </span>
+    </a>`;
 }
 
 function renderRanch(data) {
   const query = String(formData().search || '').toLowerCase();
   const items = (data.items || []).filter(item => !query || item.name.toLowerCase().includes(query));
-  if (!items.length) return renderJson(data);
-  return items.map(item => {
-    const best = item.best ? `${item.best.name} (${item.best.ownedCount || 0} owned)` : 'No candidate';
-    return resultCard(item.name, `<p>Best: ${escapeHtml(best)}</p><p>${escapeHtml(item.count)} ranch candidate(s)</p>`);
-  }).join('');
+  const selected = selectedRanchItem(data);
+  if (selected) {
+    const others = (selected.pals || []).filter(card => card.name !== selected.best?.name);
+    return `
+      <div class="ranch-detail-head">
+        <div><h3>${escapeHtml(selected.name)}</h3><p>${escapeHtml(data.sourceNote || '')}</p></div>
+        <a class="card-action" href="/pals/ranch/">All drops</a>
+      </div>
+      ${selected.best ? `<section class="work-rec-section ranch-top-pick"><div class="group-heading"><h3>Top Pick</h3></div><div class="work-rec-grid primary-picks">${renderRanchPalCard(selected.best, selected.name)}</div></section>` : ''}
+      <section class="result-group">
+        <div class="group-heading"><h3>All Producers</h3><p>Sorted by ownership, Farming level, footprint, and focus.</p></div>
+        <div class="work-card-grid ranch-candidate-grid">${[selected.best, ...others].filter(Boolean).map(card => renderRanchPalCard(card, selected.name)).join('')}</div>
+      </section>`;
+  }
+  if (!items.length) return '<div class="empty">No ranch drops match that search.</div>';
+  return `
+    <div class="owned-notice work-note">
+      <strong>Ranch Drops</strong>
+      <span>${escapeHtml(data.sourceNote || '')}</span>
+    </div>
+    <div class="ranch-item-grid">${items.map(renderRanchItemCard).join('')}</div>`;
 }
 
 function renderBases(data) {
@@ -422,15 +826,16 @@ async function submitTool(event) {
   try {
     let result;
     if (moduleKey === 'breeding') {
+      const customProfile = customProfileByValue(data.breedingProfile);
       result = await api('/optimize', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           owner: data.owner || 'David',
           target: data.target,
-          passives: splitList(data.passives),
+          passives: customProfile ? customProfile.passives : splitList(data.passives),
           genderPreference: data.genderPreference || 'any',
-          breedingProfile: data.breedingProfile || 'manual',
+          breedingProfile: customProfile ? 'manual' : data.breedingProfile || 'manual',
           routePreference: 'best_overall',
         }),
       });
@@ -448,10 +853,8 @@ async function submitTool(event) {
         }),
       });
     } else if (moduleKey === 'work') {
-      result = await api(`/work-suitability?owner=${encodeURIComponent(data.owner || 'David')}&work=${encodeURIComponent(data.work || '')}`);
-      if (data.display === 'owned') {
-        result.groups = (result.groups || []).map(group => ({...group, cards: (group.cards || []).filter(card => card.ownedCount)}));
-      }
+      const includeSelf = data.includeSelfBreeders ? '1' : '0';
+      result = await api(`/work-suitability?owner=${encodeURIComponent(data.owner || 'David')}&work=${encodeURIComponent(data.work || '')}&includeSelfBreeders=${includeSelf}`);
     } else if (moduleKey === 'ranch') {
       result = await api(`/ranch-drops?owner=${encodeURIComponent(data.owner || 'David')}`);
     } else if (moduleKey === 'bases') {
@@ -477,9 +880,69 @@ async function submitTool(event) {
 }
 
 async function reloadOptions() {
+  setText('#toolStatus', 'Reloading...');
   await api('/reload');
   options = await api('/options');
   fillOptions();
+  setText('#toolStatus', `Reloaded ${options.rosterCount || 0} Pals.`);
+}
+
+function applyUrlPrefill() {
+  if (moduleKey !== 'breeding') return;
+  const params = new URLSearchParams(window.location.search);
+  const target = params.get('target');
+  const profile = params.get('profile');
+  if (target) {
+    const targetInput = document.querySelector('[name="target"]');
+    if (targetInput && !targetInput.value) targetInput.value = target;
+  }
+  if (profile && $('#breedingProfile')) {
+    $('#breedingProfile').value = profile;
+    applySelectedProfile();
+  }
+  syncCustomSelects();
+}
+
+function syncCustomSelects() {
+  $$('select').forEach(select => {
+    if (select.dataset.customSelectReady === '1') {
+      updateCustomSelect(select);
+      return;
+    }
+    select.dataset.customSelectReady = '1';
+    select.classList.add('native-select-hidden');
+    const shell = document.createElement('span');
+    shell.className = 'custom-select';
+    shell.innerHTML = '<button type="button" class="custom-select-button"></button><span class="custom-select-menu"></span>';
+    select.after(shell);
+    shell.querySelector('button')?.addEventListener('click', () => {
+      $$('.custom-select.open').forEach(open => {
+        if (open !== shell) open.classList.remove('open');
+      });
+      shell.classList.toggle('open');
+    });
+    shell.addEventListener('click', event => {
+      const option = event.target.closest('[data-select-value]');
+      if (!option) return;
+      select.value = option.dataset.selectValue || '';
+      select.dispatchEvent(new Event('change', {bubbles: true}));
+      shell.classList.remove('open');
+      updateCustomSelect(select);
+    });
+    select.addEventListener('change', () => updateCustomSelect(select));
+    updateCustomSelect(select);
+  });
+}
+
+function updateCustomSelect(select) {
+  const shell = select.nextElementSibling?.classList?.contains('custom-select') ? select.nextElementSibling : null;
+  if (!shell) return;
+  const selected = select.selectedOptions?.[0];
+  shell.querySelector('.custom-select-button').textContent = selected?.textContent || 'Choose';
+  shell.querySelector('.custom-select-menu').innerHTML = [...select.options].map(option => `
+    <button type="button" data-select-value="${escapeHtml(option.value)}" class="${option.value === select.value ? 'is-selected' : ''}">
+      ${escapeHtml(option.textContent)}
+    </button>`).join('');
 }
 
 async function loadLiveStatus() {
@@ -513,20 +976,31 @@ async function uploadSave(file) {
 }
 
 async function init() {
-  setTheme(localStorage.getItem('pals.theme') || 'light');
+  setTheme(localStorage.getItem('pals.theme') || 'dark');
   $('#themeToggle')?.addEventListener('click', () => {
     setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
   });
   $('#toolForm')?.addEventListener('submit', submitTool);
   initSuggestFields();
   initPassivePickers();
+  initPassiveTooltips();
+  initProfiles();
   $('#reloadData')?.addEventListener('click', () => reloadOptions().catch(error => setText('#toolStatus', error.message)));
   $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setText('#liveStatus', error.message)));
   $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setText('#liveStatus', error.message)));
   options = await api('/options');
   fillOptions();
+  if (moduleKey === 'ranch' && window.PALS_RANCH_ITEM_SLUG) {
+    $('#toolForm')?.requestSubmit();
+  }
   loadLiveStatus().catch(() => {});
 }
+
+document.addEventListener('click', event => {
+  if (!event.target.closest('.custom-select')) {
+    $$('.custom-select.open').forEach(shell => shell.classList.remove('open'));
+  }
+});
 
 init().catch(error => {
   setText('#palsMeta', error.message);

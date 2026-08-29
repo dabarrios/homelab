@@ -9,6 +9,7 @@ urlpatterns = [
     path("ivs/", views.ivs, name="ivs"),
     path("work/", views.work, name="work"),
     path("ranch/", views.ranch, name="ranch"),
+    path("ranch/<slug:item_slug>/", views.ranch, name="ranch_item"),
     path("bases/", views.bases, name="bases"),
     path("api/options", views.options, name="api_options"),
     path("api/work-suitability", views.work_suitability, name="api_work_suitability"),

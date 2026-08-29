@@ -17,6 +17,7 @@
         <span class="passive-input-row">
             <input data-passive-input autocomplete="off" placeholder="Choose a passive">
             <button type="button" data-passive-add>Add</button>
+            <button type="button" data-passive-clear>Clear</button>
         </span>
         <span class="passive-chips" data-passive-chips></span>
         <input type="hidden" name="passives">
@@ -32,11 +33,14 @@
     </select>
 </label>
 <label>
-    Route Profile
-    <select name="breedingProfile">
-        <option value="manual">Manual passives</option>
-        <option value="work_speed">Best work speed</option>
-        <option value="ranch_drops_focus">Ranch drops focus</option>
-    </select>
+    Passive Profile
+    <span class="profile-control">
+        <select name="breedingProfile" id="breedingProfile"></select>
+        <span class="profile-buttons">
+            <button type="button" id="addProfile">Add</button>
+            <button type="button" id="editProfile">Edit</button>
+        </span>
+    </span>
+    <span class="field-hint" id="profileHint">Manual passives lets you choose each passive yourself.</span>
 </label>
 {% endblock %}
