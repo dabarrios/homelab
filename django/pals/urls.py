@@ -7,5 +7,6 @@ urlpatterns = [
     path('breeding/', views.breeding, name='breeding'),
     path('ivs/', views.ivs, name='ivs'),
     path('work/', views.work, name='work'),
-    path('base-planner/', views.base_planner, name='base_planner'),
+    path('bases/', views.base_planner, name='base_planner'),
+    path('ranch/', views.ranch, name='ranch'),
 ]

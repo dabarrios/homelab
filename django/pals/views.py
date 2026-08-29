@@ -21,6 +21,10 @@ def work(request):
     # Placeholder for the work view
     return render(request, 'work.html', {})
 
-def base_planner(request):
+def bases(request):
     # Placeholder for the base planner view
     return render(request, 'base_planner.html', {})
+
+def ranch(request):
+    # Placeholder for the ranch view
+    return render(request, 'ranch.html', {})
