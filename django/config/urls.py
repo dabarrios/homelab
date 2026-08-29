@@ -5,7 +5,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("dashboard/", include("game_servers.urls")),
+    path("dashboard/", include("gsc.urls")),
 ]
 
 if settings.DEBUG_TOOLBAR_AVAILABLE:

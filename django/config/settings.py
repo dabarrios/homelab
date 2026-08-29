@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "game_servers",
+    "gsc.apps.GameServerConsoleConfig",
 ]
 
 MIDDLEWARE = [
@@ -69,7 +69,7 @@ if DEBUG_TOOLBAR_AVAILABLE:
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 INTERNAL_IPS = ["127.0.0.1"]
-ROOT_URLCONF = "homelab.urls"
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -86,8 +86,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "homelab.wsgi.application"
-ASGI_APPLICATION = "homelab.asgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 DATABASES = {
     "default": {

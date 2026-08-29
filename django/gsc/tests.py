@@ -63,7 +63,7 @@ class DockerMetadataTest(TestCase):
         self.assertEqual(_compose_port(service, 8211), 8200)
         self.assertEqual(_container_port(container, 8211), 8200)
 
-    @patch("game_servers.docker_sync.subprocess.run")
+    @patch("gsc.docker_sync.subprocess.run")
     def test_container_version_command(self, run):
         run.return_value.stdout = "v1.0.2.101103\n"
 

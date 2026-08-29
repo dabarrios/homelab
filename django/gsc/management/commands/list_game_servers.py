@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from game_servers.models import GameServer
+from gsc.models import GameServer
 import subprocess
 
 

@@ -2,9 +2,11 @@
 *.env
 
 # Django-related directories
-homelab/db.sqlite3
-homelab/staticfiles/
-homelab/data/
+django/.venv/
+django/.dev-logs/
+django/db.sqlite3
+django/staticfiles/
+django/data/
 **/__pycache__/
 *.pyc
 

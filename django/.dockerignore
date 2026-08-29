@@ -9,7 +9,7 @@ __pycache__/
 *.sqlite3
 data/
 staticfiles/
-game_servers/design/
+gsc/design/
 .pytest_cache/
 .mypy_cache/
 .coverage

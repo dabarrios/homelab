@@ -24,8 +24,8 @@ COPY --from=builder /opt/venv /opt/venv
 COPY --from=docker_cli /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=docker_cli /usr/local/libexec/docker/cli-plugins/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose
 COPY --chown=app:app manage.py ./
-COPY --chown=app:app homelab ./homelab
-COPY --chown=app:app game_servers ./game_servers
+COPY --chown=app:app config ./config
+COPY --chown=app:app gsc ./gsc
 COPY --chown=app:app docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN DJANGO_SECRET_KEY=build-only-static-key DJANGO_DEBUG=false DJANGO_SECURE_SSL_REDIRECT=false DJANGO_SECURE_COOKIES=false \
     /opt/venv/bin/python manage.py collectstatic --noinput && \
@@ -33,4 +33,4 @@ RUN DJANGO_SECRET_KEY=build-only-static-key DJANGO_DEBUG=false DJANGO_SECURE_SSL
 USER app
 EXPOSE 8000
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "4", "--timeout", "150", "--no-control-socket", "--access-logfile", "-", "--error-logfile", "-", "homelab.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "4", "--timeout", "150", "--no-control-socket", "--access-logfile", "-", "--error-logfile", "-", "config.wsgi:application"]

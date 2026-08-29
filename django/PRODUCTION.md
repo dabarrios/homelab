@@ -8,7 +8,7 @@ The dashboard runs as a non-root Gunicorn container built from a multi-stage Alp
 2. Set the real hostname in `DJANGO_ALLOWED_HOSTS` and HTTPS origin in `DJANGO_CSRF_TRUSTED_ORIGINS`.
 3. Set `DOCKER_GID` using `stat -c %g /var/run/docker.sock`.
 4. Ensure `data/db.sqlite3` exists. The current database has already been copied there.
-5. Build and start with `docker compose up -d --build` from the `homelab/` directory.
+5. Build and start with `docker compose up -d --build` from the `django/` directory.
 6. Inspect startup with `docker compose logs -f dashboard`.
 7. Verify health with `docker compose ps`.
 
