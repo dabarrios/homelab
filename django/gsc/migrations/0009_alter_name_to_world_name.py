@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game_servers', '0008_alter_port_to_small_int'),
+        ('gsc', '0008_alter_port_to_small_int'),
     ]
 
     operations = [

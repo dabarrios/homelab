@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game_servers', '0005_add_container_name'),
+        ('gsc', '0005_add_container_name'),
     ]
 
     operations = [

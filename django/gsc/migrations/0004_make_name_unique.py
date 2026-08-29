@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game_servers', '0003_add_allocated_memory'),
+        ('gsc', '0003_add_allocated_memory'),
     ]
 
     operations = [

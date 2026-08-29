@@ -2,7 +2,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("game_servers", "0009_alter_name_to_world_name")]
+    dependencies = [("gsc", "0009_alter_name_to_world_name")]
 
     operations = [
         migrations.AlterField(
