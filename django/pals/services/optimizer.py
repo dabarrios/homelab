@@ -2835,6 +2835,7 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
     commands = [
         f"cd {w_tools}",
         ". .wsl-venv/bin/activate",
+        f"export PALWORLD_PARSER_ASSETS_DIR={w_tools}/palworld-server-tool/web/src/assets",
         f"python3 palworld-server-tool/sav_cli/sav_cli.py -f {w_work}/Level.sav -o {w_work}/structure.json",
         f"palsav convert {w_work}/Level.sav --to-json -o {w_work}/Level.full.json --force",
     ]

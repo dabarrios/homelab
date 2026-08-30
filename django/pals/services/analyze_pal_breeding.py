@@ -1,10 +1,11 @@
 import csv
 import json
+import os
 from collections import defaultdict, Counter
 from pathlib import Path
 
-WORK = Path('/mnt/c/Users/David/AppData/Local/Temp/palworld_breeding_readonly_303_2026')
-ASSETS = Path('/mnt/c/Users/David/AppData/Local/Temp/palworld_parser_tools/palworld-server-tool/web/src/assets')
+WORK = Path(__file__).resolve().parent
+ASSETS = Path(os.environ.get('PALWORLD_PARSER_ASSETS_DIR', '/mnt/c/Users/David/AppData/Local/Temp/palworld_parser_tools/palworld-server-tool/web/src/assets'))
 OUT_ROSTER = WORK / 'pal_roster.csv'
 OUT_PASSIVES = WORK / 'passive_inventory.csv'
 OUT_REPORT = WORK / 'breeding_report.md'
