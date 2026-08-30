@@ -15,7 +15,7 @@ services:
 
 # Subtitle Services for Regular/Anime Media
   bazarr: 
-    image: lscr.io/linuxserver/bazarr:latest
+    image: lscr.io/linuxserver/bazarr:nightly
     container_name: bazarr
     environment:
       PUID: ${PUID}
