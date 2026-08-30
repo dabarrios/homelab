@@ -199,6 +199,75 @@ function renderTypeChips(types = []) {
   return types.length ? `<div class="type-row">${types.map(type => `<span>${escapeHtml(type)}</span>`).join('')}</div>` : '';
 }
 
+function speciesMeta(name) {
+  return options.speciesMeta?.[name] || {};
+}
+
+function speciesMatches(query) {
+  const normalized = String(query || '').trim().toLowerCase();
+  if (!normalized) return [];
+  return (options.species || [])
+    .filter(value => value.toLowerCase().includes(normalized))
+    .slice(0, 8);
+}
+
+function exactSpeciesName(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return '';
+  return (options.species || []).find(species => species.toLowerCase() === normalized) || '';
+}
+
+function speciesAvatarHtml(name) {
+  const meta = speciesMeta(name);
+  if (meta.icon) {
+    return `<img src="${escapeHtml(assetUrl(meta.icon))}" alt="">`;
+  }
+  return `<span>${escapeHtml(speciesInitials(name))}</span>`;
+}
+
+function renderSpeciesSuggestion(name) {
+  const meta = speciesMeta(name);
+  return `
+    <button type="button" class="species-suggest-row" data-suggest-value="${escapeHtml(name)}">
+      <span class="species-suggest-avatar">${speciesAvatarHtml(name)}</span>
+      <span class="species-suggest-copy">
+        <span>${escapeHtml(name)}</span>
+        ${renderTypeChips(meta.types || [])}
+      </span>
+    </button>`;
+}
+
+function ensureSpeciesSelectedMeta(field) {
+  let selected = field.parentElement?.querySelector('[data-species-selected]');
+  if (selected) return selected;
+  selected = document.createElement('span');
+  selected.className = 'species-selected-meta hidden';
+  selected.dataset.speciesSelected = '';
+  field.after(selected);
+  return selected;
+}
+
+function updateSpeciesSelection(field) {
+  if (field.dataset.suggest !== 'species') return;
+  const input = field.querySelector('[data-suggest-input]');
+  const selected = ensureSpeciesSelectedMeta(field);
+  const species = exactSpeciesName(input?.value || '');
+  if (!species) {
+    selected.innerHTML = '';
+    selected.classList.add('hidden');
+    return;
+  }
+  const meta = speciesMeta(species);
+  selected.innerHTML = `
+    <span class="species-selected-name">${escapeHtml(species)}</span>
+    ${renderTypeChips(meta.types || [])}`;
+  selected.classList.remove('hidden');
+}
+
+function updateAllSpeciesSelections() {
+  $$('[data-suggest="species"]').forEach(updateSpeciesSelection);
+}
+
 function breedUrl(card, profile = 'manual') {
   const params = new URLSearchParams({target: card.name || ''});
   if (profile) params.set('profile', profile);
@@ -440,6 +509,7 @@ function fillOptions() {
   renderImplantInventories();
   syncCustomSelects();
   applyUrlPrefill();
+  updateAllSpeciesSelections();
 }
 
 function loadProfiles() {
@@ -609,35 +679,68 @@ function renderSuggestions(field) {
   const type = field.dataset.suggest;
   const input = field.querySelector('[data-suggest-input]');
   const menu = field.querySelector('[data-suggest-menu]');
+  if (!input || !menu) return;
   const query = String(input.value || '').trim().toLowerCase();
   if (!query) {
     menu.innerHTML = '';
     menu.classList.remove('open');
+    updateSpeciesSelection(field);
     return;
   }
-  const values = type === 'species' ? options.species || [] : options.passives || [];
-  const matches = values
-    .filter(value => value.toLowerCase().includes(query))
-    .slice(0, 8);
+  const matches = type === 'species'
+    ? speciesMatches(query)
+    : (options.passives || []).filter(value => value.toLowerCase().includes(query)).slice(0, 8);
   menu.innerHTML = matches.map(value => {
+    if (type === 'species') return renderSpeciesSuggestion(value);
     const tone = type === 'passives' || type === 'passive' ? passiveTone(value) : '';
     return `<button type="button" data-suggest-value="${escapeHtml(value)}">${tone ? `<span class="passive-dot ${tone}"></span>` : ''}<span>${escapeHtml(value)}</span></button>`;
   }).join('');
   menu.classList.toggle('open', matches.length > 0);
+  updateSpeciesSelection(field);
+}
+
+function selectSuggestion(field, value) {
+  const input = field.querySelector('[data-suggest-input]');
+  const menu = field.querySelector('[data-suggest-menu]');
+  if (!input) return;
+  input.value = value;
+  menu?.classList.remove('open');
+  input.dispatchEvent(new Event('change', {bubbles: true}));
+  updateSpeciesSelection(field);
 }
 
 function initSuggestFields() {
   $$('[data-suggest]').forEach(field => {
     const input = field.querySelector('[data-suggest-input]');
     input?.addEventListener('input', () => renderSuggestions(field));
+    input?.addEventListener('focus', () => renderSuggestions(field));
+    input?.addEventListener('change', () => updateSpeciesSelection(field));
+    input?.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        field.querySelector('[data-suggest-menu]')?.classList.remove('open');
+        return;
+      }
+      if (event.key !== 'Enter') return;
+      const type = field.dataset.suggest;
+      const value = input.value || '';
+      const matches = type === 'species'
+        ? speciesMatches(value)
+        : (options.passives || []).filter(item => item.toLowerCase().includes(String(value).trim().toLowerCase())).slice(0, 8);
+      const exact = type === 'species'
+        ? exactSpeciesName(value)
+        : (options.passives || []).find(item => item.toLowerCase() === String(value).trim().toLowerCase()) || '';
+      const selection = exact || (matches.length === 1 ? matches[0] : '');
+      if (!selection) return;
+      event.preventDefault();
+      selectSuggestion(field, selection);
+    });
     input?.addEventListener('blur', () => {
       window.setTimeout(() => field.querySelector('[data-suggest-menu]')?.classList.remove('open'), 120);
     });
     field.addEventListener('click', event => {
       const value = event.target.closest('[data-suggest-value]')?.dataset.suggestValue;
       if (!value) return;
-      input.value = value;
-      field.querySelector('[data-suggest-menu]').classList.remove('open');
+      selectSuggestion(field, value);
     });
   });
 }
