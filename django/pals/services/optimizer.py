@@ -1922,6 +1922,25 @@ def gender_matches(s: State, preference: str) -> bool:
 def gender_filtered(states: list[State], preference: str) -> list[State]:
     return [s for s in states if gender_matches(s, preference)]
 
+
+def ready_to_finish_states(
+    owned_target_states: list[State],
+    final_target: frozenset[str],
+    implant_passives: frozenset[str],
+    gender_preference: str,
+) -> list[State]:
+    if not final_target or not implant_passives:
+        return []
+    candidates = []
+    for state in gender_filtered(owned_target_states, gender_preference):
+        missing = final_target - state.passives
+        if not missing:
+            continue
+        if missing <= implant_passives and final_target <= (state.passives | implant_passives):
+            candidates.append(state)
+    return candidates
+
+
 def best_storage_substitute(s: State, owned: list[State], target: frozenset[str], allowed: frozenset[str]) -> State | None:
     if s.parents or not s.base_workers_used:
         return None
@@ -2232,6 +2251,12 @@ def build_plan(payload: dict) -> dict:
     owned_target_states = [s for s in owned if s.species_key == target_key]
     owned_matching_target_states = [s for s in owned_target_states if target_complete(s, target)]
     owned_matching_target_for_gender = gender_filtered(owned_matching_target_states, gender_preference)
+    ready_finish_states = ready_to_finish_states(
+        owned_target_states,
+        final_target,
+        frozenset(implant_passives),
+        gender_preference,
+    )
 
     clean_group = build_group(
         "cleanest",
@@ -2360,6 +2385,10 @@ def build_plan(payload: dict) -> dict:
             "count": len(owned_matching_target_states),
             "matchingGenderCount": len(owned_matching_target_for_gender),
             "results": unique_serialized(owned_matching_target_for_gender or owned_matching_target_states, target, allowed, 6, iv_preference=iv_preference, intended_gender=gender_preference),
+        },
+        "readyToFinish": {
+            "count": len(ready_finish_states),
+            "results": unique_serialized(ready_finish_states, final_target, implant_passives, 6, iv_preference=iv_preference, intended_gender=gender_preference),
         },
         "groups": groups,
         "results": recommended,

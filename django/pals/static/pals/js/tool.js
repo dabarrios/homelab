@@ -1227,42 +1227,33 @@ function palboxLocationText(node) {
   return locationText(node);
 }
 
-function readyFinishCandidate(data) {
+function readyFinishCandidates(data) {
   const finalPassives = new Set(data.finalPassives || []);
   const implantPassives = new Set(data.implantPassives || []);
-  if (!finalPassives.size || !implantPassives.size) return null;
-  return (data.alreadyOwned?.results || []).find(candidate => {
+  if (!finalPassives.size || !implantPassives.size) return [];
+  const candidates = data.readyToFinish?.results || data.alreadyOwned?.results || [];
+  return candidates.filter(candidate => {
     const owned = new Set(candidate.passives || []);
     const missing = [...finalPassives].filter(passive => !owned.has(passive));
     return missing.length > 0 && missing.every(passive => implantPassives.has(passive));
-  }) || null;
+  });
 }
 
-function renderReadyFinishCard(candidate, data) {
+function renderReadyFinishCards(candidates, data) {
   const finalPassives = data.finalPassives || [];
-  const owned = new Set(candidate.passives || []);
   const implantPassives = new Set(data.implantPassives || []);
-  const present = finalPassives.filter(passive => owned.has(passive));
-  const missingImplants = finalPassives.filter(passive => !owned.has(passive) && implantPassives.has(passive));
-  const junk = candidate.junk || [];
-  return `
-    <article class="ready-finish-card">
-      <div class="ready-kicker"><span class="ready-star" aria-hidden="true"></span>Best Option</div>
-      <div class="ready-head">
-        <div>
-          <h3>Ready to Finish</h3>
-          <p>Use your owned ${escapeHtml(candidate.species)} and implant the missing passive.</p>
-        </div>
-        <div class="ready-metrics">
-          <span><b>Breeding Steps</b><strong>0</strong></span>
-          <span><b>Junk Pals</b><strong>${escapeHtml(junk.length)}</strong></span>
-        </div>
-      </div>
-      <div class="ready-grid">
+  const top = candidates[0] || {};
+  const candidateCards = candidates.map(candidate => {
+    const owned = new Set(candidate.passives || []);
+    const present = finalPassives.filter(passive => owned.has(passive));
+    const missingImplants = finalPassives.filter(passive => !owned.has(passive) && implantPassives.has(passive));
+    const replaceable = candidate.junk || [];
+    return `
+      <article class="ready-option-card">
         <div class="ready-pal-summary">
           <div class="pal-avatar ready-avatar">${candidate.icon ? `<img src="${escapeHtml(assetUrl(candidate.icon))}" alt="">` : escapeHtml(speciesInitials(candidate.species))}</div>
           <div>
-            <h4>${escapeHtml(candidate.species)}</h4>
+            <h4>${escapeHtml(candidate.species)} ${candidate.displayGender ? `<span class="gender ${escapeHtml(String(candidate.displayGender).toLowerCase())}">${escapeHtml(candidate.displayGender)}</span>` : ''}</h4>
             <p>${escapeHtml(palboxLocationText(candidate))}</p>
             <span class="role-badge owned">Already owned</span>
           </div>
@@ -1279,14 +1270,30 @@ function renderReadyFinishCard(candidate, data) {
           </div>
           <p>Available in implant inventory</p>
         </div>
-      </div>
-      <div class="ready-passives">
-        <span>Passives</span>
-        <div class="passive-list ready-passive-list">
-          ${present.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
-          ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+        <div class="ready-passives ready-option-passives">
+          <span>Passives</span>
+          <div class="passive-list ready-passive-list">
+            ${present.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+          </div>
+          ${replaceable.length ? `<p class="ready-replaceable">Replaceable: ${escapeHtml(replaceable.join(', '))}</p>` : ''}
+        </div>
+      </article>`;
+  }).join('');
+  return `
+    <article class="ready-finish-card">
+      <div class="ready-kicker"><span class="ready-star" aria-hidden="true"></span>Best Option</div>
+      <div class="ready-head">
+        <div>
+          <h3>Ready to Finish</h3>
+          <p>Use an owned ${escapeHtml(top.species || 'Pal')} and implant the missing passive${finalPassives.length === 1 ? '' : 's'}.</p>
+        </div>
+        <div class="ready-metrics">
+          <span><b>Breeding Steps</b><strong>0</strong></span>
+          <span><b>Options</b><strong>${escapeHtml(candidates.length)}</strong></span>
         </div>
       </div>
+      <div class="ready-options-grid">${candidateCards}</div>
       <div class="ready-actions">
         <button type="button" class="card-action ready-fresh-copy" data-show-fresh-copy>Breed a fresh copy instead</button>
       </div>
@@ -1299,13 +1306,13 @@ function renderBreeding(data) {
   const group = groups.find(item => (item.results || []).length) || groups[0];
   const route = (group.results || [])[0];
   if (!route) return '<div class="results-empty">No route found. Try fewer desired passives or upload a fresher save.</div>';
-  const readyCandidate = readyFinishCandidate(data);
+  const readyCandidates = readyFinishCandidates(data);
   const profileNotice = renderProfileResultNotice(data);
-  if (readyCandidate) {
+  if (readyCandidates.length) {
     return `
       <section class="result-group">
         ${profileNotice}
-        ${renderReadyFinishCard(readyCandidate, data)}
+        ${renderReadyFinishCards(readyCandidates, data)}
         <article class="route-card fresh-copy-card hidden" data-fresh-copy-tree>
           <div class="route-header">
             <div>
