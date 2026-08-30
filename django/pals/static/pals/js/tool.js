@@ -949,6 +949,18 @@ function initImplantInventories() {
   });
 }
 
+function initFreshCopyToggle() {
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-show-fresh-copy]');
+    if (!button) return;
+    const tree = document.querySelector('[data-fresh-copy-tree]');
+    if (!tree) return;
+    tree.classList.remove('hidden');
+    button.hidden = true;
+    tree.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+  });
+}
+
 function resultCard(title, body, meta = '') {
   return `<article class="result-card"><h3>${escapeHtml(title)}</h3>${meta ? `<p class="result-meta">${escapeHtml(meta)}</p>` : ''}<div>${body}</div></article>`;
 }
@@ -957,12 +969,103 @@ function renderJson(data) {
   return `<pre class="json-output">${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
 }
 
+function palboxLocationText(node) {
+  if (node.box) return `Box ${node.box}, slot ${node.slot}`;
+  return locationText(node);
+}
+
+function readyFinishCandidate(data) {
+  const finalPassives = new Set(data.finalPassives || []);
+  const implantPassives = new Set(data.implantPassives || []);
+  if (!finalPassives.size || !implantPassives.size) return null;
+  return (data.alreadyOwned?.results || []).find(candidate => {
+    const owned = new Set(candidate.passives || []);
+    const missing = [...finalPassives].filter(passive => !owned.has(passive));
+    return missing.length > 0 && missing.every(passive => implantPassives.has(passive));
+  }) || null;
+}
+
+function renderReadyFinishCard(candidate, data) {
+  const finalPassives = data.finalPassives || [];
+  const owned = new Set(candidate.passives || []);
+  const implantPassives = new Set(data.implantPassives || []);
+  const present = finalPassives.filter(passive => owned.has(passive));
+  const missingImplants = finalPassives.filter(passive => !owned.has(passive) && implantPassives.has(passive));
+  const junk = candidate.junk || [];
+  return `
+    <article class="ready-finish-card">
+      <div class="ready-kicker"><span class="ready-star" aria-hidden="true"></span>Best Option</div>
+      <div class="ready-head">
+        <div>
+          <h3>Ready to Finish</h3>
+          <p>Use your owned ${escapeHtml(candidate.species)} and implant the missing passive.</p>
+        </div>
+        <div class="ready-metrics">
+          <span><b>Breeding Steps</b><strong>0</strong></span>
+          <span><b>Junk Pals</b><strong>${escapeHtml(junk.length)}</strong></span>
+        </div>
+      </div>
+      <div class="ready-grid">
+        <div class="ready-pal-summary">
+          <div class="pal-avatar ready-avatar">${candidate.icon ? `<img src="${escapeHtml(assetUrl(candidate.icon))}" alt="">` : escapeHtml(speciesInitials(candidate.species))}</div>
+          <div>
+            <h4>${escapeHtml(candidate.species)}</h4>
+            <p>${escapeHtml(palboxLocationText(candidate))}</p>
+            <span class="role-badge owned">Already owned</span>
+          </div>
+        </div>
+        <div class="ready-progress">
+          <span>Progress</span>
+          <strong>${escapeHtml(present.length)} / ${escapeHtml(finalPassives.length)} <em>final passives present</em></strong>
+          <p>${escapeHtml(missingImplants.length)} implant${missingImplants.length === 1 ? '' : 's'} needed</p>
+        </div>
+        <div class="ready-missing">
+          <span>Missing Passive</span>
+          <div class="passive-list ready-passive-list">
+            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+          </div>
+          <p>Available in implant inventory</p>
+        </div>
+      </div>
+      <div class="ready-passives">
+        <span>Passives</span>
+        <div class="passive-list ready-passive-list">
+          ${present.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+          ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+        </div>
+      </div>
+      <div class="ready-actions">
+        <button type="button" class="card-action ready-fresh-copy" data-show-fresh-copy>Breed a fresh copy instead</button>
+      </div>
+    </article>`;
+}
+
 function renderBreeding(data) {
   const groups = data.groups || [];
   if (!groups.length) return renderJson(data);
   const group = groups.find(item => (item.results || []).length) || groups[0];
   const route = (group.results || [])[0];
   if (!route) return '<div class="results-empty">No route found. Try fewer desired passives or upload a fresher save.</div>';
+  const readyCandidate = readyFinishCandidate(data);
+  if (readyCandidate) {
+    return `
+      <section class="result-group">
+        ${renderReadyFinishCard(readyCandidate, data)}
+        <article class="route-card fresh-copy-card hidden" data-fresh-copy-tree>
+          <div class="route-header">
+            <div>
+              <h3>Fresh Copy</h3>
+              <p>This breeds a new ${escapeHtml(route.species)} with all requested passives.</p>
+            </div>
+            <div class="badges">
+              <span>${escapeHtml(route.steps || 0)} steps</span>
+              <span class="${(route.junk || []).length ? 'bad' : 'good'}">${(route.junk || []).length} junk</span>
+            </div>
+          </div>
+          <div class="breed-tree">${renderBreedTree(route, true)}</div>
+        </article>
+      </section>`;
+  }
   return `
     <section class="result-group">
       <div class="group-heading">
@@ -1437,6 +1540,7 @@ async function init() {
   initPassiveTooltips();
   initProfiles();
   initImplantInventories();
+  initFreshCopyToggle();
   initRanchDropSearch();
   $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setLiveStatus(error.message, 'bad')));
   $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setLiveStatus(error.message, 'bad')));
