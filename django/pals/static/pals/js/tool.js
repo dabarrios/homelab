@@ -237,35 +237,121 @@ function renderSpeciesSuggestion(name) {
     </button>`;
 }
 
-function ensureSpeciesSelectedMeta(field) {
-  let selected = field.parentElement?.querySelector('[data-species-selected]');
+function ensureSpeciesSelectedTypes(field) {
+  let selected = field.querySelector('[data-species-selected]');
   if (selected) return selected;
   selected = document.createElement('span');
-  selected.className = 'species-selected-meta hidden';
+  selected.className = 'species-selected-types hidden';
   selected.dataset.speciesSelected = '';
-  field.after(selected);
+  field.append(selected);
+  return selected;
+}
+
+function ensureSpeciesSelectedAvatar(field) {
+  let selected = field.querySelector('[data-species-avatar]');
+  if (selected) return selected;
+  selected = document.createElement('span');
+  selected.className = 'species-selected-avatar hidden';
+  selected.dataset.speciesAvatar = '';
+  field.prepend(selected);
   return selected;
 }
 
 function updateSpeciesSelection(field) {
   if (field.dataset.suggest !== 'species') return;
   const input = field.querySelector('[data-suggest-input]');
-  const selected = ensureSpeciesSelectedMeta(field);
+  const selected = ensureSpeciesSelectedTypes(field);
+  const avatar = ensureSpeciesSelectedAvatar(field);
   const species = exactSpeciesName(input?.value || '');
   if (!species) {
     selected.innerHTML = '';
+    avatar.innerHTML = '';
     selected.classList.add('hidden');
+    avatar.classList.add('hidden');
+    field.classList.remove('has-species-type');
+    field.classList.remove('has-species-avatar');
     return;
   }
   const meta = speciesMeta(species);
-  selected.innerHTML = `
-    <span class="species-selected-name">${escapeHtml(species)}</span>
-    ${renderTypeChips(meta.types || [])}`;
-  selected.classList.remove('hidden');
+  avatar.innerHTML = speciesAvatarHtml(species);
+  avatar.classList.remove('hidden');
+  selected.innerHTML = renderTypeChips(meta.types || []);
+  selected.classList.toggle('hidden', !(meta.types || []).length);
+  field.classList.toggle('has-species-type', (meta.types || []).length > 0);
+  field.classList.add('has-species-avatar');
+  clearSpeciesWarning(field);
 }
 
 function updateAllSpeciesSelections() {
   $$('[data-suggest="species"]').forEach(updateSpeciesSelection);
+}
+
+function clearSpeciesWarning(field) {
+  const input = field.querySelector('[data-suggest-input]');
+  const warning = field.parentElement?.querySelector('[data-species-warning]');
+  input?.removeAttribute('aria-invalid');
+  field.classList.remove('is-invalid');
+  warning?.classList.add('hidden');
+}
+
+function showSpeciesWarning(field, message) {
+  const input = field.querySelector('[data-suggest-input]');
+  let warning = field.parentElement?.querySelector('[data-species-warning]');
+  if (!warning) {
+    warning = document.createElement('span');
+    warning.className = 'field-hint invalid species-warning hidden';
+    warning.dataset.speciesWarning = '';
+    warning.setAttribute('role', 'alert');
+    field.parentElement?.append(warning);
+  }
+  input?.setAttribute('aria-invalid', 'true');
+  field.classList.add('is-invalid');
+  warning.innerHTML = `<span aria-hidden="true">!</span><span>${escapeHtml(message)}</span>`;
+  warning.title = message;
+  warning.classList.remove('hidden');
+}
+
+function validateTargetSpecies() {
+  const targetInput = document.querySelector('[name="target"]');
+  if (!targetInput) return true;
+  const field = targetInput.closest('[data-suggest="species"]');
+  if (!field) return true;
+  const value = String(targetInput.value || '').trim();
+  if (!value) {
+    showSpeciesWarning(field, 'Choose a target Pal before running this tool.');
+    return false;
+  }
+  if (exactSpeciesName(value)) {
+    updateSpeciesSelection(field);
+    return true;
+  }
+  const matches = speciesMatches(value);
+  const suffix = matches.length
+    ? ` Did you mean ${matches.slice(0, 3).join(', ')}?`
+    : ' Start typing and choose a Pal from the list.';
+  showSpeciesWarning(field, `Unknown target species: ${value}.${suffix}`);
+  return false;
+}
+
+function validateSpeciesFieldOnExit(field) {
+  if (field.dataset.suggest !== 'species') return;
+  const input = field.querySelector('[data-suggest-input]');
+  const value = String(input?.value || '').trim();
+  if (!value) {
+    clearSpeciesWarning(field);
+    return;
+  }
+  if (exactSpeciesName(value)) {
+    updateSpeciesSelection(field);
+    return;
+  }
+  const matches = speciesMatches(value);
+  const suffix = matches.length
+    ? ` Did you mean ${matches.slice(0, 3).join(', ')}?`
+    : ' Start typing and choose a Pal from the list.';
+  showSpeciesWarning(field, `Unknown target species: ${value}.${suffix}`);
+  showEmptyState();
+  setText('#toolStatus', 'Check the target species.');
 }
 
 function breedUrl(card, profile = 'manual') {
@@ -685,6 +771,7 @@ function renderSuggestions(field) {
     menu.innerHTML = '';
     menu.classList.remove('open');
     updateSpeciesSelection(field);
+    clearSpeciesWarning(field);
     return;
   }
   const matches = type === 'species'
@@ -697,6 +784,7 @@ function renderSuggestions(field) {
   }).join('');
   menu.classList.toggle('open', matches.length > 0);
   updateSpeciesSelection(field);
+  if (type === 'species') clearSpeciesWarning(field);
 }
 
 function selectSuggestion(field, value) {
@@ -714,7 +802,14 @@ function initSuggestFields() {
     const input = field.querySelector('[data-suggest-input]');
     input?.addEventListener('input', () => renderSuggestions(field));
     input?.addEventListener('focus', () => renderSuggestions(field));
-    input?.addEventListener('change', () => updateSpeciesSelection(field));
+    input?.addEventListener('change', () => validateSpeciesFieldOnExit(field));
+    input?.addEventListener('invalid', event => {
+      if (field.dataset.suggest !== 'species') return;
+      event.preventDefault();
+      showSpeciesWarning(field, 'Choose a target Pal before running this tool.');
+      showEmptyState();
+      setText('#toolStatus', 'Check the target species.');
+    });
     input?.addEventListener('keydown', event => {
       if (event.key === 'Escape') {
         field.querySelector('[data-suggest-menu]')?.classList.remove('open');
@@ -730,12 +825,21 @@ function initSuggestFields() {
         ? exactSpeciesName(value)
         : (options.passives || []).find(item => item.toLowerCase() === String(value).trim().toLowerCase()) || '';
       const selection = exact || (matches.length === 1 ? matches[0] : '');
-      if (!selection) return;
+      if (!selection) {
+        if (type !== 'species') return;
+        event.preventDefault();
+        field.querySelector('[data-suggest-menu]')?.classList.remove('open');
+        validateSpeciesFieldOnExit(field);
+        return;
+      }
       event.preventDefault();
       selectSuggestion(field, selection);
     });
     input?.addEventListener('blur', () => {
-      window.setTimeout(() => field.querySelector('[data-suggest-menu]')?.classList.remove('open'), 120);
+      window.setTimeout(() => {
+        field.querySelector('[data-suggest-menu]')?.classList.remove('open');
+        validateSpeciesFieldOnExit(field);
+      }, 120);
     });
     field.addEventListener('click', event => {
       const value = event.target.closest('[data-suggest-value]')?.dataset.suggestValue;
@@ -1464,6 +1568,11 @@ function initRanchDropSearch() {
 
 async function submitTool(event) {
   event.preventDefault();
+  if (!validateTargetSpecies()) {
+    showEmptyState();
+    setText('#toolStatus', 'Check the target species.');
+    return;
+  }
   setText('#toolStatus', 'Running...');
   $('#results').innerHTML = '';
   const data = formData();

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -165,14 +166,11 @@ def live_save_status(request):
 @login_required
 @require_GET
 def pal_asset(request, name: str):
-    file_path = (optimizer.PAL_IMAGES / Path(name).name).resolve()
-    try:
-        images_root = optimizer.PAL_IMAGES.resolve()
-    except OSError as exc:
-        raise Http404 from exc
-    if not str(file_path).startswith(str(images_root)) or not file_path.exists():
+    file_path = optimizer.pal_image_path(name)
+    if not file_path:
         raise Http404
-    return FileResponse(file_path.open("rb"), content_type="image/png")
+    content_type = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
+    return FileResponse(file_path.open("rb"), content_type=content_type)
 
 
 @login_required

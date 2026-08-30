@@ -52,6 +52,7 @@ if LIVE_STATE_FILE.exists():
     except (OSError, json.JSONDecodeError):
         pass
 PAL_IMAGES = TOOLS / "palworld-server-tool" / "web" / "src" / "assets" / "pals"
+LOCAL_PAL_IMAGES = LOCAL_ROOT / "assets" / "pals"
 SKILL_METADATA = TOOLS / "palworld-server-tool" / "web" / "src" / "assets" / "skill.json"
 TARGET_ONLY = "target_only"
 LEAST_JUNK = "least_junk"
@@ -433,10 +434,24 @@ STORE = DataStore()
 
 
 
+def pal_image_path(name: str) -> Path | None:
+    safe_name = Path(name).name
+    for root in (LOCAL_PAL_IMAGES, PAL_IMAGES):
+        try:
+            file_path = (root / safe_name).resolve()
+            root_path = root.resolve()
+        except OSError:
+            continue
+        if str(file_path).startswith(str(root_path)) and file_path.exists():
+            return file_path
+    return None
+
+
 def icon_url_for_key(key: str) -> str | None:
-    icon_path = PAL_IMAGES / f"{key}.png"
-    if icon_path.exists():
-        return f"/assets/pals/{key}.png"
+    for suffix in (".png", ".webp"):
+        name = f"{key}{suffix}"
+        if pal_image_path(name):
+            return f"/assets/pals/{name}"
     return None
 
 
