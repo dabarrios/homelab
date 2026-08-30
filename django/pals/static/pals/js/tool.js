@@ -19,6 +19,20 @@ const BUILT_IN_PROFILES = [
   {value: 'work_speed', label: 'Best work speed', locked: true},
   {value: 'ranch_drops_focus', label: 'Ranch drops focus', locked: true},
 ];
+const BUILT_IN_PROFILE_PASSIVES = {
+  work_speed: [
+    ['Demon’s Hand', 90],
+    ['Remarkable Craftsmanship', 75],
+    ['Artisan', 50],
+    ['Work Slave', 30],
+  ],
+  ranch_drops_focus: [
+    ['Ranch Master', 0],
+    ['Farmhand', 0],
+    ['Remarkable Craftsmanship', 75],
+    ['Artisan', 50],
+  ],
+};
 
 function apiUrl(path) {
   return `${apiBase}${path.startsWith('/') ? path : `/${path}`}`;
@@ -655,12 +669,32 @@ function updateProfileHint() {
   const custom = customProfileByValue(value);
   const builtIn = builtInProfileByValue(value);
   if (custom) {
-    hint.textContent = `Uses saved passives: ${custom.passives.join(', ') || 'none selected yet'}.`;
+    hint.innerHTML = `${profilePassiveSummary(custom.passives, 'Saved passives')}`;
   } else if (builtIn?.locked) {
-    hint.textContent = 'Built-in profile: the app chooses passives with built-in logic. You can rename this profile, but the selection rules stay managed by the app.';
+    const passives = BUILT_IN_PROFILE_PASSIVES[builtIn.value] || [];
+    hint.innerHTML = `
+      ${profilePassiveSummary(passives.map(([passive]) => passive), 'Prioritizes', true)}
+      <span class="profile-note">Built-in profile: the app chooses the fastest reachable combination for this target. You can rename this profile, but the selection rules stay managed by the app.</span>`;
   } else {
     hint.textContent = 'Manual passives lets you choose each passive yourself.';
   }
+}
+
+function profilePassiveSummary(passives, label, showScore = false) {
+  const items = (passives || []).slice(0, 4);
+  if (!items.length) return `<span>${escapeHtml(label)}: none selected yet.</span>`;
+  const total = items.reduce((sum, passive) => {
+    const score = (BUILT_IN_PROFILE_PASSIVES.work_speed || []).find(([name]) => name === passive)?.[1] || 0;
+    return sum + score;
+  }, 0);
+  return `
+    <span class="profile-passive-summary">
+      <span>${escapeHtml(label)}</span>
+      <span class="passive-list compact">
+        ${items.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+      </span>
+      ${showScore && total ? `<span class="profile-score">absolute +${escapeHtml(total)}% work speed</span>` : ''}
+    </span>`;
 }
 
 function applySelectedProfile() {
@@ -671,6 +705,15 @@ function applySelectedProfile() {
   }
   passiveSelections.passives = [...custom.passives].slice(0, 4);
   document.querySelectorAll('[data-picker="passives"]').forEach(renderPassivePicker);
+  updateProfileHint();
+}
+
+function switchToManualProfileForPassiveEdit(picker) {
+  if (picker.dataset.picker !== 'passives') return;
+  const select = $('#breedingProfile');
+  if (!select || select.value === 'manual') return;
+  select.value = 'manual';
+  updateCustomSelect(select);
   updateProfileHint();
 }
 
@@ -967,6 +1010,7 @@ function addPassive(picker) {
     return;
   }
   passiveSelections[key] = [...selected, match.value];
+  switchToManualProfileForPassiveEdit(picker);
   input.value = '';
   hint.textContent = `${match.value} added.`;
   hint.className = 'field-hint valid';
@@ -979,6 +1023,7 @@ function initPassivePickers() {
   $$('[data-picker]').forEach(picker => {
     picker.querySelector('[data-passive-add]')?.addEventListener('click', () => addPassive(picker));
     picker.querySelector('[data-passive-clear]')?.addEventListener('click', () => {
+      switchToManualProfileForPassiveEdit(picker);
       passiveSelections[picker.dataset.picker] = [];
       picker.querySelector('[data-passive-hint]').textContent = 'Selected passives cleared.';
       picker.querySelector('[data-passive-hint]').className = 'field-hint';
@@ -1003,6 +1048,7 @@ function initPassivePickers() {
       if (!passive) return;
       event.stopPropagation();
       const key = picker.dataset.picker;
+      switchToManualProfileForPassiveEdit(picker);
       passiveSelections[key] = (passiveSelections[key] || []).filter(item => item !== passive);
       renderPassivePicker(picker);
     });
@@ -1254,9 +1300,11 @@ function renderBreeding(data) {
   const route = (group.results || [])[0];
   if (!route) return '<div class="results-empty">No route found. Try fewer desired passives or upload a fresher save.</div>';
   const readyCandidate = readyFinishCandidate(data);
+  const profileNotice = renderProfileResultNotice(data);
   if (readyCandidate) {
     return `
       <section class="result-group">
+        ${profileNotice}
         ${renderReadyFinishCard(readyCandidate, data)}
         <article class="route-card fresh-copy-card hidden" data-fresh-copy-tree>
           <div class="route-header">
@@ -1275,6 +1323,7 @@ function renderBreeding(data) {
   }
   return `
     <section class="result-group">
+      ${profileNotice}
       <div class="group-heading">
         <h3>Recommended Route</h3>
         <p>${escapeHtml(group.description || 'Best practical option from the current search.')}</p>
@@ -1291,6 +1340,30 @@ function renderBreeding(data) {
           <div class="breed-tree">${renderBreedTree(route, true)}</div>
         </article>
     </section>`;
+}
+
+function renderProfileResultNotice(data) {
+  const selected = data.profileSelectedPassives || [];
+  const ideal = data.profileIdealPassives || [];
+  if (!selected.length && !ideal.length && !data.profileDisclaimer) return '';
+  return `
+    <div class="profile-result-notice">
+      <div>
+        <strong>Passive profile result</strong>
+        ${data.profileDisclaimer ? `<p>${escapeHtml(data.profileDisclaimer)}</p>` : ''}
+      </div>
+      <div class="profile-result-grid">
+        ${ideal.length ? `<span><b>Absolute target</b>${profileResultPassiveList(ideal)}</span>` : ''}
+        ${selected.length ? `<span><b>Using</b>${profileResultPassiveList(selected)}</span>` : ''}
+      </div>
+    </div>`;
+}
+
+function profileResultPassiveList(passives) {
+  return `
+    <span class="passive-list compact">
+      ${(passives || []).map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+    </span>`;
 }
 
 function renderIvs(data) {
@@ -1588,6 +1661,7 @@ async function submitTool(event) {
           owner: data.owner || 'David',
           target: data.target,
           passives: finalPassives,
+          includeImplants: Boolean(data.includeImplants),
           implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
           genderPreference: data.genderPreference || 'any',
           breedingProfile: customProfile ? 'manual' : data.breedingProfile || 'manual',

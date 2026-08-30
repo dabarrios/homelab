@@ -876,6 +876,14 @@ def load_implant_inventory() -> dict:
     return inventory
 
 
+def available_implant_passives() -> set[str]:
+    return {
+        passive
+        for passive, item in load_implant_inventory().items()
+        if item.get("infinite") or as_int(item.get("count")) > 0
+    }
+
+
 def save_implant_inventory(inventory: dict) -> None:
     IMPLANT_INVENTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
     IMPLANT_INVENTORY_FILE.write_text(json.dumps(inventory, indent=2, sort_keys=True), encoding="utf-8")
@@ -2026,10 +2034,18 @@ def restore_profile_tree(state: State, originals: dict[tuple, State], desired: f
     )
 
 
-def best_work_speed_profile(owned: list[State], target_key: str, gender_preference: str, include_insomnia: bool = False, priority_passive_groups: list[list[str]] | None = None) -> dict:
+def best_work_speed_profile(
+    owned: list[State],
+    target_key: str,
+    gender_preference: str,
+    include_insomnia: bool = False,
+    priority_passive_groups: list[list[str]] | None = None,
+    implant_passives: set[str] | None = None,
+) -> dict:
     target_is_dark = "dark" in {str(t).lower() for t in species_types_for_key(target_key)}
     force_insomnia = include_insomnia and not target_is_dark
     scores = work_speed_profile_scores(force_insomnia)
+    implant_passives = set(implant_passives or set())
     priority_groups = [
         list(dict.fromkeys(passive for passive in group if passive))
         for group in (priority_passive_groups or [])
@@ -2056,12 +2072,13 @@ def best_work_speed_profile(owned: list[State], target_key: str, gender_preferen
         for state in owned
         for passive in state.passives
         if passive in scores
-    )
+    ) | frozenset(passive for passive in implant_passives if passive in scores)
     if not available:
         return {"ideal": ideal, "selected": [], "route": None, "score": 0}
 
+    breeding_available = frozenset(passive for passive in available if passive not in implant_passives)
     projected_owned = [
-        replace(state, passives=frozenset(state.passives & available))
+        replace(state, passives=frozenset(state.passives & breeding_available))
         for state in owned
     ]
     originals = {
@@ -2070,7 +2087,7 @@ def best_work_speed_profile(owned: list[State], target_key: str, gender_preferen
     }
     states = search_states(
         projected_owned,
-        available,
+        breeding_available,
         frozenset(),
         strict=False,
         max_steps=3,
@@ -2080,7 +2097,7 @@ def best_work_speed_profile(owned: list[State], target_key: str, gender_preferen
     routes = states + final_parent_routes(
         states,
         target_key,
-        available,
+        breeding_available,
         frozenset(),
         limit=500,
     )
@@ -2090,20 +2107,21 @@ def best_work_speed_profile(owned: list[State], target_key: str, gender_preferen
             continue
         forced = []
         priority_rank = 0
+        available_on_candidate = set(state.passives) | implant_passives
         for group in priority_groups:
-            selected_priority = next((passive for passive in group if passive in state.passives), None)
+            selected_priority = next((passive for passive in group if passive in available_on_candidate), None)
             if selected_priority:
                 forced.append(selected_priority)
                 priority_rank += group.index(selected_priority)
             else:
                 priority_rank += len(group)
-        has_forced_insomnia = force_insomnia and "Insomnia" in state.passives
+        has_forced_insomnia = force_insomnia and "Insomnia" in available_on_candidate
         if force_insomnia and not has_forced_insomnia:
             priority_rank += 1
         speed_slots = 3 if has_forced_insomnia else 4
         selected = forced + [
             passive
-            for passive in work_speed_passive_order(state.passives, scores)
+            for passive in work_speed_passive_order(available_on_candidate, scores)
             if passive not in forced and passive != "Insomnia"
         ][:max(0, speed_slots - len(forced))]
         if has_forced_insomnia and "Insomnia" not in selected:
@@ -2171,7 +2189,9 @@ def build_plan(payload: dict) -> dict:
     if not target_key:
         return {"error": f"Unknown target species: {target_name}"}
     final_target = canonical_passives(payload.get("passives", []))
-    implant_passives = canonical_passives(payload.get("implantPassives", [])) & final_target
+    include_implants = bool(payload.get("includeImplants"))
+    inventory_implants = available_implant_passives() if include_implants else set()
+    implant_passives = (canonical_passives(payload.get("implantPassives", [])) | inventory_implants) & final_target
     target = frozenset(final_target - implant_passives)
     allowed = canonical_passives(payload.get("allowedExtras", [])) | implant_passives
     gender_preference = payload.get("genderPreference") or "any"
@@ -2189,10 +2209,11 @@ def build_plan(payload: dict) -> dict:
             gender_preference,
             include_insomnia="Insomnia" in final_target,
             priority_passive_groups=priority_passive_groups,
+            implant_passives=inventory_implants,
         )
         if work_speed_profile["selected"]:
             final_target = frozenset(work_speed_profile["selected"])
-            implant_passives = implant_passives & final_target
+            implant_passives = (implant_passives | inventory_implants) & final_target
             target = frozenset(final_target - implant_passives)
             allowed = allowed | implant_passives
             profile_route = work_speed_profile["route"]
@@ -2289,8 +2310,8 @@ def build_plan(payload: dict) -> dict:
         for passive in profile_ideal:
             if passive in profile_selected:
                 continue
-            if passive not in available:
-                reasons.append(f"{passive} is not owned")
+            if passive not in available and passive not in inventory_implants:
+                reasons.append(f"{passive} is not owned or available as an implant")
             else:
                 reasons.append(f"{passive} could not be included in a stronger reachable combination")
         profile_scores = work_speed_profile.get("scores", WORK_SPEED_PASSIVE_SCORE)
