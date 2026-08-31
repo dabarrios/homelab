@@ -2064,6 +2064,9 @@ def best_work_speed_profile(
     target_is_dark = "dark" in {str(t).lower() for t in species_types_for_key(target_key)}
     force_insomnia = include_insomnia and not target_is_dark
     scores = work_speed_profile_scores(force_insomnia)
+    selection_scores = dict(scores)
+    if force_insomnia and "Lucky" in selection_scores and "Work Slave" in selection_scores:
+        selection_scores["Lucky"] = max(selection_scores["Lucky"], selection_scores["Work Slave"] + 1)
     implant_passives = set(implant_passives or set())
     priority_groups = [
         list(dict.fromkeys(passive for passive in group if passive))
@@ -2140,7 +2143,7 @@ def best_work_speed_profile(
         speed_slots = 3 if has_forced_insomnia else 4
         selected = forced + [
             passive
-            for passive in work_speed_passive_order(available_on_candidate, scores)
+            for passive in work_speed_passive_order(available_on_candidate, selection_scores)
             if passive not in forced and passive != "Insomnia"
         ][:max(0, speed_slots - len(forced))]
         if has_forced_insomnia and "Insomnia" not in selected:
@@ -2226,7 +2229,7 @@ def build_plan(payload: dict) -> dict:
             owned,
             target_key,
             gender_preference,
-            include_insomnia="Insomnia" in final_target,
+            include_insomnia=bool(payload.get("includeInsomnia")),
             priority_passive_groups=priority_passive_groups,
             implant_passives=inventory_implants,
         )

@@ -191,7 +191,8 @@ function locationText(node) {
   return location || 'Unknown location';
 }
 
-function displayPassives(node, isRoot = false) {
+function displayPassives(node, isRoot = false, plan = null) {
+  if (isRoot && plan?.finalPassives?.length) return plan.finalPassives;
   return (isRoot || node.parents?.length) ? (node.desired || []) : (node.passives || []);
 }
 
@@ -199,13 +200,14 @@ function displayJunk(node, isRoot = false) {
   return (isRoot || node.parents?.length) ? [] : (node.junk || []);
 }
 
-function renderPassiveBars(node, isRoot = false) {
-  const passives = displayPassives(node, isRoot);
+function renderPassiveBars(node, isRoot = false, plan = null) {
+  const passives = displayPassives(node, isRoot, plan);
   if (!passives.length) return '<div class="passive-list empty-passives">No passives</div>';
   const junk = new Set(displayJunk(node, isRoot));
+  const implants = new Set(isRoot ? (plan?.implantPassives || []) : []);
   return `<div class="passive-list">${passives.map(passive => {
     const tone = passiveTone(passive);
-    return `<span class="passive-bar ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${junk.has(passive) ? '<em>Junk</em>' : ''}</span>`;
+    return `<span class="passive-bar ${implants.has(passive) ? 'implant-missing' : ''} ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implants.has(passive) ? '<em>Implant</em>' : junk.has(passive) ? '<em>Junk</em>' : ''}</span>`;
   }).join('')}</div>`;
 }
 
@@ -553,11 +555,10 @@ function showEmptyState() {
   setText('#resultCount', '');
 }
 
-function renderPalNode(node, isRoot = false) {
+function renderPalNode(node, isRoot = false, plan = null) {
   const role = isRoot ? 'FINAL EGG' : node.parents?.length ? 'BREED FIRST' : 'OWNED';
   const roleClass = role === 'OWNED' ? 'owned' : role === 'FINAL EGG' ? 'target' : 'breed';
   const gender = genderLabel(node);
-  const junk = displayJunk(node, isRoot);
   return `
     <article class="pal-node ${roleClass}">
       <div class="pal-main">
@@ -568,22 +569,19 @@ function renderPalNode(node, isRoot = false) {
           ${renderTypeChips(node.types || [])}
         </div>
       </div>
-      ${renderPassiveBars(node, isRoot)}
+      ${renderPassiveBars(node, isRoot, plan)}
       <div class="node-foot">
         <span class="role-badge ${roleClass}">${role}</span>
         <span>IV ${formatIv(node.hpIv)}/${formatIv(node.attackIv)}/${formatIv(node.defenseIv)}</span>
-        <span>${(node.desired || []).length}/${(node.desired || []).length + (node.missing || []).length} desired</span>
-        <span>${junk.length} junk</span>
       </div>
-      ${junk.length ? `<p class="junk-text">Junk: ${escapeHtml(junk.join(', '))}</p>` : ''}
     </article>`;
 }
 
-function renderBreedTree(node, isRoot = false) {
+function renderBreedTree(node, isRoot = false, plan = null) {
   const parents = node.parents?.length
-    ? `<div class="branch"><div class="children">${node.parents.map(parent => renderBreedTree(parent)).join('')}</div></div>`
+    ? `<div class="branch"><div class="children">${node.parents.map(parent => renderBreedTree(parent, false, plan)).join('')}</div></div>`
     : '';
-  return `<div class="tree-node">${renderPalNode(node, isRoot)}${parents}</div>`;
+  return `<div class="tree-node">${renderPalNode(node, isRoot, plan)}${parents}</div>`;
 }
 
 function fillOptions() {
@@ -1259,22 +1257,22 @@ function renderReadyFinishCards(candidates, data) {
           </div>
         </div>
         <div class="ready-progress">
-          <span>Progress</span>
-          <strong>${escapeHtml(present.length)} / ${escapeHtml(finalPassives.length)} <em>final passives present</em></strong>
-          <p>${escapeHtml(missingImplants.length)} implant${missingImplants.length === 1 ? '' : 's'} needed</p>
-        </div>
-        <div class="ready-missing">
-          <span>Missing Passive</span>
-          <div class="passive-list ready-passive-list">
-            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
-          </div>
-          <p>Available in implant inventory</p>
-        </div>
-        <div class="ready-passives ready-option-passives">
-          <span>Passives</span>
+          <span>Breed for</span>
           <div class="passive-list ready-passive-list">
             ${present.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
-            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+          </div>
+        </div>
+        <div class="ready-missing">
+          <span>Add later</span>
+          <div class="passive-list ready-passive-list">
+            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em>Implant</em></span>`).join('')}
+          </div>
+        </div>
+        <div class="ready-passives ready-option-passives">
+          <span>Final passives</span>
+          <div class="passive-list ready-passive-list">
+            ${present.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em>Implant</em></span>`).join('')}
           </div>
           ${replaceable.length ? `<p class="ready-replaceable">Replaceable: ${escapeHtml(replaceable.join(', '))}</p>` : ''}
         </div>
@@ -1321,10 +1319,9 @@ function renderBreeding(data) {
             </div>
             <div class="badges">
               <span>${escapeHtml(route.steps || 0)} steps</span>
-              <span class="${(route.junk || []).length ? 'bad' : 'good'}">${(route.junk || []).length} junk</span>
             </div>
           </div>
-          <div class="breed-tree">${renderBreedTree(route, true)}</div>
+          <div class="breed-tree">${renderBreedTree(route, true, data)}</div>
         </article>
       </section>`;
   }
@@ -1341,10 +1338,9 @@ function renderBreeding(data) {
               <h3>${escapeHtml(route.species)}</h3>
             </div>
             <div class="badges">
-              <span class="${(route.junk || []).length ? 'bad' : 'good'}">${(route.junk || []).length} junk</span>
             </div>
           </div>
-          <div class="breed-tree">${renderBreedTree(route, true)}</div>
+          <div class="breed-tree">${renderBreedTree(route, true, data)}</div>
         </article>
     </section>`;
 }
@@ -1352,24 +1348,32 @@ function renderBreeding(data) {
 function renderProfileResultNotice(data) {
   const selected = data.profileSelectedPassives || [];
   const ideal = data.profileIdealPassives || [];
-  if (!selected.length && !ideal.length && !data.profileDisclaimer) return '';
+  const finalPassives = data.finalPassives || [];
+  const implantPassives = new Set(data.implantPassives || []);
+  const breedFor = finalPassives.filter(passive => !implantPassives.has(passive));
+  const addLater = finalPassives.filter(passive => implantPassives.has(passive));
+  const hasImplantPlan = addLater.length > 0;
+  if (!selected.length && !ideal.length && !data.profileDisclaimer && !hasImplantPlan) return '';
   return `
     <div class="profile-result-notice">
       <div>
         <strong>Passive profile result</strong>
         ${data.profileDisclaimer ? `<p>${escapeHtml(data.profileDisclaimer)}</p>` : ''}
+        ${hasImplantPlan ? '<p>Implant inventory is included in this route; some final passives are planned for after breeding.</p>' : ''}
       </div>
       <div class="profile-result-grid">
         ${ideal.length ? `<span><b>Absolute target</b>${profileResultPassiveList(ideal)}</span>` : ''}
         ${selected.length ? `<span><b>Using</b>${profileResultPassiveList(selected)}</span>` : ''}
+        ${hasImplantPlan ? `<span><b>Breed for</b>${profileResultPassiveList(breedFor)}</span>` : ''}
+        ${hasImplantPlan ? `<span><b>Add later</b>${profileResultPassiveList(addLater, implantPassives)}</span>` : ''}
       </div>
     </div>`;
 }
 
-function profileResultPassiveList(passives) {
+function profileResultPassiveList(passives, implantPassives = new Set()) {
   return `
     <span class="passive-list compact">
-      ${(passives || []).map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
+      ${(passives || []).map(passive => `<span class="passive-bar ${implantPassives.has(passive) ? 'implant-missing' : ''} ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implantPassives.has(passive) ? '<em>Implant</em>' : ''}</span>`).join('')}
     </span>`;
 }
 
@@ -1669,6 +1673,7 @@ async function submitTool(event) {
           target: data.target,
           passives: finalPassives,
           includeImplants: Boolean(data.includeImplants),
+          includeInsomnia: Boolean(data.includeInsomnia),
           implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
           genderPreference: data.genderPreference || 'any',
           breedingProfile: customProfile ? 'manual' : data.breedingProfile || 'manual',
