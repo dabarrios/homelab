@@ -11,9 +11,15 @@ let builtInProfileNames = {};
 let editingProfileId = '';
 let editingBuiltInProfile = '';
 let ranchDropsCache = null;
+let savedBreedingPlans = [];
+let restoredFormState = false;
+let restoredResult = false;
+let lastBreedingResult = null;
 
 const CUSTOM_PROFILES_KEY = 'pals.customProfiles.v1';
 const BUILT_IN_PROFILE_NAMES_KEY = 'pals.builtInProfileNames.v1';
+const SAVED_BREEDING_PLANS_KEY = 'pals.savedBreedingPlans.v1';
+const MODULE_FORM_STATE_KEY = `pals.formState.${moduleKey}.v1`;
 const BUILT_IN_PROFILES = [
   {value: 'manual', label: 'Manual passives', locked: false},
   {value: 'work_speed', label: 'Best work speed', locked: true},
@@ -33,6 +39,10 @@ const BUILT_IN_PROFILE_PASSIVES = {
     ['Artisan', 50],
   ],
 };
+const POSITIVE_PASSIVE_FALLBACKS = new Set([
+  "Demon's Hand",
+  "Demon’s Hand",
+]);
 
 function apiUrl(path) {
   return `${apiBase}${path.startsWith('/') ? path : `/${path}`}`;
@@ -139,6 +149,7 @@ function escapeHtml(value) {
 }
 
 function passiveTone(passive) {
+  if (POSITIVE_PASSIVE_FALLBACKS.has(passive)) return 'positive';
   return options.passiveMeta?.[passive]?.tone || 'neutral';
 }
 
@@ -200,15 +211,34 @@ function displayJunk(node, isRoot = false) {
   return (isRoot || node.parents?.length) ? [] : (node.junk || []);
 }
 
+function passiveBarHtml(passive, {implant = false, junk = false} = {}) {
+  const tone = passiveTone(passive);
+  return `<span class="passive-bar ${implant ? 'implant-missing' : ''} ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implant ? '<em class="implant-badge">Implant</em>' : junk ? '<em>Junk</em>' : ''}</span>`;
+}
+
 function renderPassiveBars(node, isRoot = false, plan = null) {
-  const passives = displayPassives(node, isRoot, plan);
-  if (!passives.length) return '<div class="passive-list empty-passives">No passives</div>';
+  const implantPassives = new Set(plan?.implantPassives || []);
+  const naturalPassives = isRoot && plan?.finalPassives?.length
+    ? (plan.finalPassives || []).filter(passive => !implantPassives.has(passive))
+    : displayPassives(node, isRoot, plan);
+  const plannedImplants = (isRoot || node.parents?.length)
+    ? (plan?.finalPassives || []).filter(passive => implantPassives.has(passive))
+    : [];
+  const passives = isRoot ? naturalPassives : displayPassives(node, isRoot, plan);
   const junk = new Set(displayJunk(node, isRoot));
-  const implants = new Set(isRoot ? (plan?.implantPassives || []) : []);
-  return `<div class="passive-list">${passives.map(passive => {
-    const tone = passiveTone(passive);
-    return `<span class="passive-bar ${implants.has(passive) ? 'implant-missing' : ''} ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implants.has(passive) ? '<em>Implant</em>' : junk.has(passive) ? '<em>Junk</em>' : ''}</span>`;
-  }).join('')}</div>`;
+  const naturalLabel = node.parents?.length && !isRoot ? '<span class="passive-list-label">Needs</span>' : '';
+  const naturalBars = passives.map(passive => passiveBarHtml(passive, {junk: junk.has(passive)})).join('');
+  const implantRow = plannedImplants.length
+    ? `<div class="passive-list passive-list-labeled implant-plan"><span class="passive-list-label">Implant</span><span class="passive-list-items">${plannedImplants.map(passive => passiveBarHtml(passive, {implant: true})).join('')}</span></div>`
+    : '';
+  const extraHint = node.parents?.length && plannedImplants.length
+    ? '<div class="breed-passive-hint">Extra passives OK - replaceable by implants.</div>'
+    : '';
+  const emptyText = !isRoot && !node.parents?.length ? 'No passives' : 'No natural passives needed';
+  const naturalRow = passives.length
+    ? `<div class="passive-list ${naturalLabel ? 'passive-list-labeled' : ''}">${naturalLabel}${naturalLabel ? `<span class="passive-list-items">${naturalBars}</span>` : naturalBars}</div>`
+    : `<div class="passive-list empty-passives">${emptyText}</div>`;
+  return `${naturalRow}${implantRow}${extraHint}`;
 }
 
 function renderTypeChips(types = []) {
@@ -606,6 +636,7 @@ function fillOptions() {
   renderProfileOptions();
   renderImplantInventories();
   syncCustomSelects();
+  restoreModuleFormState();
   applyUrlPrefill();
   updateAllSpeciesSelections();
 }
@@ -628,6 +659,168 @@ function loadProfiles() {
 function saveProfiles() {
   localStorage.setItem(CUSTOM_PROFILES_KEY, JSON.stringify(customProfiles));
   localStorage.setItem(BUILT_IN_PROFILE_NAMES_KEY, JSON.stringify(builtInProfileNames));
+}
+
+function loadSavedBreedingPlans() {
+  try {
+    savedBreedingPlans = JSON.parse(localStorage.getItem(SAVED_BREEDING_PLANS_KEY) || '[]');
+    if (!Array.isArray(savedBreedingPlans)) savedBreedingPlans = [];
+  } catch {
+    savedBreedingPlans = [];
+  }
+}
+
+function saveSavedBreedingPlans() {
+  localStorage.setItem(SAVED_BREEDING_PLANS_KEY, JSON.stringify(savedBreedingPlans));
+}
+
+function currentFormState() {
+  const form = $('#toolForm');
+  const data = {};
+  if (form) {
+    Array.from(form.elements).forEach(field => {
+      if (!field.name || field.type === 'file') return;
+      data[field.name] = field.type === 'checkbox' ? Boolean(field.checked) : field.value;
+    });
+  }
+  return {
+    values: data,
+    passives: [...passiveSelections.passives],
+    implantPassives: [...passiveSelections.implantPassives],
+    result: moduleKey === 'breeding' && lastBreedingResult ? lastBreedingResult : null,
+  };
+}
+
+function applyFormState(state) {
+  if (!state?.values) return;
+  const form = $('#toolForm');
+  if (!form) return;
+  Object.entries(state.values).forEach(([name, value]) => {
+    const field = form.elements[name];
+    if (!field) return;
+    if (window.RadioNodeList && field instanceof RadioNodeList) {
+      [...field].forEach(item => {
+        if (item.type === 'checkbox' || item.type === 'radio') item.checked = String(item.value) === String(value);
+      });
+    } else if (field.type === 'checkbox') {
+      field.checked = Boolean(value);
+    } else {
+      field.value = value;
+    }
+  });
+  if (Array.isArray(state.passives)) passiveSelections.passives = state.passives.slice(0, 4);
+  if (Array.isArray(state.implantPassives)) passiveSelections.implantPassives = state.implantPassives.slice(0, 4);
+  document.querySelectorAll('[data-picker="passives"], [data-picker="implantPassives"]').forEach(renderPassivePicker);
+  updateProfileHint();
+  syncCustomSelects();
+  updateAllSpeciesSelections();
+}
+
+function saveModuleFormState() {
+  const form = $('#toolForm');
+  if (!form) return;
+  try {
+    localStorage.setItem(MODULE_FORM_STATE_KEY, JSON.stringify(currentFormState()));
+  } catch {
+    return;
+  }
+}
+
+function markFormChanged() {
+  if (moduleKey === 'breeding') lastBreedingResult = null;
+  saveModuleFormState();
+}
+
+function restoreModuleFormState() {
+  if (restoredFormState) return;
+  restoredFormState = true;
+  if (moduleKey === 'breeding' && window.location.search) return;
+  try {
+    const state = JSON.parse(localStorage.getItem(MODULE_FORM_STATE_KEY) || 'null');
+    applyFormState(state);
+    if (moduleKey === 'breeding' && state?.result) {
+      renderResult(state.result);
+      restoredResult = true;
+      setText('#toolStatus', 'Restored saved view.');
+    }
+  } catch {
+    return;
+  }
+}
+
+function defaultBreedingPlanName() {
+  const target = exactSpeciesName(formData().target) || formData().target || 'Breeding setup';
+  return String(target).trim().replace(/\s+/g, '_').slice(0, 60) || 'Breeding_setup';
+}
+
+function renderSavedBreedingPlanOptions(selected = '') {
+  const select = $('#savedBreedingPlan');
+  if (!select) return;
+  select.innerHTML = savedBreedingPlans.length
+    ? savedBreedingPlans.map(plan => `<option value="${escapeHtml(plan.id)}">${escapeHtml(plan.name)}</option>`).join('')
+    : '<option value="">No saved setups</option>';
+  select.value = savedBreedingPlans.some(plan => plan.id === selected) ? selected : (savedBreedingPlans[0]?.id || '');
+  $('#loadBreedingPlan')?.toggleAttribute('disabled', !savedBreedingPlans.length);
+  $('#deleteBreedingPlan')?.toggleAttribute('disabled', !savedBreedingPlans.length);
+  updateCustomSelect(select);
+}
+
+function saveBreedingPlan() {
+  if (moduleKey !== 'breeding') return;
+  const input = $('#breedingPlanName');
+  const name = (input?.value || defaultBreedingPlanName()).trim().slice(0, 60);
+  const state = currentFormState();
+  const result = lastBreedingResult ? JSON.parse(JSON.stringify(lastBreedingResult)) : null;
+  let plan = savedBreedingPlans.find(item => item.name.toLowerCase() === name.toLowerCase());
+  if (plan) {
+    plan.state = state;
+    plan.result = result;
+    plan.savedAt = new Date().toISOString();
+  } else {
+    plan = {id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, name, state, result, savedAt: new Date().toISOString()};
+    savedBreedingPlans.push(plan);
+  }
+  saveSavedBreedingPlans();
+  renderSavedBreedingPlanOptions(plan.id);
+  if (input) input.value = name;
+  setText('#breedingPlanStatus', result ? 'Saved setup and displayed tree.' : 'Saved setup. Optimize once to capture a tree.');
+}
+
+function loadBreedingPlan() {
+  const id = $('#savedBreedingPlan')?.value || '';
+  const plan = savedBreedingPlans.find(item => item.id === id);
+  if (!plan) return;
+  applyFormState(plan.state);
+  if ($('#breedingPlanName')) $('#breedingPlanName').value = plan.name;
+  saveModuleFormState();
+  if (plan.result) {
+    lastBreedingResult = JSON.parse(JSON.stringify(plan.result));
+    renderResult(lastBreedingResult);
+    setText('#toolStatus', 'Loaded saved tree.');
+    setText('#breedingPlanStatus', 'Loaded saved setup and captured tree.');
+  } else {
+    showEmptyState();
+    setText('#breedingPlanStatus', 'Loaded saved setup. Optimize to build the tree.');
+  }
+}
+
+function deleteBreedingPlan() {
+  const id = $('#savedBreedingPlan')?.value || '';
+  const plan = savedBreedingPlans.find(item => item.id === id);
+  if (!plan) return;
+  savedBreedingPlans = savedBreedingPlans.filter(item => item.id !== id);
+  saveSavedBreedingPlans();
+  renderSavedBreedingPlanOptions();
+  setText('#breedingPlanStatus', `Deleted ${plan.name}.`);
+}
+
+function initBreedingPlans() {
+  if (moduleKey !== 'breeding') return;
+  loadSavedBreedingPlans();
+  renderSavedBreedingPlanOptions();
+  $('#saveBreedingPlan')?.addEventListener('click', saveBreedingPlan);
+  $('#loadBreedingPlan')?.addEventListener('click', loadBreedingPlan);
+  $('#deleteBreedingPlan')?.addEventListener('click', deleteBreedingPlan);
 }
 
 function profileLabel(profile) {
@@ -1014,6 +1207,7 @@ function addPassive(picker) {
   hint.className = 'field-hint valid';
   renderPassivePicker(picker);
   renderPassiveSuggestions(picker);
+  markFormChanged();
   input.focus();
 }
 
@@ -1026,6 +1220,7 @@ function initPassivePickers() {
       picker.querySelector('[data-passive-hint]').textContent = 'Selected passives cleared.';
       picker.querySelector('[data-passive-hint]').className = 'field-hint';
       renderPassivePicker(picker);
+      markFormChanged();
     });
     picker.querySelector('[data-passive-input]')?.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
@@ -1049,6 +1244,7 @@ function initPassivePickers() {
       switchToManualProfileForPassiveEdit(picker);
       passiveSelections[key] = (passiveSelections[key] || []).filter(item => item !== passive);
       renderPassivePicker(picker);
+      markFormChanged();
     });
     renderPassivePicker(picker);
   });
@@ -1286,10 +1482,6 @@ function renderReadyFinishCards(candidates, data) {
           <h3>Ready to Finish</h3>
           <p>Use an owned ${escapeHtml(top.species || 'Pal')} and implant the missing passive${finalPassives.length === 1 ? '' : 's'}.</p>
         </div>
-        <div class="ready-metrics">
-          <span><b>Breeding Steps</b><strong>0</strong></span>
-          <span><b>Options</b><strong>${escapeHtml(candidates.length)}</strong></span>
-        </div>
       </div>
       <div class="ready-options-grid">${candidateCards}</div>
       <div class="ready-actions">
@@ -1337,8 +1529,6 @@ function renderBreeding(data) {
             <div>
               <h3>${escapeHtml(route.species)}</h3>
             </div>
-            <div class="badges">
-            </div>
           </div>
           <div class="breed-tree">${renderBreedTree(route, true, data)}</div>
         </article>
@@ -1356,16 +1546,19 @@ function renderProfileResultNotice(data) {
   if (!selected.length && !ideal.length && !data.profileDisclaimer && !hasImplantPlan) return '';
   return `
     <div class="profile-result-notice">
-      <div>
-        <strong>Passive profile result</strong>
+      <div class="profile-result-summary">
+        <div class="profile-result-title">
+          <span class="profile-result-icon" aria-hidden="true">★</span>
+          <strong>Passive profile result</strong>
+        </div>
         ${data.profileDisclaimer ? `<p>${escapeHtml(data.profileDisclaimer)}</p>` : ''}
         ${hasImplantPlan ? '<p>Implant inventory is included in this route; some final passives are planned for after breeding.</p>' : ''}
       </div>
       <div class="profile-result-grid">
-        ${ideal.length ? `<span><b>Absolute target</b>${profileResultPassiveList(ideal)}</span>` : ''}
-        ${selected.length ? `<span><b>Using</b>${profileResultPassiveList(selected)}</span>` : ''}
-        ${hasImplantPlan ? `<span><b>Breed for</b>${profileResultPassiveList(breedFor)}</span>` : ''}
-        ${hasImplantPlan ? `<span><b>Add later</b>${profileResultPassiveList(addLater, implantPassives)}</span>` : ''}
+        ${ideal.length ? `<section><b>Absolute target</b>${profileResultPassiveList(ideal)}</section>` : ''}
+        ${selected.length ? `<section><b>Using</b>${profileResultPassiveList(selected)}</section>` : ''}
+        ${hasImplantPlan ? `<section><b>Breed for</b>${profileResultPassiveList(breedFor)}</section>` : ''}
+        ${hasImplantPlan ? `<section><b>Add later</b>${profileResultPassiveList(addLater, implantPassives)}</section>` : ''}
       </div>
     </div>`;
 }
@@ -1438,10 +1631,11 @@ function renderWorkCard(card, compact = false, recommendation = null, profile = 
         <div class="work-rec-kicker">${escapeHtml(recommendation.title)}</div>
       </div>
       ${renderBreedAction(card, profile)}
-    </div>` : renderBreedAction(card, profile);
+    </div>` : '';
   return `
     <article class="work-pal-card ${compact ? 'compact' : ''} ${recommendation ? 'work-rec-card' : ''}">
       ${recHead}
+      ${recommendation ? '' : renderBreedAction(card, profile)}
       <div class="pal-main">
         <div class="pal-avatar">${card.icon ? `<img src="${escapeHtml(assetUrl(card.icon))}" alt="">` : escapeHtml(speciesInitials(card.name))}</div>
         <div class="pal-copy">
@@ -1587,6 +1781,7 @@ async function saveBaseLabel() {
 
 function renderResult(data) {
   const renderers = {breeding: renderBreeding, ivs: renderIvs, work: renderWork, ranch: renderRanch, bases: renderBases};
+  if (moduleKey === 'breeding') lastBreedingResult = data;
   $('#results').classList.remove('results-empty');
   $('#results').innerHTML = (renderers[moduleKey] || renderJson)(data);
   const count = data.total || data.totalItems || data.rosterCount || (data.groups || []).length || '';
@@ -1647,6 +1842,19 @@ function initRanchDropSearch() {
     window.history.replaceState({}, '', `/pals/ranch/${slugify(drop)}/`);
     field.querySelector('[data-ranch-drop-menu]')?.classList.remove('open');
     $('#toolForm')?.requestSubmit();
+  });
+}
+
+function initFormStatePersistence() {
+  const form = $('#toolForm');
+  if (!form) return;
+  form.addEventListener('input', event => {
+    if (event.target.closest('#breedingPlanName, #savedBreedingPlan')) return;
+    markFormChanged();
+  });
+  form.addEventListener('change', event => {
+    if (event.target.closest('#breedingPlanName, #savedBreedingPlan')) return;
+    markFormChanged();
   });
 }
 
@@ -1714,6 +1922,7 @@ async function submitTool(event) {
       });
     }
     renderResult(result);
+    saveModuleFormState();
     setText('#toolStatus', 'Done.');
   } catch (error) {
     $('#results').classList.add('results-empty');
@@ -1837,16 +2046,18 @@ async function init() {
   initPassivePickers();
   initPassiveTooltips();
   initProfiles();
+  initBreedingPlans();
   initImplantInventories();
   initFreshCopyToggle();
   initRanchDropSearch();
+  initFormStatePersistence();
   $('#refreshLiveSave')?.addEventListener('click', () => refreshLiveSave().catch(error => setLiveStatus(error.message, 'bad')));
   $('#saveUpload')?.addEventListener('change', event => uploadSave(event.target.files?.[0]).catch(error => setLiveStatus(error.message, 'bad')));
   $('.js-base')?.addEventListener('change', updateBaseLabelField);
   $('#saveBaseLabel')?.addEventListener('click', () => saveBaseLabel().catch(error => setText('#baseLabelHint', error.message)));
   options = await api('/options');
   fillOptions();
-  showEmptyState();
+  if (!restoredResult) showEmptyState();
   if (moduleKey === 'ranch' && window.PALS_RANCH_ITEM_SLUG) {
     $('#toolForm')?.requestSubmit();
   }

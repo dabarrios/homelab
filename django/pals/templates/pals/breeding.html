@@ -55,4 +55,19 @@
     </span>
     <span class="field-hint" id="profileHint">Manual passives lets you choose each passive yourself.</span>
 </label>
+<label>
+    Saved Setup
+    <span class="saved-plan-control">
+        <span class="saved-plan-row">
+            <input id="breedingPlanName" autocomplete="off" placeholder="Plan name">
+            <button type="button" id="saveBreedingPlan">Save</button>
+        </span>
+        <span class="saved-plan-row saved-plan-load-row">
+            <select id="savedBreedingPlan"></select>
+            <button type="button" id="loadBreedingPlan">Load</button>
+            <button type="button" id="deleteBreedingPlan">Delete</button>
+        </span>
+    </span>
+    <span class="field-hint" id="breedingPlanStatus">Save the current setup and exact displayed tree.</span>
+</label>
 {% endblock %}

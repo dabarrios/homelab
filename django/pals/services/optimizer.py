@@ -98,6 +98,8 @@ NEGATIVE_PASSIVES = {
 BLUE_PASSIVES = {
     "Ancient Might",
     "Diamond Body",
+    "Demon's Hand",
+    "Demon’s Hand",
     "Dimensional Leap",
     "Eternal Engine",
     "Eternal Engine S",
