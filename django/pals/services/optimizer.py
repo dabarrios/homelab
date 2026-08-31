@@ -63,6 +63,7 @@ GOLD_PASSIVES = {
     "Diet Lover",
     "Earth Emperor",
     "Eternal Flame",
+    "Farmhand",
     "Ferocious",
     "Flame Emperor",
     "Ice Emperor",

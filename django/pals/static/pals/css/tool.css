@@ -1301,6 +1301,7 @@
 
 .passive-list.compact {
     gap: 5px;
+    margin-top: 0;
 }
 
 .passive-list.compact .passive-bar {

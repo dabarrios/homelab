@@ -43,6 +43,9 @@ const POSITIVE_PASSIVE_FALLBACKS = new Set([
   "Demon's Hand",
   "Demon’s Hand",
 ]);
+const GOLD_PASSIVE_FALLBACKS = new Set([
+  'Farmhand',
+]);
 
 function apiUrl(path) {
   return `${apiBase}${path.startsWith('/') ? path : `/${path}`}`;
@@ -150,6 +153,7 @@ function escapeHtml(value) {
 
 function passiveTone(passive) {
   if (POSITIVE_PASSIVE_FALLBACKS.has(passive)) return 'positive';
+  if (GOLD_PASSIVE_FALLBACKS.has(passive)) return 'gold';
   return options.passiveMeta?.[passive]?.tone || 'neutral';
 }
 
@@ -750,7 +754,7 @@ function restoreModuleFormState() {
 
 function defaultBreedingPlanName() {
   const target = exactSpeciesName(formData().target) || formData().target || 'Breeding setup';
-  return String(target).trim().replace(/\s+/g, '_').slice(0, 60) || 'Breeding_setup';
+  return String(target).trim().replace(/\s+/g, ' ').slice(0, 60) || 'Breeding setup';
 }
 
 function renderSavedBreedingPlanOptions(selected = '') {
@@ -889,14 +893,8 @@ function profilePassiveSummary(passives, label, showScore = false) {
 }
 
 function applySelectedProfile() {
-  const custom = customProfileByValue(selectedProfileValue());
-  if (!custom) {
-    updateProfileHint();
-    return;
-  }
-  passiveSelections.passives = [...custom.passives].slice(0, 4);
-  document.querySelectorAll('[data-picker="passives"]').forEach(renderPassivePicker);
   updateProfileHint();
+  markFormChanged();
 }
 
 function switchToManualProfileForPassiveEdit(picker) {
