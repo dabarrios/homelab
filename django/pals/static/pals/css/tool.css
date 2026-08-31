@@ -298,6 +298,63 @@
 .empty-icon::before { transform: rotate(-42deg) translate(1px, -1px); }
 .empty-icon::after { transform: rotate(38deg) translate(4px, 8px); }
 
+.empty-state-icon {
+    color: var(--accent);
+}
+
+.empty-state-icon-breeding,
+.empty-state-icon-ivs {
+    color: #56a6df;
+    border-color: rgba(86, 166, 223, .72);
+    background: rgba(53, 120, 212, .13);
+}
+
+.empty-state-icon-work {
+    color: #75c5aa;
+}
+
+.empty-state-icon-ranch {
+    color: #d6a728;
+    border-color: rgba(214, 167, 40, .72);
+    background: radial-gradient(circle at 45% 35%, rgba(214, 167, 40, .18), rgba(214, 167, 40, .08));
+}
+
+.empty-state-icon-bases {
+    color: #9e8cff;
+    border-color: rgba(158, 140, 255, .66);
+    background: radial-gradient(circle at 45% 35%, rgba(158, 140, 255, .17), rgba(158, 140, 255, .08));
+}
+
+.empty-state-icon::before,
+.empty-state-icon::after,
+.empty-state-icon span,
+.empty-state-icon span::before,
+.empty-state-icon span::after {
+    content: none;
+    display: none;
+}
+
+.empty-state-svg {
+    width: 32px;
+    height: 32px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.85;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.empty-tool-icon .empty-state-svg {
+    width: 34px;
+    height: 34px;
+}
+
+.empty-ranch-icon .empty-state-svg,
+.empty-bases-icon .empty-state-svg {
+    width: 44px;
+    height: 44px;
+}
+
 .empty-hero h3 {
     margin: 0;
     color: var(--ink);

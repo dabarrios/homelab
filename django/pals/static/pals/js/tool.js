@@ -465,14 +465,56 @@ const EMPTY_STATES = {
   },
 };
 
+const EMPTY_STATE_ICON_NAMES = {
+  breeding: 'git-fork',
+  ivs: 'git-fork',
+  work: 'wrench',
+  ranch: 'candy',
+  bases: 'castle',
+};
+
+const LUCIDE_ICON_PATHS = {
+  'git-fork': `
+    <circle cx="12" cy="18" r="3"></circle>
+    <circle cx="6" cy="6" r="3"></circle>
+    <circle cx="18" cy="6" r="3"></circle>
+    <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"></path>
+    <path d="M12 12v3"></path>
+  `,
+  wrench: `
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path>
+  `,
+  candy: `
+    <path d="M10 7v10.9"></path>
+    <path d="M14 6.1V17"></path>
+    <path d="M16 7V3a1 1 0 0 1 1.707-.707 2.5 2.5 0 0 0 2.152.717 1 1 0 0 1 1.131 1.131 2.5 2.5 0 0 0 .717 2.152A1 1 0 0 1 21 8h-4"></path>
+    <path d="M16.536 7.465a5 5 0 0 0-7.072 0l-2 2a5 5 0 0 0 0 7.07 5 5 0 0 0 7.072 0l2-2a5 5 0 0 0 0-7.07"></path>
+    <path d="M8 17v4a1 1 0 0 1-1.707.707 2.5 2.5 0 0 0-2.152-.717 1 1 0 0 1-1.131-1.131 2.5 2.5 0 0 0-.717-2.152A1 1 0 0 1 3 16h4"></path>
+  `,
+  castle: `
+    <path d="M10 5V3"></path>
+    <path d="M14 5V3"></path>
+    <path d="M15 21v-3a3 3 0 0 0-6 0v3"></path>
+    <path d="M18 3v8"></path>
+    <path d="M18 5H6"></path>
+    <path d="M22 11H2"></path>
+    <path d="M22 9v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9"></path>
+    <path d="M6 3v8"></path>
+  `,
+};
+
+function emptyStateIconHtml(key) {
+  const iconName = EMPTY_STATE_ICON_NAMES[key] || EMPTY_STATE_ICON_NAMES.breeding;
+  return `<svg class="empty-state-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${LUCIDE_ICON_PATHS[iconName]}</svg>`;
+}
+
 function emptyStateHtml(key = moduleKey) {
-  const state = EMPTY_STATES[key] || EMPTY_STATES.breeding;
-  const focusedState = key === 'work' ? `
+  const stateKey = EMPTY_STATES[key] ? key : 'breeding';
+  const state = EMPTY_STATES[stateKey];
+  const focusedState = stateKey === 'work' ? `
     <div class="empty-hero empty-focused-hero">
       <div class="empty-work-state">
-        <div class="empty-tool-icon empty-work-icon" aria-hidden="true">
-          <span></span>
-        </div>
+        <div class="empty-tool-icon empty-state-icon empty-state-icon-work" aria-hidden="true">${emptyStateIconHtml('work')}</div>
         <h3>${escapeHtml(state.title)}</h3>
         <p>${escapeHtml(state.lead)}</p>
         <div class="empty-work-divider"><span></span><b class="empty-divider-work-mark"></b><span></span></div>
@@ -481,15 +523,10 @@ function emptyStateHtml(key = moduleKey) {
         </div>
         <p class="empty-hint">${escapeHtml(state.hint)}</p>
       </div>
-    </div>` : key === 'ranch' ? `
+    </div>` : stateKey === 'ranch' ? `
     <div class="empty-hero empty-focused-hero">
       <div class="empty-ranch-state">
-        <div class="empty-ranch-icon" aria-hidden="true">
-          <span class="barn-roof"></span>
-          <span class="barn-body"></span>
-          <span class="barn-door"></span>
-          <span class="barn-fence"></span>
-        </div>
+        <div class="empty-ranch-icon empty-state-icon empty-state-icon-ranch" aria-hidden="true">${emptyStateIconHtml('ranch')}</div>
         <h3>${escapeHtml(state.title)}</h3>
         <p>${escapeHtml(state.lead)}</p>
         <div class="empty-work-divider empty-ranch-divider"><span></span><b>◇</b><span></span></div>
@@ -498,14 +535,10 @@ function emptyStateHtml(key = moduleKey) {
         </div>
         <p class="empty-hint">${escapeHtml(state.hint)}</p>
       </div>
-    </div>` : key === 'bases' ? `
+    </div>` : stateKey === 'bases' ? `
     <div class="empty-hero empty-focused-hero empty-bases-hero">
       <div class="empty-bases-state">
-        <div class="empty-bases-icon" aria-hidden="true">
-          <span class="base-tower"></span>
-          <span class="base-wall"></span>
-          <span class="base-gate"></span>
-        </div>
+        <div class="empty-bases-icon empty-state-icon empty-state-icon-bases" aria-hidden="true">${emptyStateIconHtml('bases')}</div>
         <h3>${escapeHtml(state.title)}</h3>
         <p>${escapeHtml(state.lead)}</p>
         <p>Then click Build Best Team to see the optimal lineup.</p>
@@ -525,7 +558,7 @@ function emptyStateHtml(key = moduleKey) {
       </div>
     </div>` : '';
   if (focusedState) return focusedState;
-  const diagram = key === 'ivs' ? `
+  const diagram = stateKey === 'ivs' ? `
       <div class="empty-diagram empty-diagram-ivs">
         <div class="empty-card iv-empty-card">
           <strong>Parent A</strong>
@@ -555,22 +588,20 @@ function emptyStateHtml(key = moduleKey) {
       </div>` : `
       <div class="empty-diagram">
         <div class="empty-card">
-          <strong>${key === 'work' ? 'Candidate A' : key === 'ranch' ? 'Producer A' : 'Parent A'}</strong>
+          <strong>${stateKey === 'work' ? 'Candidate A' : stateKey === 'ranch' ? 'Producer A' : 'Parent A'}</strong>
           <i></i><i></i><i></i>
         </div>
         <div class="empty-plus">+</div>
         <div class="empty-card">
-          <strong>${key === 'work' ? 'Candidate B' : key === 'ranch' ? 'Producer B' : 'Parent B'}</strong>
+          <strong>${stateKey === 'work' ? 'Candidate B' : stateKey === 'ranch' ? 'Producer B' : 'Parent B'}</strong>
           <i></i><i></i><i></i>
         </div>
         <div class="empty-arrow"></div>
-        <div class="empty-target"><strong>${key === 'bases' ? 'Base Team' : key === 'work' ? 'Best Pick' : key === 'ranch' ? 'Selected Drop' : 'Target Pal'}</strong><span>?</span></div>
+        <div class="empty-target"><strong>${stateKey === 'bases' ? 'Base Team' : stateKey === 'work' ? 'Best Pick' : stateKey === 'ranch' ? 'Selected Drop' : 'Target Pal'}</strong><span>?</span></div>
       </div>`;
   return `
     <div class="empty-hero">
-      <div class="empty-icon" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
+      <div class="empty-icon empty-state-icon empty-state-icon-${stateKey}" aria-hidden="true">${emptyStateIconHtml(stateKey)}</div>
       <h3>${escapeHtml(state.title)}</h3>
       <p>${escapeHtml(state.lead)}</p>
       ${diagram}
