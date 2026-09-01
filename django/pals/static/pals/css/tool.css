@@ -305,11 +305,16 @@
     color: var(--accent);
 }
 
-.empty-state-icon-breeding,
-.empty-state-icon-ivs {
+.empty-state-icon-breeding {
     color: #56a6df;
     border-color: rgba(86, 166, 223, .72);
     background: rgba(53, 120, 212, .13);
+}
+
+.empty-state-icon-ivs {
+    color: #75c5aa;
+    border-color: #8cc9b5;
+    background: rgba(117, 197, 170, .12);
 }
 
 .empty-state-icon-work {
@@ -769,6 +774,43 @@
     transform: rotate(45deg);
 }
 
+.empty-feature-lucide {
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+}
+
+.empty-feature-lucide::before,
+.empty-feature-lucide::after {
+    content: none;
+    display: none;
+}
+
+.empty-base-feature-lucide::before,
+.empty-base-feature-lucide::after {
+    content: none;
+    display: none;
+    border: 0;
+    box-shadow: none;
+}
+
+.empty-feature-svg,
+.empty-base-step-svg,
+.work-rec-kicker-icon,
+.badge-svg,
+.passive-badge-svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.empty-feature-svg {
+    width: 19px;
+    height: 19px;
+}
+
 .empty-ranch-state {
     width: min(840px, 100%);
     display: grid;
@@ -1138,6 +1180,28 @@
     border-top: 2px solid var(--accent);
     clip-path: polygon(0 100%, 20% 0, 50% 58%, 80% 0, 100% 100%);
     background: var(--accent);
+}
+
+.empty-base-step .empty-base-step-icon {
+    display: grid;
+    place-items: center;
+    gap: 0;
+    grid-template-columns: none;
+    color: var(--accent);
+    border: 1px solid rgba(117, 197, 170, .45);
+    border-radius: 12px;
+    background: rgba(117, 197, 170, .10);
+}
+
+.empty-base-step .empty-base-step-icon::before,
+.empty-base-step .empty-base-step-icon::after {
+    content: none;
+    display: none;
+}
+
+.empty-base-step-svg {
+    width: 27px;
+    height: 27px;
 }
 
 .empty-base-features {
@@ -1608,6 +1672,22 @@
     color: var(--muted);
     font-size: 12px;
     font-weight: 800;
+}
+
+.badge,
+.role-badge,
+.passive-bar em {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-svg,
+.passive-badge-svg {
+    width: 12px;
+    height: 12px;
+    flex: 0 0 auto;
+    stroke-width: 2.4;
 }
 
 .badges .good,
@@ -2542,11 +2622,21 @@
 }
 
 .work-rec-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     color: var(--accent);
     font-size: 11px;
     font-weight: 900;
     letter-spacing: 1px;
     text-transform: uppercase;
+}
+
+.work-rec-kicker-icon {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    stroke-width: 2.3;
 }
 
 .work-rec-reason {

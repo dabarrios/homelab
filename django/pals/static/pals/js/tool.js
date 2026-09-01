@@ -218,7 +218,10 @@ function displayJunk(node, isRoot = false) {
 
 function passiveBarHtml(passive, {implant = false, junk = false} = {}) {
   const tone = passiveTone(passive);
-  return `<span class="passive-bar ${implant ? 'implant-missing' : ''} ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implant ? '<em class="implant-badge">Implant</em>' : junk ? '<em>Junk</em>' : ''}</span>`;
+  const suffix = implant
+    ? '<em class="implant-badge">Implant</em>'
+    : junk ? `<em class="junk-badge">${lucideIconHtml('trash-2', 'passive-badge-svg')}<span>Junk</span></em>` : '';
+  return `<span class="passive-bar ${implant ? 'implant-missing' : ''} ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${suffix}</span>`;
 }
 
 function renderPassiveBars(node, isRoot = false, plan = null) {
@@ -468,10 +471,31 @@ const EMPTY_STATES = {
 
 const EMPTY_STATE_ICON_NAMES = {
   breeding: 'git-fork',
-  ivs: 'git-fork',
+  ivs: 'dna',
   work: 'wrench',
   ranch: 'candy',
   bases: 'castle',
+};
+
+const WORK_FEATURE_ICONS = {
+  'Best Overall Pick': 'star',
+  'Best Dark-Type Pick': 'moon',
+  'Condensed Levels': 'layers',
+  'Breed From Here': 'corner-right-up',
+};
+
+const BASE_STEP_ICONS = {
+  sites: 'search',
+  rules: 'settings-2',
+  team: 'users-round',
+  best: 'crown',
+};
+
+const BASE_FEATURE_ICONS = {
+  'Optimal Team': 'users-round',
+  'Role Coverage': 'badge-check',
+  Alternatives: 'shuffle',
+  'Breeding Path': 'network',
 };
 
 const LUCIDE_ICON_PATHS = {
@@ -481,6 +505,82 @@ const LUCIDE_ICON_PATHS = {
     <circle cx="18" cy="6" r="3"></circle>
     <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"></path>
     <path d="M12 12v3"></path>
+  `,
+  star: `
+    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+  `,
+  moon: `
+    <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path>
+  `,
+  'trash-2': `
+    <path d="M10 11v6"></path>
+    <path d="M14 11v6"></path>
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+    <path d="M3 6h18"></path>
+    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+  `,
+  'circle-check': `
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="m16 9-5.5 5.5L8 12"></path>
+  `,
+  'badge-check': `
+    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path>
+    <path d="m16 9-5.5 5.5L8 12"></path>
+  `,
+  dna: `
+    <path d="m10 16 1.5 1.5"></path>
+    <path d="m14 8-1.5-1.5"></path>
+    <path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"></path>
+    <path d="m16.5 10.5 1 1"></path>
+    <path d="m17 6-2.891-2.891"></path>
+    <path d="M2 15c6.667-6 13.333 0 20-6"></path>
+    <path d="m20 9 .891.891"></path>
+    <path d="M3.109 14.109 4 15"></path>
+    <path d="m6.5 12.5 1 1"></path>
+    <path d="m7 18 2.891 2.891"></path>
+    <path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"></path>
+  `,
+  search: `
+    <path d="m21 21-4.34-4.34"></path>
+    <circle cx="11" cy="11" r="8"></circle>
+  `,
+  'settings-2': `
+    <path d="M14 17H5"></path>
+    <path d="M19 7h-9"></path>
+    <circle cx="17" cy="17" r="3"></circle>
+    <circle cx="7" cy="7" r="3"></circle>
+  `,
+  'users-round': `
+    <path d="M18 21a8 8 0 0 0-16 0"></path>
+    <circle cx="10" cy="8" r="5"></circle>
+    <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"></path>
+  `,
+  shuffle: `
+    <path d="m18 14 4 4-4 4"></path>
+    <path d="m18 2 4 4-4 4"></path>
+    <path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"></path>
+    <path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"></path>
+    <path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"></path>
+  `,
+  network: `
+    <rect x="16" y="16" width="6" height="6" rx="1"></rect>
+    <rect x="2" y="16" width="6" height="6" rx="1"></rect>
+    <rect x="9" y="2" width="6" height="6" rx="1"></rect>
+    <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"></path>
+    <path d="M12 12V8"></path>
+  `,
+  crown: `
+    <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path>
+    <path d="M5 21h14"></path>
+  `,
+  layers: `
+    <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path>
+    <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path>
+    <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path>
+  `,
+  'corner-right-up': `
+    <path d="m10 9 5-5 5 5"></path>
+    <path d="M4 20h7a4 4 0 0 0 4-4V4"></path>
   `,
   wrench: `
     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"></path>
@@ -504,9 +604,14 @@ const LUCIDE_ICON_PATHS = {
   `,
 };
 
+function lucideIconHtml(name, className = 'empty-state-svg') {
+  const iconPaths = LUCIDE_ICON_PATHS[name] || LUCIDE_ICON_PATHS['git-fork'];
+  return `<svg class="${escapeHtml(className)}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${iconPaths}</svg>`;
+}
+
 function emptyStateIconHtml(key) {
   const iconName = EMPTY_STATE_ICON_NAMES[key] || EMPTY_STATE_ICON_NAMES.breeding;
-  return `<svg class="empty-state-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${LUCIDE_ICON_PATHS[iconName]}</svg>`;
+  return lucideIconHtml(iconName);
 }
 
 function emptyStateHtml(key = moduleKey) {
@@ -520,7 +625,7 @@ function emptyStateHtml(key = moduleKey) {
         <p>${escapeHtml(state.lead)}</p>
         <div class="empty-work-divider"><span></span><b class="empty-divider-work-mark"></b><span></span></div>
         <div class="empty-work-features empty-work-features-wide">
-          ${state.features.map(([title, text], index) => `<div><i class="empty-feature-icon empty-feature-icon-${index + 1}" aria-hidden="true"></i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+          ${state.features.map(([title, text]) => `<div><i class="empty-feature-icon empty-feature-lucide" aria-hidden="true">${lucideIconHtml(WORK_FEATURE_ICONS[title] || 'star', 'empty-feature-svg')}</i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
         </div>
         <p class="empty-hint">${escapeHtml(state.hint)}</p>
       </div>
@@ -544,16 +649,16 @@ function emptyStateHtml(key = moduleKey) {
         <p>${escapeHtml(state.lead)}</p>
         <p>Then click Build Best Team to see the optimal lineup.</p>
         <div class="empty-base-flow" aria-hidden="true">
-          <div class="empty-base-step empty-base-step-sites"><i></i><b>1. Detect Base Sites</b><span>Read your base structure and work sites.</span></div>
+          <div class="empty-base-step empty-base-step-sites"><i class="empty-base-step-icon">${lucideIconHtml(BASE_STEP_ICONS.sites, 'empty-base-step-svg')}</i><b>1. Detect Base Sites</b><span>Read your base structure and work sites.</span></div>
           <em></em>
-          <div class="empty-base-step empty-base-step-rules"><i></i><b>2. Apply Constraints</b><span>Your team mode and worker count guide the build.</span></div>
+          <div class="empty-base-step empty-base-step-rules"><i class="empty-base-step-icon">${lucideIconHtml(BASE_STEP_ICONS.rules, 'empty-base-step-svg')}</i><b>2. Apply Constraints</b><span>Your team mode and worker count guide the build.</span></div>
           <em></em>
-          <div class="empty-base-step empty-base-step-team"><i></i><b>3. Optimize Team</b><span>Analyze all Pals to find the best combination.</span></div>
+          <div class="empty-base-step empty-base-step-team"><i class="empty-base-step-icon">${lucideIconHtml(BASE_STEP_ICONS.team, 'empty-base-step-svg')}</i><b>3. Optimize Team</b><span>Analyze all Pals to find the best combination.</span></div>
           <em></em>
-          <div class="empty-base-step empty-base-step-best"><i></i><b>4. Best Team</b><span>Get role coverage and breeding handoffs.</span></div>
+          <div class="empty-base-step empty-base-step-best"><i class="empty-base-step-icon">${lucideIconHtml(BASE_STEP_ICONS.best, 'empty-base-step-svg')}</i><b>4. Best Team</b><span>Get role coverage and breeding handoffs.</span></div>
         </div>
         <div class="empty-work-features empty-base-features empty-work-features-wide">
-          ${state.features.map(([title, text], index) => `<div><i class="empty-feature-icon empty-base-feature-icon-${index + 1}" aria-hidden="true"></i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+          ${state.features.map(([title, text]) => `<div><i class="empty-feature-icon empty-feature-lucide empty-base-feature-lucide" aria-hidden="true">${lucideIconHtml(BASE_FEATURE_ICONS[title] || 'users-round', 'empty-feature-svg')}</i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
         </div>
         <p class="empty-hint">${escapeHtml(state.hint)}</p>
       </div>
@@ -577,9 +682,9 @@ function emptyStateHtml(key = moduleKey) {
         <div class="empty-arrow"></div>
         <div class="empty-target iv-empty-target">
           <strong>Target Pal</strong>
-          <span>HP <em>-</em></span>
-          <span>Attack <em>-</em></span>
-          <span>Defense <em>-</em></span>
+          <span>HP <em>100</em></span>
+          <span>Attack <em>100</em></span>
+          <span>Defense <em>100</em></span>
         </div>
         <div class="empty-goal-card">
           <strong>Goal</strong>
@@ -624,6 +729,7 @@ function showEmptyState() {
 function renderPalNode(node, isRoot = false, plan = null) {
   const role = isRoot ? 'FINAL EGG' : node.parents?.length ? 'BREED FIRST' : 'OWNED';
   const roleClass = role === 'OWNED' ? 'owned' : role === 'FINAL EGG' ? 'target' : 'breed';
+  const roleIcon = roleClass === 'owned' ? lucideIconHtml('circle-check', 'badge-svg') : '';
   const gender = genderLabel(node);
   return `
     <article class="pal-node ${roleClass}">
@@ -637,7 +743,7 @@ function renderPalNode(node, isRoot = false, plan = null) {
       </div>
       ${renderPassiveBars(node, isRoot, plan)}
       <div class="node-foot">
-        <span class="role-badge ${roleClass}">${role}</span>
+        <span class="role-badge ${roleClass}">${roleIcon}<span>${role}</span></span>
         <span>IV ${formatIv(node.hpIv)}/${formatIv(node.attackIv)}/${formatIv(node.defenseIv)}</span>
       </div>
     </article>`;
@@ -1529,7 +1635,7 @@ function renderReadyFinishCards(candidates, data) {
           <div>
             <h4>${escapeHtml(candidate.species)} ${candidate.displayGender ? `<span class="gender ${escapeHtml(String(candidate.displayGender).toLowerCase())}">${escapeHtml(candidate.displayGender)}</span>` : ''}</h4>
             <p>${escapeHtml(palboxLocationText(candidate))}</p>
-            <span class="role-badge owned">Already owned</span>
+            <span class="role-badge owned">${lucideIconHtml('circle-check', 'badge-svg')}<span>Already owned</span></span>
           </div>
         </div>
         <div class="ready-progress">
@@ -1699,16 +1805,17 @@ function renderBreedAction(card, profile) {
 }
 
 function renderWorkCard(card, compact = false, recommendation = null, profile = 'work_speed') {
-  const owned = card.ownedCount ? `<span class="role-badge owned">Own: ${escapeHtml(card.ownedCount)}</span>` : '<span class="role-badge">Not owned</span>';
+  const owned = card.ownedCount ? `<span class="role-badge owned">${lucideIconHtml('circle-check', 'badge-svg')}<span>Own: ${escapeHtml(card.ownedCount)}</span></span>` : '<span class="role-badge">Not owned</span>';
   const breedable = card.requiresOwnedSeed
     ? '<span class="badge self-breed">Self-Breed Only</span>'
-    : card.breedable ? '<span class="badge good">Breedable</span>' : '<span class="badge bad">Not breedable</span>';
+    : card.breedable ? `<span class="badge good">${lucideIconHtml('circle-check', 'badge-svg')}<span>Breedable</span></span>` : '<span class="badge bad">Not breedable</span>';
   const size = card.sizeKnown ? `${card.sizeGroup} (${card.size})` : 'Unknown size';
   const unavailable = card.unavailableReason ? `<p class="work-seed-warning">${escapeHtml(card.unavailableReason)}</p>` : '';
+  const recommendationIcon = recommendation?.role === 'dark' || /dark/i.test(recommendation?.title || '') ? 'moon' : 'star';
   const recHead = recommendation ? `
     <div class="work-rec-head">
       <div>
-        <div class="work-rec-kicker">${escapeHtml(recommendation.title)}</div>
+        <div class="work-rec-kicker">${lucideIconHtml(recommendationIcon, 'work-rec-kicker-icon')}<span>${escapeHtml(recommendation.title)}</span></div>
       </div>
       ${renderBreedAction(card, profile)}
     </div>` : '';
