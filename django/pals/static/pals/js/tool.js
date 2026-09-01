@@ -12,6 +12,7 @@ let editingProfileId = '';
 let editingBuiltInProfile = '';
 let ranchDropsCache = null;
 let savedBreedingPlans = [];
+let loadedBreedingPlanId = '';
 let restoredFormState = false;
 let restoredResult = false;
 let lastBreedingResult = null;
@@ -791,13 +792,29 @@ function defaultBreedingPlanName() {
 function renderSavedBreedingPlanOptions(selected = '') {
   const select = $('#savedBreedingPlan');
   if (!select) return;
-  select.innerHTML = savedBreedingPlans.length
-    ? savedBreedingPlans.map(plan => `<option value="${escapeHtml(plan.id)}">${escapeHtml(plan.name)}</option>`).join('')
-    : '<option value="">No saved setups</option>';
-  select.value = savedBreedingPlans.some(plan => plan.id === selected) ? selected : (savedBreedingPlans[0]?.id || '');
-  $('#loadBreedingPlan')?.toggleAttribute('disabled', !savedBreedingPlans.length);
-  $('#deleteBreedingPlan')?.toggleAttribute('disabled', !savedBreedingPlans.length);
+  select.innerHTML = [
+    '<option value="">Choose profile...</option>',
+    ...savedBreedingPlans.map(plan => `<option value="${escapeHtml(plan.id)}">${escapeHtml(plan.name)}</option>`),
+  ].join('');
+  select.value = savedBreedingPlans.some(plan => plan.id === selected) ? selected : '';
+  updateSavedBreedingPlanControls();
   updateCustomSelect(select);
+}
+
+function updateSavedBreedingPlanControls() {
+  const selectedPlanId = $('#savedBreedingPlan')?.value || '';
+  const hasSelectedPlan = Boolean(selectedPlanId);
+  $('#loadBreedingPlan')?.toggleAttribute('disabled', !hasSelectedPlan);
+  $('#deleteBreedingPlan')?.toggleAttribute('disabled', !hasSelectedPlan);
+  $('#renameBreedingPlan')?.toggleAttribute('disabled', !loadedBreedingPlanId || selectedPlanId !== loadedBreedingPlanId);
+}
+
+function setBreedingPlanStatus(text, tone = '') {
+  const status = $('#breedingPlanStatus');
+  if (!status) return;
+  status.textContent = text || '';
+  status.classList.toggle('valid', tone === 'good');
+  status.classList.toggle('invalid', tone === 'bad');
 }
 
 function saveBreedingPlan() {
@@ -808,6 +825,13 @@ function saveBreedingPlan() {
   const result = lastBreedingResult ? JSON.parse(JSON.stringify(lastBreedingResult)) : null;
   let plan = savedBreedingPlans.find(item => item.name.toLowerCase() === name.toLowerCase());
   if (plan) {
+    if (plan.id !== loadedBreedingPlanId) {
+      const shouldOverride = window.confirm(`A profile named "${name}" already exists. Override it?`);
+      if (!shouldOverride) {
+        setBreedingPlanStatus('Save canceled.', 'bad');
+        return;
+      }
+    }
     plan.state = state;
     plan.result = result;
     plan.savedAt = new Date().toISOString();
@@ -815,28 +839,31 @@ function saveBreedingPlan() {
     plan = {id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, name, state, result, savedAt: new Date().toISOString()};
     savedBreedingPlans.push(plan);
   }
+  loadedBreedingPlanId = plan.id;
   saveSavedBreedingPlans();
   renderSavedBreedingPlanOptions(plan.id);
   if (input) input.value = name;
-  setText('#breedingPlanStatus', result ? 'Saved setup and displayed tree.' : 'Saved setup. Optimize once to capture a tree.');
+  setBreedingPlanStatus('Pal profile saved.', 'good');
 }
 
 function loadBreedingPlan() {
   const id = $('#savedBreedingPlan')?.value || '';
   const plan = savedBreedingPlans.find(item => item.id === id);
   if (!plan) return;
+  loadedBreedingPlanId = plan.id;
   applyFormState(plan.state);
   if ($('#breedingPlanName')) $('#breedingPlanName').value = plan.name;
   saveModuleFormState();
   if (plan.result) {
     lastBreedingResult = JSON.parse(JSON.stringify(plan.result));
     renderResult(lastBreedingResult);
-    setText('#toolStatus', 'Loaded saved tree.');
-    setText('#breedingPlanStatus', 'Loaded saved setup and captured tree.');
+    setText('#toolStatus', '');
+    setBreedingPlanStatus('Loaded saved setup.');
   } else {
     showEmptyState();
-    setText('#breedingPlanStatus', 'Loaded saved setup. Optimize to build the tree.');
+    setBreedingPlanStatus('Loaded saved setup.');
   }
+  updateSavedBreedingPlanControls();
 }
 
 function deleteBreedingPlan() {
@@ -844,9 +871,31 @@ function deleteBreedingPlan() {
   const plan = savedBreedingPlans.find(item => item.id === id);
   if (!plan) return;
   savedBreedingPlans = savedBreedingPlans.filter(item => item.id !== id);
+  if (loadedBreedingPlanId === id) loadedBreedingPlanId = '';
   saveSavedBreedingPlans();
   renderSavedBreedingPlanOptions();
-  setText('#breedingPlanStatus', `Deleted ${plan.name}.`);
+  setBreedingPlanStatus(`Deleted ${plan.name}.`);
+}
+
+function renameBreedingPlan() {
+  const plan = savedBreedingPlans.find(item => item.id === loadedBreedingPlanId);
+  const input = $('#breedingPlanName');
+  const name = (input?.value || '').trim().slice(0, 60);
+  if (!plan || !name) return;
+  const duplicate = savedBreedingPlans.find(item => item.id !== plan.id && item.name.toLowerCase() === name.toLowerCase());
+  if (duplicate) {
+    const shouldOverride = window.confirm(`A profile named "${name}" already exists. Override it?`);
+    if (!shouldOverride) {
+      setBreedingPlanStatus('Rename canceled.', 'bad');
+      return;
+    }
+    savedBreedingPlans = savedBreedingPlans.filter(item => item.id !== duplicate.id);
+  }
+  plan.name = name;
+  plan.savedAt = new Date().toISOString();
+  saveSavedBreedingPlans();
+  renderSavedBreedingPlanOptions(plan.id);
+  setBreedingPlanStatus('Pal profile saved.', 'good');
 }
 
 function initBreedingPlans() {
@@ -854,8 +903,10 @@ function initBreedingPlans() {
   loadSavedBreedingPlans();
   renderSavedBreedingPlanOptions();
   $('#saveBreedingPlan')?.addEventListener('click', saveBreedingPlan);
+  $('#renameBreedingPlan')?.addEventListener('click', renameBreedingPlan);
   $('#loadBreedingPlan')?.addEventListener('click', loadBreedingPlan);
   $('#deleteBreedingPlan')?.addEventListener('click', deleteBreedingPlan);
+  $('#savedBreedingPlan')?.addEventListener('change', updateSavedBreedingPlanControls);
 }
 
 function profileLabel(profile) {

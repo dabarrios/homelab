@@ -157,6 +157,9 @@
     font: 700 14px "DM Sans", system-ui, sans-serif;
     text-align: left;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .custom-select-button::after {
@@ -2054,7 +2057,7 @@
 
 .saved-plan-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     gap: 8px;
 }
 
