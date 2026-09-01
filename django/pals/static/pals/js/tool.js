@@ -426,7 +426,6 @@ const EMPTY_STATES = {
   breeding: {
     title: 'Build a breeding plan',
     lead: 'Choose a target Pal and the passives you want.',
-    hint: 'Select your target Pal and desired passives, then click Optimize.',
     features: [
       ['Optimized Path', 'Finds a practical route to collect your desired passives.'],
       ['Resource Aware', 'Uses owned Pals and implant inventory when enabled.'],
@@ -491,6 +490,12 @@ const WORK_FEATURE_ICONS = {
   'Breed From Here': 'corner-right-up',
 };
 
+const BREEDING_FEATURE_ICONS = {
+  'Optimized Path': 'route',
+  'Resource Aware': 'package-check',
+  'Multiple Routes': 'git-fork',
+};
+
 const IV_FEATURE_ICONS = {
   'Parent Coverage': 'heart-handshake',
   'Implant Aware': 'syringe',
@@ -518,6 +523,18 @@ const LUCIDE_ICON_PATHS = {
     <circle cx="18" cy="6" r="3"></circle>
     <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"></path>
     <path d="M12 12v3"></path>
+  `,
+  route: `
+    <circle cx="6" cy="19" r="3"></circle>
+    <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path>
+    <circle cx="18" cy="5" r="3"></circle>
+  `,
+  'package-check': `
+    <path d="M12 22V12"></path>
+    <path d="m16 17 2 2 4-4"></path>
+    <path d="M21 11.127V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l1.32-.753"></path>
+    <path d="M3.29 7 12 12l8.71-5"></path>
+    <path d="m7.5 4.27 8.997 5.148"></path>
   `,
   star: `
     <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
@@ -688,11 +705,12 @@ function emptyStateHtml(key = moduleKey) {
       </div>
     </div>` : '';
   if (focusedState) return focusedState;
-  const featureHtml = stateKey === 'ivs'
+  const splitFeatureIcons = stateKey === 'breeding' ? BREEDING_FEATURE_ICONS : stateKey === 'ivs' ? IV_FEATURE_ICONS : null;
+  const featureHtml = splitFeatureIcons
     ? `
-      <div class="empty-work-divider empty-iv-divider"><span></span><b>${emptyStateIconHtml('ivs')}</b><span></span></div>
-      <div class="empty-work-features empty-iv-features empty-work-features-wide">
-        ${state.features.map(([title, text]) => `<div><i class="empty-feature-icon empty-feature-lucide empty-iv-feature-lucide" aria-hidden="true">${lucideIconHtml(IV_FEATURE_ICONS[title] || 'heart-handshake', 'empty-feature-svg')}</i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+      <div class="empty-work-divider empty-split-divider empty-${stateKey}-divider"><span></span><b>${emptyStateIconHtml(stateKey)}</b><span></span></div>
+      <div class="empty-work-features empty-split-features empty-${stateKey}-features">
+        ${state.features.map(([title, text]) => `<div><i class="empty-feature-icon empty-feature-lucide empty-${stateKey}-feature-lucide" aria-hidden="true">${lucideIconHtml(splitFeatureIcons[title] || 'git-fork', 'empty-feature-svg')}</i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
       </div>`
     : `
       <div class="empty-features">
@@ -746,7 +764,7 @@ function emptyStateHtml(key = moduleKey) {
       <p>${escapeHtml(state.lead)}</p>
       ${diagram}
       ${featureHtml}
-      ${stateKey === 'ivs' ? '' : `<p class="empty-hint">${escapeHtml(state.hint)}</p>`}
+      ${splitFeatureIcons ? '' : `<p class="empty-hint">${escapeHtml(state.hint)}</p>`}
     </div>`;
 }
 

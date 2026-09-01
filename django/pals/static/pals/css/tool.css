@@ -335,12 +335,7 @@
     color: var(--accent);
 }
 
-.empty-state-icon-breeding {
-    color: #56a6df;
-    border-color: rgba(86, 166, 223, .72);
-    background: rgba(53, 120, 212, .13);
-}
-
+.empty-state-icon-breeding,
 .empty-state-icon-ivs {
     color: #75c5aa;
     border-color: #8cc9b5;
@@ -841,11 +836,11 @@
     height: 19px;
 }
 
-.empty-iv-divider {
+.empty-split-divider {
     margin: 18px 0 2px;
 }
 
-.empty-iv-divider b {
+.empty-split-divider b {
     display: grid;
     place-items: center;
     width: 30px;
@@ -856,14 +851,31 @@
     color: #75c5aa;
 }
 
-.empty-iv-divider .empty-state-svg {
+.empty-split-divider .empty-state-svg {
     width: 18px;
     height: 18px;
     stroke-width: 2;
 }
 
-.empty-iv-features {
-    width: min(720px, 100%);
+.empty-split-features {
+    width: min(760px, 100%);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.empty-split-features div {
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: start;
+    min-width: 0;
+    padding: 18px 22px;
+}
+
+.empty-split-features b,
+.empty-split-features span {
+    min-width: 0;
+}
+
+.empty-split-features span {
+    max-width: 18ch;
 }
 
 .empty-ranch-state {
