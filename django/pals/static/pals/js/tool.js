@@ -487,13 +487,19 @@ const WORK_FEATURE_ICONS = {
   'Best Overall Pick': 'star',
   'Best Dark-Type Pick': 'moon',
   'Condensed Levels': 'layers',
-  'Breed From Here': 'corner-right-up',
+  'Breed From Here': 'network',
 };
 
 const BREEDING_FEATURE_ICONS = {
   'Optimized Path': 'route',
   'Resource Aware': 'package-check',
   'Multiple Routes': 'git-fork',
+};
+
+const RANCH_FEATURE_ICONS = {
+  'Best Rancher': 'award',
+  'All Drop Sources': 'package-open',
+  'Breed From Here': 'network',
 };
 
 const IV_FEATURE_ICONS = {
@@ -523,6 +529,16 @@ const LUCIDE_ICON_PATHS = {
     <circle cx="18" cy="6" r="3"></circle>
     <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"></path>
     <path d="M12 12v3"></path>
+  `,
+  award: `
+    <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"></path>
+    <circle cx="12" cy="8" r="6"></circle>
+  `,
+  'package-open': `
+    <path d="M12 22v-9"></path>
+    <path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z"></path>
+    <path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13"></path>
+    <path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z"></path>
   `,
   route: `
     <circle cx="6" cy="19" r="3"></circle>
@@ -678,7 +694,7 @@ function emptyStateHtml(key = moduleKey) {
         <p>${escapeHtml(state.lead)}</p>
         <div class="empty-work-divider empty-ranch-divider"><span></span><b>◇</b><span></span></div>
         <div class="empty-work-features empty-ranch-features">
-          ${state.features.map(([title, text]) => `<div><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+          ${state.features.map(([title, text]) => `<div><i class="empty-feature-icon empty-feature-lucide empty-ranch-feature-lucide" aria-hidden="true">${lucideIconHtml(RANCH_FEATURE_ICONS[title] || 'award', 'empty-feature-svg')}</i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
         </div>
         <p class="empty-hint">${escapeHtml(state.hint)}</p>
       </div>

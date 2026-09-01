@@ -1012,6 +1012,18 @@
     width: min(760px, 100%);
 }
 
+.empty-ranch-features div {
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: start;
+    min-width: 0;
+}
+
+.empty-ranch-feature-lucide::before,
+.empty-ranch-feature-lucide::after {
+    content: none;
+    display: none;
+}
+
 .empty-bases-hero {
     width: min(980px, 100%);
 }
