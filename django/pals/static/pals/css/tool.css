@@ -74,6 +74,36 @@
     border-color: var(--accent-dark);
 }
 
+.form-action-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+}
+
+.form-action-row .primary-action,
+.form-action-row .secondary-action {
+    width: 100%;
+}
+
+.secondary-action {
+    min-height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+    padding: 8px 12px;
+    font: 700 13px "DM Sans", system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.secondary-action:hover,
+.secondary-action:focus-visible {
+    border-color: #a9d0c3;
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+}
+
 .tool-grid {
     display: grid;
     grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
@@ -809,6 +839,31 @@
 .empty-feature-svg {
     width: 19px;
     height: 19px;
+}
+
+.empty-iv-divider {
+    margin: 18px 0 2px;
+}
+
+.empty-iv-divider b {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(117, 197, 170, .58);
+    border-radius: 50%;
+    background: rgba(117, 197, 170, .10);
+    color: #75c5aa;
+}
+
+.empty-iv-divider .empty-state-svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+}
+
+.empty-iv-features {
+    width: min(720px, 100%);
 }
 
 .empty-ranch-state {
@@ -3005,7 +3060,8 @@
 :root[data-theme="dark"] .modal-head button,
 :root[data-theme="dark"] .modal-actions button,
 :root[data-theme="dark"] .profile-buttons button,
-:root[data-theme="dark"] .saved-plan-control button {
+:root[data-theme="dark"] .saved-plan-control button,
+:root[data-theme="dark"] .secondary-action {
     background: var(--surface);
     color: var(--ink);
 }

@@ -40,6 +40,14 @@ const BUILT_IN_PROFILE_PASSIVES = {
     ['Artisan', 50],
   ],
 };
+const DEFAULT_PASSIVE_HINTS = {
+  breeding: {
+    passives: 'Pick from known passives in your loaded roster.',
+  },
+  ivs: {
+    passives: 'Every selected passive is bred naturally unless added below.',
+  },
+};
 const POSITIVE_PASSIVE_FALLBACKS = new Set([
   "Demon's Hand",
   "Demon’s Hand",
@@ -428,7 +436,6 @@ const EMPTY_STATES = {
   ivs: {
     title: 'Find IV parents',
     lead: 'Pick a target Pal and final passives to compare parent pairs.',
-    hint: 'Choose the final passives, then calculate IVs.',
     features: [
       ['Parent Coverage', 'Highlights pairs with the best HP, Attack, and Defense support.'],
       ['Implant Aware', 'Ignores passives you plan to add later when enabled.'],
@@ -484,6 +491,12 @@ const WORK_FEATURE_ICONS = {
   'Breed From Here': 'corner-right-up',
 };
 
+const IV_FEATURE_ICONS = {
+  'Parent Coverage': 'heart-handshake',
+  'Implant Aware': 'syringe',
+  'Junk Tracking': 'trash-2',
+};
+
 const BASE_STEP_ICONS = {
   sites: 'search',
   rules: 'settings-2',
@@ -526,6 +539,17 @@ const LUCIDE_ICON_PATHS = {
   'badge-check': `
     <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path>
     <path d="m16 9-5.5 5.5L8 12"></path>
+  `,
+  'heart-handshake': `
+    <path d="M19.414 14.414C21 12.828 22 11.5 22 9.5a5.5 5.5 0 0 0-9.591-3.676.6.6 0 0 1-.818.001A5.5 5.5 0 0 0 2 9.5c0 2.3 1.5 4 3 5.5l5.535 5.362a2 2 0 0 0 2.879.052 2.12 2.12 0 0 0-.004-3 2.124 2.124 0 1 0 3-3 2.124 2.124 0 0 0 3.004 0 2 2 0 0 0 0-2.828l-1.881-1.882a2.41 2.41 0 0 0-3.409 0l-1.71 1.71a2 2 0 0 1-2.828 0 2 2 0 0 1 0-2.828l2.823-2.762"></path>
+  `,
+  syringe: `
+    <path d="m18 2 4 4"></path>
+    <path d="m17 7 3-3"></path>
+    <path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"></path>
+    <path d="m9 11 4 4"></path>
+    <path d="m5 19-3 3"></path>
+    <path d="m14 4 6 6"></path>
   `,
   dna: `
     <path d="m10 16 1.5 1.5"></path>
@@ -664,6 +688,16 @@ function emptyStateHtml(key = moduleKey) {
       </div>
     </div>` : '';
   if (focusedState) return focusedState;
+  const featureHtml = stateKey === 'ivs'
+    ? `
+      <div class="empty-work-divider empty-iv-divider"><span></span><b>${emptyStateIconHtml('ivs')}</b><span></span></div>
+      <div class="empty-work-features empty-iv-features empty-work-features-wide">
+        ${state.features.map(([title, text]) => `<div><i class="empty-feature-icon empty-feature-lucide empty-iv-feature-lucide" aria-hidden="true">${lucideIconHtml(IV_FEATURE_ICONS[title] || 'heart-handshake', 'empty-feature-svg')}</i><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+      </div>`
+    : `
+      <div class="empty-features">
+        ${state.features.map(([title, text]) => `<div><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
+      </div>`;
   const diagram = stateKey === 'ivs' ? `
       <div class="empty-diagram empty-diagram-ivs">
         <div class="empty-card iv-empty-card">
@@ -711,10 +745,8 @@ function emptyStateHtml(key = moduleKey) {
       <h3>${escapeHtml(state.title)}</h3>
       <p>${escapeHtml(state.lead)}</p>
       ${diagram}
-      <div class="empty-features">
-        ${state.features.map(([title, text]) => `<div><b>${escapeHtml(title)}</b><span>${escapeHtml(text)}</span></div>`).join('')}
-      </div>
-      <p class="empty-hint">${escapeHtml(state.hint)}</p>
+      ${featureHtml}
+      ${stateKey === 'ivs' ? '' : `<p class="empty-hint">${escapeHtml(state.hint)}</p>`}
     </div>`;
 }
 
@@ -870,6 +902,60 @@ function saveModuleFormState() {
 
 function markFormChanged() {
   if (moduleKey === 'breeding') lastBreedingResult = null;
+  saveModuleFormState();
+}
+
+function clearToolForm() {
+  const form = $('#toolForm');
+  if (!form) return;
+  const owners = new Map($$('.js-owner').map(select => [select, select.value]));
+  form.reset();
+  owners.forEach((value, select) => {
+    if ([...select.options].some(option => option.value === value)) select.value = value;
+  });
+
+  passiveSelections.passives = [];
+  passiveSelections.implantPassives = [];
+  form.querySelectorAll('[data-picker]').forEach(picker => {
+    const key = picker.dataset.picker;
+    const hint = picker.querySelector('[data-passive-hint]');
+    const input = picker.querySelector('[data-passive-input]');
+    passiveSelections[key] = [];
+    if (input) input.value = '';
+    if (hint) {
+      hint.textContent = DEFAULT_PASSIVE_HINTS[moduleKey]?.[key] || '';
+      hint.className = 'field-hint';
+    }
+    picker.querySelector('[data-passive-suggestions]')?.classList.remove('open');
+    renderPassivePicker(picker);
+  });
+
+  if (moduleKey === 'breeding') {
+    loadedBreedingPlanId = '';
+    renderProfileOptions('manual');
+    renderSavedBreedingPlanOptions();
+    setBreedingPlanStatus('');
+  }
+  if (moduleKey === 'bases') updateBaseLabelField();
+  if (moduleKey === 'ranch') {
+    window.PALS_RANCH_ITEM_SLUG = '';
+    if (window.location.pathname !== '/pals/ranch/') window.history.replaceState({}, '', '/pals/ranch/');
+  }
+
+  document.querySelectorAll('[data-suggest-menu], [data-ranch-drop-menu], [data-passive-suggestions]').forEach(menu => {
+    menu.innerHTML = '';
+    menu.classList.remove('open');
+  });
+  document.querySelectorAll('[data-suggest="species"]').forEach(field => {
+    clearSpeciesWarning(field);
+    updateSpeciesSelection(field);
+  });
+  hidePassiveTooltip();
+  lastBreedingResult = null;
+  restoredResult = false;
+  setText('#toolStatus', '');
+  showEmptyState();
+  syncCustomSelects();
   saveModuleFormState();
 }
 
@@ -2229,6 +2315,7 @@ async function uploadSave(file) {
 async function init() {
   setTheme(localStorage.getItem('pals.theme') || 'dark');
   $('#toolForm')?.addEventListener('submit', submitTool);
+  $('#clearToolForm')?.addEventListener('click', clearToolForm);
   initSuggestFields();
   initPassivePickers();
   initPassiveTooltips();
