@@ -565,6 +565,42 @@ const LUCIDE_ICON_PATHS = {
     <path d="M3 6h18"></path>
     <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
   `,
+  'cake-slice': `
+    <path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"></path>
+    <path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"></path>
+    <path d="M2 21h20"></path>
+    <path d="M7 8v3"></path>
+    <path d="M12 8v3"></path>
+    <path d="M17 8v3"></path>
+    <path d="M7 4h.01"></path>
+    <path d="M12 4h.01"></path>
+    <path d="M17 4h.01"></path>
+  `,
+  egg: `
+    <path d="M12 22c6.23-.05 9.96-6.55 6.89-12.23L13.4 2.85a1.64 1.64 0 0 0-2.8 0L5.1 9.77C2.04 15.45 5.77 21.95 12 22Z"></path>
+  `,
+  'map-pin': `
+    <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+    <circle cx="12" cy="10" r="3"></circle>
+  `,
+  info: `
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M12 16v-4"></path>
+    <path d="M12 8h.01"></path>
+  `,
+  'arrow-right-circle': `
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M8 12h8"></path>
+    <path d="m12 8 4 4-4 4"></path>
+  `,
+  'triangle-alert': `
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+    <path d="M12 9v4"></path>
+    <path d="M12 17h.01"></path>
+  `,
+  flag: `
+    <path d="M4 22V4a1 1 0 0 1 .4-.8C5.733 2.2 7.067 2.2 8.4 3.2c1.333 1 2.667 1 4 0 1.333-1 2.667-1 4 0 1.333 1 2.667 1 4 0A1 1 0 0 1 22 4v11a1 1 0 0 1-.4.8c-1.333 1-2.667 1-4 0-1.333-1-2.667-1-4 0-1.333 1-2.667 1-4 0-1.333-1-2.667-1-4 0A1 1 0 0 0 4 16.6"></path>
+  `,
   'circle-check': `
     <circle cx="12" cy="12" r="10"></circle>
     <path d="m16 9-5.5 5.5L8 12"></path>
@@ -1878,6 +1914,7 @@ function profileResultPassiveList(passives, implantPassives = new Set()) {
 
 function renderIvs(data) {
   if (data.error) return resultCard('No IV plan', escapeHtml(data.error));
+  if (data.alphaOnly) return renderIvAlphaOnly(data);
   const pairs = data.pairs || data.parentPairs || [];
   if (!pairs.length) return renderJson(data);
   return pairs.slice(0, 8).map((pair, index) => `
@@ -1895,6 +1932,98 @@ function renderIvs(data) {
       <div class="iv-pair-grid">${(pair.parents || []).map(parent => renderPalNode(parent)).join('')}</div>
       ${(pair.junk || []).length ? `<p class="junk-text">Junk in parent pool: ${escapeHtml(pair.junk.join(', '))}</p>` : ''}
     </article>`).join('');
+}
+
+function renderIvStat(label, value) {
+  return `<span><b>${escapeHtml(label)}</b><strong>${escapeHtml(value)}</strong></span>`;
+}
+
+function renderIvAlphaOwnedMatch(card, requestedPassives = []) {
+  const gender = genderLabel(card);
+  const passiveSet = requestedPassives.length ? requestedPassives : (card.passives || []);
+  return `
+    <article class="iv-alpha-owned route-card">
+      <div class="iv-alpha-section-title">${lucideIconHtml('circle-check', 'iv-alpha-title-icon')}<h3>Owned Match</h3></div>
+      <div class="iv-alpha-owned-grid">
+        <div class="iv-alpha-pal">
+          <div class="pal-avatar iv-alpha-avatar">${card.icon ? `<img src="${escapeHtml(assetUrl(card.icon))}" alt="">` : escapeHtml(speciesInitials(card.species))}</div>
+          <div>
+            <h4>${escapeHtml(card.species)} ${gender.symbol ? `<span class="gender ${gender.className}" title="${gender.text}">${escapeHtml(gender.symbol)}</span>` : ''}</h4>
+            <p>${escapeHtml(card.label || '')}</p>
+            <span class="role-badge ${card.isAlpha ? 'owned' : ''}">${lucideIconHtml(card.isAlpha ? 'crown' : 'egg', 'badge-svg')}<span>${card.isAlpha ? 'Alpha' : 'Non-Alpha'}</span></span>
+          </div>
+        </div>
+        <div class="iv-alpha-block">
+          <strong>Passives (${escapeHtml((card.desired || []).length)}/${escapeHtml(passiveSet.length)} match)</strong>
+          <div class="passive-list compact">${passiveSet.map(passive => passiveBarHtml(passive)).join('')}</div>
+        </div>
+        <div class="iv-alpha-block">
+          <strong>IVs</strong>
+          <div class="iv-alpha-stats">
+            ${renderIvStat('HP', card.hpIv)}
+            ${renderIvStat('ATK', card.attackIv)}
+            ${renderIvStat('DEF', card.defenseIv)}
+          </div>
+        </div>
+        <div class="iv-alpha-block">
+          <strong>Location</strong>
+          <p class="iv-alpha-location">${lucideIconHtml('map-pin', 'iv-alpha-inline-icon')}<span>${escapeHtml(locationText(card))}</span></p>
+        </div>
+      </div>
+    </article>`;
+}
+
+function renderIvAlphaOnly(data) {
+  const alpha = data.alphaOnly;
+  const missing = alpha.missing?.length ? alpha.missing.join(', ') : 'None';
+  const steps = alpha.nextSteps || [];
+  return `
+    <section class="iv-alpha-result">
+      <div class="iv-alpha-hero ${alpha.state === 'complete' ? 'complete' : ''}">
+        <div class="iv-alpha-hero-copy">
+          <span class="iv-alpha-hero-icon">${lucideIconHtml('circle-check', 'iv-alpha-hero-svg')}</span>
+          <div>
+            <h3>${escapeHtml(alpha.title)}</h3>
+            <p>${escapeHtml(alpha.message)}</p>
+          </div>
+        </div>
+        <span class="iv-alpha-missing">${lucideIconHtml('crown', 'badge-svg')}<span>Missing: ${escapeHtml(missing)}</span></span>
+      </div>
+      ${renderIvAlphaOwnedMatch(alpha.ownedMatch || {}, data.requestedPassives || [])}
+      <article class="iv-alpha-next route-card">
+        <div class="iv-alpha-section-title">${lucideIconHtml('arrow-right-circle', 'iv-alpha-title-icon')}<h3>Next Steps (Alpha Only)</h3></div>
+        <div class="iv-alpha-step-grid">
+          ${steps.map((step, index) => `
+            <div class="iv-alpha-step ${step.primary ? 'primary' : ''}">
+              <span>${lucideIconHtml(step.icon || 'circle-check', 'iv-alpha-step-icon')}</span>
+              <div>
+                <h4>${index + 1}. ${escapeHtml(step.title)}</h4>
+                <p>${escapeHtml(step.detail)}</p>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="iv-alpha-notes">
+          <div>${lucideIconHtml('info', 'iv-alpha-note-icon')}<p><strong>Why Special Cake?</strong><span>${escapeHtml(alpha.recommendedCakeReason || '')}</span></p></div>
+          <div>${lucideIconHtml('info', 'iv-alpha-note-icon')}<p><strong>Why Broncherry + Broncherry Aqua?</strong><span>They handle Alpha egg pickup while you continue hatching from the solved pair.</span></p></div>
+        </div>
+      </article>
+      ${alpha.parentPoolWarning ? `
+        <div class="iv-alpha-warning">
+          ${lucideIconHtml('triangle-alert', 'iv-alpha-warning-icon')}
+          <div>
+            <h3>If your breeding pair has extra passives</h3>
+            <p>Your owned ${escapeHtml(data.target)} meets the target, but Special Cake is only ideal when the parent passive pool is exactly the ${escapeHtml((data.naturalPassives || []).length)} target passives.</p>
+          </div>
+        </div>` : ''}
+      <div class="iv-alpha-summary">
+        ${lucideIconHtml('flag', 'iv-alpha-inline-icon')}
+        <strong>Target Summary</strong>
+        <span>${escapeHtml(data.target || '')}</span>
+        <div class="passive-list compact">${(data.requestedPassives || []).map(passive => passiveBarHtml(passive)).join('')}</div>
+        <span>IVs <b>100 / 100 / 100</b></span>
+        <span>${lucideIconHtml('crown', 'badge-svg')} Alpha ${data.requireAlpha ? '(required)' : ''}</span>
+      </div>
+    </section>`;
 }
 
 function finalWorkLevel(card) {
@@ -2092,7 +2221,7 @@ function renderResult(data) {
   $('#results').classList.remove('results-empty');
   $('#results').innerHTML = (renderers[moduleKey] || renderJson)(data);
   const count = data.total || data.totalItems || data.rosterCount || (data.groups || []).length || '';
-  setText('#resultCount', moduleKey === 'breeding' ? 'Top route' : count ? `${count} result${count === 1 ? '' : 's'}` : '');
+  setText('#resultCount', data.alphaOnly ? 'Alpha target' : moduleKey === 'breeding' ? 'Top route' : count ? `${count} result${count === 1 ? '' : 's'}` : '');
 }
 
 async function ranchDropsData() {
@@ -2207,6 +2336,7 @@ async function submitTool(event) {
           implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
           genderPreference: data.genderPreference || 'any',
           ivGoal: 'perfect',
+          requireAlpha: Boolean(data.requireAlpha),
         }),
       });
     } else if (moduleKey === 'work') {

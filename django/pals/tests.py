@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -133,3 +134,50 @@ class WorkSpeedProfileTest(SimpleTestCase):
             result["selected"],
             ["Remarkable Craftsmanship", "Artisan", "Work Slave", "Lucky"],
         )
+
+
+class IvAlphaOnlyTest(SimpleTestCase):
+    def state(self, passives, *, is_alpha=False):
+        return optimizer.State(
+            species_key="jet",
+            species="Jetragon",
+            passives=frozenset(passives),
+            gender="Male",
+            steps=0,
+            breed_count=0,
+            hp_iv=100,
+            attack_iv=100,
+            defense_iv=100,
+            iv_total=300,
+            iv_sources=1,
+            label="Jetragon Male L50 IV 100/100/100 Palbox",
+            location="Palbox",
+            box=1,
+            slot=1,
+            is_alpha=is_alpha,
+        )
+
+    def test_perfect_non_alpha_owned_match_returns_alpha_only_state(self):
+        passives = ["Diamond Body", "Legend", "Divine Dragon", "Serenity"]
+        store = SimpleNamespace(
+            name_to_key={"jetragon": "jet"},
+            passives=passives,
+            pals={"jet": optimizer.BreedPal("jet", "Jetragon", 1, 1, True, False)},
+        )
+
+        with patch.object(optimizer, "STORE", store), patch(
+            "pals.services.optimizer.owned_states_for_owner",
+            return_value=[self.state(passives)],
+        ):
+            result = optimizer.build_iv_plan({
+                "owner": "David",
+                "target": "Jetragon",
+                "passives": passives,
+                "requireAlpha": True,
+                "ivGoal": "perfect",
+            })
+
+        self.assertEqual(result["alphaOnly"]["state"], "missing_alpha")
+        self.assertEqual(result["alphaOnly"]["missing"], ["Alpha"])
+        self.assertEqual(result["alphaOnly"]["ownedMatch"]["isAlpha"], False)
+        self.assertEqual(result["alphaOnly"]["recommendedCake"], "Special Cake")

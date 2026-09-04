@@ -210,6 +210,12 @@ def as_int(value, default=0):
         return default
 
 
+def as_bool(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 def normalize_species(name: str) -> str:
     name = (name or "").strip()
     if name.startswith("BOSS_"):
@@ -322,6 +328,7 @@ class State:
     base_slot: int | None = None
     base_workers_used: int = 0
     instance_id: str = ""
+    is_alpha: bool = False
     parents: tuple["State", "State"] | None = None
 
     @property
@@ -1612,6 +1619,7 @@ def row_to_state(row: dict[str, str], store: DataStore) -> State | None:
         base_slot=base_slot_number,
         base_workers_used=owned_location_base_penalty(raw_location),
         instance_id=row.get("instance_id") or "",
+        is_alpha=as_bool(row.get("is_boss")),
     )
 
 
@@ -2472,6 +2480,7 @@ def serialize_iv_pal(s: State, target: frozenset[str], allowed: frozenset[str]) 
         "slot": s.slot,
         "baseSlot": s.base_slot,
         "icon": icon_url_for_key(s.species_key),
+        "isAlpha": s.is_alpha,
     }
 
 
@@ -2520,6 +2529,7 @@ def build_iv_plan(payload: dict) -> dict:
     implant_passives = canonical_passives(payload.get("implantPassives", []))
     allowed_extras = canonical_passives(payload.get("allowedExtras", []))
     gender_preference = payload.get("genderPreference") or "any"
+    require_alpha = as_bool(payload.get("requireAlpha"))
     target = canonical_passives(payload.get("passives", []))
     if not target:
         return {"error": "Choose the passives you want before calculating perfect IV pairs."}
@@ -2575,10 +2585,59 @@ def build_iv_plan(payload: dict) -> dict:
         if len(serialized_pairs) >= 12:
             break
 
+    perfect_matching = [
+        s
+        for s in ranked_matching
+        if round(s.avg_hp_iv) >= 100 and round(s.avg_attack_iv) >= 100 and round(s.avg_defense_iv) >= 100
+    ]
+    alpha_only = None
+    if require_alpha and perfect_matching:
+        owned_match = next((s for s in perfect_matching if not s.is_alpha), perfect_matching[0])
+        missing = [] if owned_match.is_alpha else ["Alpha"]
+        clean_parent_pairs = [pair for pair in serialized_pairs if pair.get("clean") and not pair.get("missing")]
+        alpha_only = {
+            "state": "complete" if owned_match.is_alpha else "missing_alpha",
+            "title": "Target complete" if owned_match.is_alpha else "Target already solved except Alpha",
+            "message": (
+                f"You own an Alpha {STORE.pals[target_key].name} with the exact passives and 100/100/100 IVs."
+                if owned_match.is_alpha
+                else f"You own a {STORE.pals[target_key].name} with the exact passives and 100/100/100 IVs. Only an Alpha version is remaining."
+            ),
+            "missing": missing,
+            "ownedMatch": serialize_iv_pal(owned_match, target, allowed),
+            "cleanParentPool": bool(clean_parent_pairs),
+            "parentPoolWarning": not bool(clean_parent_pairs),
+            "recommendedCake": "Special Cake",
+            "recommendedCakeReason": "Use it when the breeding pair's combined passive pool is exactly the target passives.",
+            "eggPickup": "Broncherry + Broncherry Aqua",
+            "nextSteps": [
+                {
+                    "title": "Use Special Cake",
+                    "detail": "Locks the passive result when the parent passive pool is clean.",
+                    "icon": "cake-slice",
+                    "primary": True,
+                },
+                {
+                    "title": "Repeat Hatch",
+                    "detail": f"Keep breeding from the solved pair until an Alpha {STORE.pals[target_key].name} hatches.",
+                    "icon": "egg",
+                    "primary": False,
+                },
+                {
+                    "title": "Egg Pickup",
+                    "detail": "Use Broncherry + Broncherry Aqua when picking up eggs for guaranteed Alpha eggs.",
+                    "icon": "crown",
+                    "primary": False,
+                },
+            ],
+        }
+
     return {
         "mode": "iv",
         "target": STORE.pals[target_key].name,
         "owner": owner,
+        "requireAlpha": require_alpha,
+        "alphaOnly": alpha_only,
         "requestedPassives": sorted(target),
         "naturalPassives": sorted(natural_target),
         "implantPassives": sorted(implant_passives),
