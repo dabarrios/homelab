@@ -825,7 +825,13 @@
 .empty-base-step-svg,
 .work-rec-kicker-icon,
 .badge-svg,
-.passive-badge-svg {
+.passive-badge-svg,
+.iv-alpha-hero-svg,
+.iv-alpha-title-icon,
+.iv-alpha-inline-icon,
+.iv-alpha-step-icon,
+.iv-alpha-note-icon,
+.iv-alpha-warning-icon {
     fill: none;
     stroke: currentColor;
     stroke-width: 2;
@@ -2197,8 +2203,7 @@
 }
 
 .iv-alpha-hero,
-.iv-alpha-warning,
-.iv-alpha-summary {
+.iv-alpha-warning {
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 18px;
@@ -2285,7 +2290,7 @@
 
 .iv-alpha-owned-grid {
     display: grid;
-    grid-template-columns: minmax(260px, 1.1fr) minmax(260px, 1.2fr) minmax(120px, .55fr) minmax(190px, .8fr);
+    grid-template-columns: minmax(260px, 1.1fr) minmax(260px, 1.2fr) minmax(120px, .55fr);
     gap: 20px;
     align-items: center;
 }
@@ -2325,6 +2330,9 @@
 }
 
 .iv-alpha-block > strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     color: var(--ink);
 }
 
@@ -2469,17 +2477,14 @@
     color: #f6c44d;
 }
 
-.iv-alpha-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    align-items: center;
+.role-badge.non-alpha {
     color: var(--muted);
 }
 
-.iv-alpha-summary strong,
-.iv-alpha-summary b {
-    color: var(--ink);
+.role-badge.alpha {
+    color: #c9941f;
+    border-color: rgba(201, 148, 31, .7);
+    background: rgba(201, 148, 31, .12);
 }
 
 .passive-picker {
@@ -2635,7 +2640,8 @@
     gap: 8px;
 }
 
-.modal-panel input {
+.modal-panel input,
+.modal-panel select {
     width: 100%;
     border: 1px solid var(--line);
     border-radius: 6px;
@@ -3260,6 +3266,64 @@
     align-content: start;
 }
 
+.passive-colors-panel {
+    width: min(680px, 100%);
+    max-height: min(760px, calc(100vh - 48px));
+    align-content: start;
+}
+
+.passive-color-edit-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 130px auto;
+    gap: 8px;
+}
+
+.passive-color-edit-row button {
+    min-height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+    padding: 8px 12px;
+    font: 800 13px "DM Sans", system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.passive-color-edit-row button:hover,
+.passive-color-edit-row button:focus-visible {
+    border-color: #a9d0c3;
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+}
+
+.passive-color-list {
+    display: grid;
+    gap: 8px;
+    max-height: min(420px, 48vh);
+    overflow: auto;
+    padding-right: 4px;
+}
+
+.passive-color-row {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) auto auto;
+    gap: 8px;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.passive-color-tone {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: capitalize;
+}
+
 .implant-list {
     display: grid;
     gap: 8px;
@@ -3374,10 +3438,12 @@
 :root[data-theme="dark"] .passive-suggestions button,
 :root[data-theme="dark"] .modal-panel,
 :root[data-theme="dark"] .modal-panel input,
+:root[data-theme="dark"] .modal-panel select,
 :root[data-theme="dark"] .modal-head button,
 :root[data-theme="dark"] .modal-actions button,
 :root[data-theme="dark"] .profile-buttons button,
 :root[data-theme="dark"] .saved-plan-control button,
+:root[data-theme="dark"] .passive-color-edit-row button,
 :root[data-theme="dark"] .secondary-action {
     background: var(--surface);
     color: var(--ink);
@@ -3398,6 +3464,12 @@
     background: var(--accent-soft);
     border-color: #3b806b;
     color: var(--accent);
+}
+
+:root[data-theme="dark"] .role-badge.alpha {
+    background: rgba(201, 148, 31, .12);
+    border-color: rgba(201, 148, 31, .7);
+    color: #f6c44d;
 }
 
 :root[data-theme="dark"] body {
@@ -3558,6 +3630,11 @@
         grid-template-columns: 1fr;
     }
 
+    .passive-color-edit-row,
+    .passive-color-row {
+        grid-template-columns: 1fr;
+    }
+
     .children,
     .iv-pair-grid,
     .work-rec-grid,
@@ -3600,12 +3677,6 @@
         border-top: 1px solid var(--line);
         padding-left: 0;
         padding-top: 14px;
-    }
-
-    .iv-alpha-summary {
-        display: grid;
-        grid-template-columns: 1fr;
-        align-items: start;
     }
 
     .profile-result-grid {

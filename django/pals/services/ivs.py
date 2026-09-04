@@ -1,5 +1,5 @@
-"""IV planning service placeholders."""
+"""IV planning service status."""
 
 
 def module_status() -> dict[str, str]:
-    return {"state": "not_imported", "message": "IV planning logic has not been imported yet."}
+    return {"state": "ready", "message": "Plan perfect IV, passive, implant, and Alpha breeding targets."}

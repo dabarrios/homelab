@@ -16,6 +16,7 @@ let loadedBreedingPlanId = '';
 let restoredFormState = false;
 let restoredResult = false;
 let lastBreedingResult = null;
+let lastRenderedResult = null;
 
 const CUSTOM_PROFILES_KEY = 'pals.customProfiles.v1';
 const BUILT_IN_PROFILE_NAMES_KEY = 'pals.builtInProfileNames.v1';
@@ -565,16 +566,29 @@ const LUCIDE_ICON_PATHS = {
     <path d="M3 6h18"></path>
     <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
   `,
+  'circle-check-big': `
+    <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+    <path d="m9 11 3 3L22 4"></path>
+  `,
+  'circle-off': `
+    <path d="m2 2 20 20"></path>
+    <path d="M8.35 2.69a10 10 0 0 1 12.96 12.96"></path>
+    <path d="M19.08 19.08A10 10 0 1 1 4.92 4.92"></path>
+  `,
+  'list-checks': `
+    <path d="m3 7 2 2 4-4"></path>
+    <path d="m3 17 2 2 4-4"></path>
+    <path d="M13 6h8"></path>
+    <path d="M13 12h8"></path>
+    <path d="M13 18h8"></path>
+  `,
   'cake-slice': `
-    <path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"></path>
-    <path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"></path>
-    <path d="M2 21h20"></path>
-    <path d="M7 8v3"></path>
-    <path d="M12 8v3"></path>
-    <path d="M17 8v3"></path>
-    <path d="M7 4h.01"></path>
-    <path d="M12 4h.01"></path>
-    <path d="M17 4h.01"></path>
+    <path d="M16 13H3"></path>
+    <path d="M16 17H3"></path>
+    <path d="M7 21h10a4 4 0 0 0 4-4V7a2 2 0 0 0-2-2h-2.07a2 2 0 0 1-1.66-.9l-.54-.8a2 2 0 0 0-3.32 0l-.54.8A2 2 0 0 1 9.21 5H7a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4Z"></path>
+    <path d="M7 8v.01"></path>
+    <path d="M11 8v.01"></path>
+    <path d="M15 8v.01"></path>
   `,
   egg: `
     <path d="M12 22c6.23-.05 9.96-6.55 6.89-12.23L13.4 2.85a1.64 1.64 0 0 0-2.8 0L5.1 9.77C2.04 15.45 5.77 21.95 12 22Z"></path>
@@ -587,6 +601,13 @@ const LUCIDE_ICON_PATHS = {
     <circle cx="12" cy="12" r="10"></circle>
     <path d="M12 16v-4"></path>
     <path d="M12 8h.01"></path>
+  `,
+  crosshair: `
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="22" x2="18" y1="12" y2="12"></line>
+    <line x1="6" x2="2" y1="12" y2="12"></line>
+    <line x1="12" x2="12" y1="6" y2="2"></line>
+    <line x1="12" x2="12" y1="22" y2="18"></line>
   `,
   'arrow-right-circle': `
     <circle cx="12" cy="12" r="10"></circle>
@@ -1657,11 +1678,6 @@ async function saveInventoryPassive(passive, patch) {
 function renderImplantInventories() {
   const entries = Object.entries(options.implantInventory || {}).sort(([a], [b]) => a.localeCompare(b));
   const availableCount = entries.filter(([, item]) => item?.infinite || Number(item?.count || 0) > 0).length;
-  $$('[data-inventory-summary]').forEach(summary => {
-    summary.textContent = entries.length
-      ? `${entries.length} implant passive${entries.length === 1 ? '' : 's'} tracked.`
-      : 'No implant passives inventoried yet.';
-  });
   $$('[data-implant-inventory]').forEach(panel => {
     const list = panel.querySelector('[data-inventory-list]');
     if (!list) return;
@@ -1674,6 +1690,137 @@ function renderImplantInventories() {
       </div>`).join('') : '<p class="field-hint">No implant passives inventoried yet.</p>';
     const status = panel.querySelector('[data-inventory-status]');
     if (status) status.textContent = entries.length ? `${entries.length} implant passive${entries.length === 1 ? '' : 's'} inventoried.` : '';
+  });
+}
+
+function refreshPassiveColorSurfaces() {
+  $$('[data-picker]').forEach(renderPassivePicker);
+  renderImplantInventories();
+  renderPassiveColors();
+  if (lastRenderedResult) renderResult(lastRenderedResult);
+}
+
+function renderPassiveColorSuggestions(panel) {
+  const input = panel.querySelector('[data-color-input]');
+  const menu = panel.querySelector('[data-color-menu]');
+  const query = String(input?.value || '').trim().toLowerCase();
+  if (!query) {
+    menu.innerHTML = '';
+    menu.classList.remove('open');
+    return;
+  }
+  const matches = (options.passives || [])
+    .filter(passive => passive.toLowerCase().includes(query))
+    .slice(0, 8);
+  menu.innerHTML = matches.map(passive => `<button type="button" data-color-choice="${escapeHtml(passive)}"><span class="passive-dot ${passiveTone(passive)}"></span><span>${escapeHtml(passive)}</span><em>${escapeHtml(options.passiveColorOverrides?.[passive] ? 'Override' : 'Default')}</em></button>`).join('');
+  menu.classList.toggle('open', matches.length > 0);
+}
+
+async function savePassiveColor(passive, tone, remove = false) {
+  const response = await api('/passive-colors', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({passive, tone, delete: remove}),
+  });
+  options.passiveColorOverrides = response.overrides || {};
+  options.passiveMeta = response.passiveMeta || options.passiveMeta || {};
+  refreshPassiveColorSurfaces();
+}
+
+async function savePassiveColorFromPanel(panel) {
+  const input = panel.querySelector('[data-color-input]');
+  const tone = panel.querySelector('[data-color-tone]')?.value || 'neutral';
+  const status = panel.querySelector('[data-color-status]');
+  const match = canonicalMatch(options.passives || [], input?.value || '');
+  if (!match.value) {
+    if (status) {
+      status.textContent = match.reason === 'ambiguous' ? `Matches: ${match.matches.join(', ')}. Keep typing.` : 'No known passive matches that text.';
+      status.className = 'field-hint invalid';
+    }
+    return;
+  }
+  await savePassiveColor(match.value, tone);
+  input.value = '';
+  renderPassiveColorSuggestions(panel);
+  if (status) {
+    status.textContent = `${match.value} set to ${tone}.`;
+    status.className = 'field-hint valid';
+  }
+  input.focus();
+}
+
+function renderPassiveColors() {
+  const entries = Object.entries(options.passiveColorOverrides || {}).sort(([a], [b]) => a.localeCompare(b));
+  $$('[data-passive-colors]').forEach(panel => {
+    const list = panel.querySelector('[data-color-list]');
+    if (!list) return;
+    list.innerHTML = entries.length ? entries.map(([passive, tone]) => `
+      <div class="passive-color-row">
+        <span class="passive-chip ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}">${escapeHtml(passive)}</span>
+        <span class="passive-color-tone"><span class="passive-dot ${escapeHtml(tone)}"></span>${escapeHtml(tone)}</span>
+        <button type="button" class="chip-remove" data-color-delete="${escapeHtml(passive)}" aria-label="Reset ${escapeHtml(passive)}">x</button>
+      </div>`).join('') : '<p class="field-hint">No passive color overrides saved.</p>';
+    const status = panel.querySelector('[data-color-status]');
+    if (status && !status.textContent) status.textContent = entries.length ? `${entries.length} passive color override${entries.length === 1 ? '' : 's'} saved.` : '';
+  });
+}
+
+function initPassiveColors() {
+  $$('[data-open-passive-colors]').forEach(button => {
+    button.addEventListener('click', () => {
+      $('#passiveColorsModal')?.classList.remove('hidden');
+      renderPassiveColors();
+      $('#passiveColorsModal [data-color-input]')?.focus();
+    });
+  });
+  $('#closePassiveColors')?.addEventListener('click', () => $('#passiveColorsModal')?.classList.add('hidden'));
+  $('#passiveColorsModal')?.addEventListener('click', event => {
+    if (event.target === $('#passiveColorsModal')) $('#passiveColorsModal')?.classList.add('hidden');
+  });
+  $$('[data-passive-colors]').forEach(panel => {
+    const input = panel.querySelector('[data-color-input]');
+    const status = panel.querySelector('[data-color-status]');
+    input?.addEventListener('input', () => renderPassiveColorSuggestions(panel));
+    input?.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        savePassiveColorFromPanel(panel).catch(error => {
+          if (status) {
+            status.textContent = error.message;
+            status.className = 'field-hint invalid';
+          }
+        });
+      }
+    });
+    input?.addEventListener('blur', () => {
+      window.setTimeout(() => panel.querySelector('[data-color-menu]')?.classList.remove('open'), 120);
+    });
+    panel.querySelector('[data-color-save]')?.addEventListener('click', () => {
+      savePassiveColorFromPanel(panel).catch(error => {
+        if (status) {
+          status.textContent = error.message;
+          status.className = 'field-hint invalid';
+        }
+      });
+    });
+    panel.addEventListener('click', event => {
+      const choice = event.target.closest('[data-color-choice]')?.dataset.colorChoice;
+      if (choice) {
+        input.value = choice;
+        panel.querySelector('[data-color-menu]')?.classList.remove('open');
+        input.focus();
+        return;
+      }
+      const deleted = event.target.closest('[data-color-delete]')?.dataset.colorDelete;
+      if (deleted) {
+        savePassiveColor(deleted, 'neutral', true).catch(error => {
+          if (status) {
+            status.textContent = error.message;
+            status.className = 'field-hint invalid';
+          }
+        });
+      }
+    });
   });
 }
 
@@ -1949,25 +2096,21 @@ function renderIvAlphaOwnedMatch(card, requestedPassives = []) {
           <div class="pal-avatar iv-alpha-avatar">${card.icon ? `<img src="${escapeHtml(assetUrl(card.icon))}" alt="">` : escapeHtml(speciesInitials(card.species))}</div>
           <div>
             <h4>${escapeHtml(card.species)} ${gender.symbol ? `<span class="gender ${gender.className}" title="${gender.text}">${escapeHtml(gender.symbol)}</span>` : ''}</h4>
-            <p>${escapeHtml(card.label || '')}</p>
-            <span class="role-badge ${card.isAlpha ? 'owned' : ''}">${lucideIconHtml(card.isAlpha ? 'crown' : 'egg', 'badge-svg')}<span>${card.isAlpha ? 'Alpha' : 'Non-Alpha'}</span></span>
+            <p class="iv-alpha-location">${lucideIconHtml('map-pin', 'iv-alpha-inline-icon')}<span>${escapeHtml(locationText(card))}</span></p>
+            <span class="role-badge ${card.isAlpha ? 'alpha' : 'non-alpha'}">${lucideIconHtml(card.isAlpha ? 'crown' : 'circle-off', 'badge-svg')}<span>${card.isAlpha ? 'Alpha' : 'Non-Alpha'}</span></span>
           </div>
         </div>
         <div class="iv-alpha-block">
-          <strong>Passives (${escapeHtml((card.desired || []).length)}/${escapeHtml(passiveSet.length)} match)</strong>
+          <strong>Target Passives</strong>
           <div class="passive-list compact">${passiveSet.map(passive => passiveBarHtml(passive)).join('')}</div>
         </div>
         <div class="iv-alpha-block">
-          <strong>IVs</strong>
+          <strong>${lucideIconHtml('dna', 'iv-alpha-inline-icon')}<span>IVs</span></strong>
           <div class="iv-alpha-stats">
             ${renderIvStat('HP', card.hpIv)}
             ${renderIvStat('ATK', card.attackIv)}
             ${renderIvStat('DEF', card.defenseIv)}
           </div>
-        </div>
-        <div class="iv-alpha-block">
-          <strong>Location</strong>
-          <p class="iv-alpha-location">${lucideIconHtml('map-pin', 'iv-alpha-inline-icon')}<span>${escapeHtml(locationText(card))}</span></p>
         </div>
       </div>
     </article>`;
@@ -1981,7 +2124,7 @@ function renderIvAlphaOnly(data) {
     <section class="iv-alpha-result">
       <div class="iv-alpha-hero ${alpha.state === 'complete' ? 'complete' : ''}">
         <div class="iv-alpha-hero-copy">
-          <span class="iv-alpha-hero-icon">${lucideIconHtml('circle-check', 'iv-alpha-hero-svg')}</span>
+          <span class="iv-alpha-hero-icon">${lucideIconHtml('circle-check-big', 'iv-alpha-hero-svg')}</span>
           <div>
             <h3>${escapeHtml(alpha.title)}</h3>
             <p>${escapeHtml(alpha.message)}</p>
@@ -1991,7 +2134,7 @@ function renderIvAlphaOnly(data) {
       </div>
       ${renderIvAlphaOwnedMatch(alpha.ownedMatch || {}, data.requestedPassives || [])}
       <article class="iv-alpha-next route-card">
-        <div class="iv-alpha-section-title">${lucideIconHtml('arrow-right-circle', 'iv-alpha-title-icon')}<h3>Next Steps (Alpha Only)</h3></div>
+        <div class="iv-alpha-section-title">${lucideIconHtml('list-checks', 'iv-alpha-title-icon')}<h3>Next Steps (Alpha Only)</h3></div>
         <div class="iv-alpha-step-grid">
           ${steps.map((step, index) => `
             <div class="iv-alpha-step ${step.primary ? 'primary' : ''}">
@@ -2004,7 +2147,7 @@ function renderIvAlphaOnly(data) {
         </div>
         <div class="iv-alpha-notes">
           <div>${lucideIconHtml('info', 'iv-alpha-note-icon')}<p><strong>Why Special Cake?</strong><span>${escapeHtml(alpha.recommendedCakeReason || '')}</span></p></div>
-          <div>${lucideIconHtml('info', 'iv-alpha-note-icon')}<p><strong>Why Broncherry + Broncherry Aqua?</strong><span>They handle Alpha egg pickup while you continue hatching from the solved pair.</span></p></div>
+          <div>${lucideIconHtml('info', 'iv-alpha-note-icon')}<p><strong>Why Broncherry + Broncherry Aqua?</strong><span>Fully condensed Broncherry + Broncherry Aqua guarantee Alpha eggs while you continue hatching from the solved pair.</span></p></div>
         </div>
       </article>
       ${alpha.parentPoolWarning ? `
@@ -2015,14 +2158,6 @@ function renderIvAlphaOnly(data) {
             <p>Your owned ${escapeHtml(data.target)} meets the target, but Special Cake is only ideal when the parent passive pool is exactly the ${escapeHtml((data.naturalPassives || []).length)} target passives.</p>
           </div>
         </div>` : ''}
-      <div class="iv-alpha-summary">
-        ${lucideIconHtml('flag', 'iv-alpha-inline-icon')}
-        <strong>Target Summary</strong>
-        <span>${escapeHtml(data.target || '')}</span>
-        <div class="passive-list compact">${(data.requestedPassives || []).map(passive => passiveBarHtml(passive)).join('')}</div>
-        <span>IVs <b>100 / 100 / 100</b></span>
-        <span>${lucideIconHtml('crown', 'badge-svg')} Alpha ${data.requireAlpha ? '(required)' : ''}</span>
-      </div>
     </section>`;
 }
 
@@ -2217,11 +2352,12 @@ async function saveBaseLabel() {
 
 function renderResult(data) {
   const renderers = {breeding: renderBreeding, ivs: renderIvs, work: renderWork, ranch: renderRanch, bases: renderBases};
+  lastRenderedResult = data;
   if (moduleKey === 'breeding') lastBreedingResult = data;
   $('#results').classList.remove('results-empty');
   $('#results').innerHTML = (renderers[moduleKey] || renderJson)(data);
   const count = data.total || data.totalItems || data.rosterCount || (data.groups || []).length || '';
-  setText('#resultCount', data.alphaOnly ? 'Alpha target' : moduleKey === 'breeding' ? 'Top route' : count ? `${count} result${count === 1 ? '' : 's'}` : '');
+  setText('#resultCount', data.alphaOnly ? '' : moduleKey === 'breeding' ? 'Top route' : count ? `${count} result${count === 1 ? '' : 's'}` : '');
 }
 
 async function ranchDropsData() {
@@ -2486,6 +2622,7 @@ async function init() {
   initProfiles();
   initBreedingPlans();
   initImplantInventories();
+  initPassiveColors();
   initFreshCopyToggle();
   initRanchDropSearch();
   initFormStatePersistence();

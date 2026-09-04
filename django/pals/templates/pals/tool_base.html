@@ -103,6 +103,32 @@
         <p class="field-hint" data-inventory-status></p>
     </div>
 </div>
+<div id="passiveColorsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="passiveColorsTitle">
+    <div class="modal-panel passive-colors-panel" data-passive-colors>
+        <div class="modal-head">
+            <div>
+                <h2 id="passiveColorsTitle">Passive Colors</h2>
+                <p class="status-line">Override a passive chip color locally.</p>
+            </div>
+            <button type="button" id="closePassiveColors" aria-label="Close passive colors">x</button>
+        </div>
+        <span class="passive-color-edit-row">
+            <span class="suggest-field" data-color-suggest>
+                <input data-color-input autocomplete="off" placeholder="Choose a passive">
+                <span class="suggest-menu" data-color-menu></span>
+            </span>
+            <select data-color-tone aria-label="Passive color">
+                <option value="positive">Positive</option>
+                <option value="gold">Gold</option>
+                <option value="negative">Negative</option>
+                <option value="neutral">Neutral</option>
+            </select>
+            <button type="button" data-color-save>Save</button>
+        </span>
+        <div class="passive-color-list" data-color-list></div>
+        <p class="field-hint" data-color-status></p>
+    </div>
+</div>
 <div id="passiveTooltip" class="floating-passive-tooltip hidden"></div>
 {% endblock %}
 {% block scripts %}

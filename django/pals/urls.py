@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/improve-ivs", views.improve_ivs, name="api_improve_ivs"),
     path("api/base-labels", views.base_labels, name="api_base_labels"),
     path("api/implant-inventory", views.implant_inventory, name="api_implant_inventory"),
+    path("api/passive-colors", views.passive_colors, name="api_passive_colors"),
     path("api/base-planner", views.base_planner, name="api_base_planner"),
     path("assets/pals/<path:name>", views.pal_asset, name="pal_asset"),
 ]

@@ -1,4 +1,6 @@
 from types import SimpleNamespace
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -181,3 +183,16 @@ class IvAlphaOnlyTest(SimpleTestCase):
         self.assertEqual(result["alphaOnly"]["missing"], ["Alpha"])
         self.assertEqual(result["alphaOnly"]["ownedMatch"]["isAlpha"], False)
         self.assertEqual(result["alphaOnly"]["recommendedCake"], "Special Cake")
+
+
+class PassiveColorOverrideTest(SimpleTestCase):
+    def test_passive_color_override_replaces_default_tone(self):
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "passive_color_overrides.json"
+            path.write_text('{"Serenity": "positive"}', encoding="utf-8")
+
+            with patch.object(optimizer, "PASSIVE_COLOR_OVERRIDES_FILE", path):
+                meta = optimizer.build_passive_meta(["Serenity"])
+
+        self.assertEqual(meta["Serenity"]["tone"], "positive")
+        self.assertEqual(meta["Serenity"]["toneSource"], "override")

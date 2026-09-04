@@ -108,6 +108,7 @@ def options(request):
         ],
         "baseSites": optimizer.base_work_sites_payload(),
         "implantInventory": optimizer.load_implant_inventory(),
+        "passiveColorOverrides": optimizer.load_passive_color_overrides(),
         "rosterCount": len(optimizer.STORE.roster),
         "dataVersion": optimizer.STORE.breeding_data.get("dataVersion"),
         "generatedAt": optimizer.STORE.breeding_data.get("generatedAt"),
@@ -279,6 +280,28 @@ def implant_inventory(request):
         inventory[passive] = {"infinite": infinite, "count": None if infinite else count}
     optimizer.save_implant_inventory(inventory)
     return JsonResponse({"ok": True, "inventory": inventory})
+
+
+@login_required
+@csrf_exempt
+@require_POST
+def passive_colors(request):
+    payload = json_payload(request)
+    overrides = optimizer.load_passive_color_overrides()
+    passive = str(payload.get("passive") or "").strip()
+    if not passive:
+        return json_error("Missing passive")
+    canonical = next((item for item in optimizer.STORE.passives if item.lower() == passive.lower()), passive)
+    if payload.get("delete"):
+        overrides.pop(canonical, None)
+    else:
+        tone = str(payload.get("tone") or "").strip()
+        if tone not in optimizer.PASSIVE_TONES:
+            return json_error("Choose a valid passive color")
+        overrides[canonical] = tone
+    optimizer.save_passive_color_overrides(overrides)
+    optimizer.STORE.passive_meta = optimizer.build_passive_meta(optimizer.STORE.passives)
+    return JsonResponse({"ok": True, "overrides": overrides, "passiveMeta": optimizer.STORE.passive_meta})
 
 
 @login_required

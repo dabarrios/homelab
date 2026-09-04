@@ -41,6 +41,7 @@ LIVE_LOCK = threading.Lock()
 LIVE_STATE_FILE = DATA_ROOT / "live_save_state.json"
 BASE_LABELS_FILE = DATA_ROOT / "base_labels.json"
 IMPLANT_INVENTORY_FILE = DATA_ROOT / "implant_inventory.json"
+PASSIVE_COLOR_OVERRIDES_FILE = DATA_ROOT / "passive_color_overrides.json"
 LIVE_STATE = {
     "last_refresh_fingerprint": "",
     "last_refresh_at": "",
@@ -203,6 +204,7 @@ SIZE_GROUPS = {
 }
 
 VALID_PAL_SIZES = {"XS", "S", "M", "L", "XL"}
+PASSIVE_TONES = {"positive", "gold", "negative", "neutral"}
 def as_int(value, default=0):
     try:
         return int(value or default)
@@ -234,6 +236,32 @@ def match_key(value: str) -> str:
 def canonical_passives(values: list[str]) -> frozenset[str]:
     by_key = {match_key(passive): passive for passive in STORE.passives}
     return frozenset(by_key.get(match_key(p), p.strip()) for p in values if p and p.strip())
+
+def load_passive_color_overrides() -> dict[str, str]:
+    if not PASSIVE_COLOR_OVERRIDES_FILE.exists():
+        return {}
+    try:
+        data = json.loads(PASSIVE_COLOR_OVERRIDES_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return {
+        str(passive): str(tone)
+        for passive, tone in data.items()
+        if str(passive).strip() and str(tone) in PASSIVE_TONES
+    }
+
+
+def save_passive_color_overrides(overrides: dict[str, str]) -> None:
+    DATA_ROOT.mkdir(parents=True, exist_ok=True)
+    cleaned = {
+        str(passive): str(tone)
+        for passive, tone in sorted(overrides.items())
+        if str(passive).strip() and str(tone) in PASSIVE_TONES
+    }
+    PASSIVE_COLOR_OVERRIDES_FILE.write_text(json.dumps(cleaned, indent=2), encoding="utf-8")
+
 
 def passive_tone(name: str, passive_id: str = "", desc: str = "") -> str:
     lowered = f"{passive_id} {desc}".lower()
@@ -276,10 +304,17 @@ def build_passive_meta(passives: list[str]) -> dict[str, dict[str, str]]:
                     "tone": passive_tone(name, passive_id, skill.get("desc", "")),
                 }
 
-    return {
-        passive: by_name.get(passive, {"id": "", "desc": "", "tone": passive_tone(passive)})
-        for passive in passives
-    }
+    overrides = load_passive_color_overrides()
+    meta = {}
+    for passive in passives:
+        entry = dict(by_name.get(passive, {"id": "", "desc": "", "tone": passive_tone(passive)}))
+        if passive in overrides:
+            entry["tone"] = overrides[passive]
+            entry["toneSource"] = "override"
+        else:
+            entry["toneSource"] = "default"
+        meta[passive] = entry
+    return meta
 
 def palbox_position(location: str) -> dict[str, int | None]:
     if not (location or "").lower().startswith("palbox/storage"):
@@ -2619,14 +2654,14 @@ def build_iv_plan(payload: dict) -> dict:
                 },
                 {
                     "title": "Repeat Hatch",
-                    "detail": f"Keep breeding from the solved pair until an Alpha {STORE.pals[target_key].name} hatches.",
+                    "detail": f"Keep breeding this pair until an Alpha {STORE.pals[target_key].name} hatches.",
                     "icon": "egg",
                     "primary": False,
                 },
                 {
                     "title": "Egg Pickup",
-                    "detail": "Use Broncherry + Broncherry Aqua when picking up eggs for guaranteed Alpha eggs.",
-                    "icon": "crown",
+                    "detail": "Pick up eggs with fully condensed Broncherry + Broncherry Aqua for guaranteed Alpha eggs.",
+                    "icon": "package-open",
                     "primary": False,
                 },
             ],
