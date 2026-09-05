@@ -239,7 +239,7 @@ function displayJunk(node, isRoot = false) {
 function passiveBarHtml(passive, {implant = false, junk = false} = {}) {
   const tone = passiveTone(passive);
   const suffix = implant
-    ? '<em class="implant-badge">Implant</em>'
+    ? `<em class="implant-badge">${lucideIconHtml('dna', 'passive-badge-svg')}<span>Implant</span></em>`
     : junk ? `<em class="junk-badge">${lucideIconHtml('trash-2', 'passive-badge-svg')}<span>Junk</span></em>` : '';
   return `<span class="passive-bar ${implant ? 'implant-missing' : ''} ${tone}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${suffix}</span>`;
 }
@@ -1934,14 +1934,14 @@ function renderReadyFinishCards(candidates, data) {
         <div class="ready-missing">
           <span>Add later</span>
           <div class="passive-list ready-passive-list">
-            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em class="implant-badge">Implant</em></span>`).join('')}
+            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em class="implant-badge">${lucideIconHtml('dna', 'passive-badge-svg')}<span>Implant</span></em></span>`).join('')}
           </div>
         </div>
         <div class="ready-passives ready-option-passives">
           <span>Final passives</span>
           <div class="passive-list ready-passive-list">
             ${present.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
-            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em class="implant-badge">Implant</em></span>`).join('')}
+            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em class="implant-badge">${lucideIconHtml('dna', 'passive-badge-svg')}<span>Implant</span></em></span>`).join('')}
           </div>
           ${replaceable.length ? `<p class="ready-replaceable">Replaceable: ${escapeHtml(replaceable.join(', '))}</p>` : ''}
         </div>
@@ -2057,7 +2057,7 @@ function renderProfileResultNotice(data) {
 function profileResultPassiveList(passives, implantPassives = new Set()) {
   return `
     <span class="passive-list compact">
-      ${(passives || []).map(passive => `<span class="passive-bar ${implantPassives.has(passive) ? 'implant-missing' : ''} ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implantPassives.has(passive) ? '<em class="implant-badge">Implant</em>' : ''}</span>`).join('')}
+      ${(passives || []).map(passive => `<span class="passive-bar ${implantPassives.has(passive) ? 'implant-missing' : ''} ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implantPassives.has(passive) ? `<em class="implant-badge">${lucideIconHtml('dna', 'passive-badge-svg')}<span>Implant</span></em>` : ''}</span>`).join('')}
     </span>`;
 }
 

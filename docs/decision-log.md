@@ -1,5 +1,11 @@
 # Decision Log
 
+## 2026-09-05 - Add DNA Icons to Implant Badges
+
+Decision: add the existing Lucide `dna` icon before the Implant label in breeding trees, implant-ready cards, and profile result summaries. Reuse the Junk badge's 12px icon sizing and spacing, keeping the purple Implant colors. This explicitly supersedes the previous no-new-icons choice for Implant badges only.
+
+Verification: all 19 frontend tests, JavaScript syntax, and diff checks pass. Browser visual verification was not performed.
+
 ## 2026-09-05 - Simplify Breeding Form and Distinguish Implant Badges
 
 Decision: keep the existing compact form style, move Gender below Target Species, and place Passive Profile immediately after Desired Passives. Show selected passive chips once, above their input; custom profile selection/restoration populates that list. Replace the duplicated profile passive summary with `Profile loaded.` and omit counts. Keep built-in automatic selection described in one short sentence. Group profile Add/Edit buttons together.
