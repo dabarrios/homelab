@@ -1,0 +1,6189 @@
+{
+  "schema": 1,
+  "dataVersion": "Palworld 1.0 canonical reference",
+  "generatedAt": "2026-09-05",
+  "source": "https://github.com/helios57/palworld",
+  "sourceCommit": "4120331a454842e8f91b8d83cc7b21e64b4a7ade",
+  "assetNameSource": "https://github.com/zaigie/palworld-server-tool",
+  "assetNameSourceCommit": "3b0e1e96a7500846e3a6fbac66f1c248b4c286e7",
+  "pals": [
+    {
+      "key": "worldtreedragon",
+      "name": "Astralym",
+      "paldex": "204",
+      "types": [],
+      "combiRank": 10,
+      "combiPriority": 10,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {}
+    },
+    {
+      "key": "kingwhale",
+      "name": "Panthalus",
+      "paldex": "203",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 20,
+      "combiPriority": 20,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {}
+    },
+    {
+      "key": "domearmordragon",
+      "name": "Aegidron",
+      "paldex": "184",
+      "types": [
+        "Dragon",
+        "Ground"
+      ],
+      "combiRank": 30,
+      "combiPriority": 30,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "mining": 8
+      }
+    },
+    {
+      "key": "blueskydragon",
+      "name": "Shaolong",
+      "paldex": "192",
+      "types": [
+        "Dragon",
+        "Water"
+      ],
+      "combiRank": 40,
+      "combiPriority": 40,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 8,
+        "gathering": 5
+      }
+    },
+    {
+      "key": "snowtigerbeastman",
+      "name": "Bastigor",
+      "paldex": "191",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 50,
+      "combiPriority": 50,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 6,
+        "mining": 5,
+        "cooling": 8
+      }
+    },
+    {
+      "key": "flowerprince",
+      "name": "Dandilord",
+      "paldex": "194",
+      "types": [
+        "Grass",
+        "Dark"
+      ],
+      "combiRank": 60,
+      "combiPriority": 60,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 8,
+        "handiwork": 6,
+        "gathering": 5,
+        "medicine": 6,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "jetdragon",
+      "name": "Jetragon",
+      "paldex": "202",
+      "types": [
+        "Dragon"
+      ],
+      "combiRank": 70,
+      "combiPriority": 70,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 8
+      }
+    },
+    {
+      "key": "mothman",
+      "name": "Silvance",
+      "paldex": "193",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 80,
+      "combiPriority": 80,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 6,
+        "handiwork": 6,
+        "gathering": 4,
+        "medicine": 8,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "legenddeer",
+      "name": "Hartalis",
+      "paldex": "197",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 90,
+      "combiPriority": 90,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 7,
+        "lumbering": 7
+      }
+    },
+    {
+      "key": "kingbahamut_dragon",
+      "name": "Blazamut Ryu",
+      "paldex": "137B",
+      "types": [
+        "Dragon",
+        "Fire"
+      ],
+      "combiRank": 100,
+      "combiPriority": 100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 6,
+        "mining": 7
+      }
+    },
+    {
+      "key": "icehorse_dark",
+      "name": "Frostallion Noct",
+      "paldex": "200B",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 110,
+      "combiPriority": 110,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 7
+      }
+    },
+    {
+      "key": "thunderdragonman",
+      "name": "Orserk",
+      "paldex": "187",
+      "types": [
+        "Dragon",
+        "Electric"
+      ],
+      "combiRank": 120,
+      "combiPriority": 120,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 8,
+        "handiwork": 3,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "nightlady_dark",
+      "name": "Bellanoir Libero",
+      "paldex": "195B",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 130,
+      "combiPriority": 130,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 6,
+        "medicine": 7,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "ghostdragon_fire",
+      "name": "Eidrolon Ignis",
+      "paldex": "171B",
+      "types": [
+        "Dragon",
+        "Fire"
+      ],
+      "combiRank": 140,
+      "combiPriority": 140,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 6,
+        "transporting": 6
+      }
+    },
+    {
+      "key": "icehorse",
+      "name": "Frostallion",
+      "paldex": "200",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 150,
+      "combiPriority": 150,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "cooling": 7
+      }
+    },
+    {
+      "key": "poseidonorca",
+      "name": "Neptilius",
+      "paldex": "201",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 160,
+      "combiPriority": 160,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 7
+      }
+    },
+    {
+      "key": "umihebi_fire",
+      "name": "Jormuntide Ignis",
+      "paldex": "121B",
+      "types": [
+        "Dragon",
+        "Fire"
+      ],
+      "combiRank": 170,
+      "combiPriority": 170,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 7
+      }
+    },
+    {
+      "key": "saintcentaur",
+      "name": "Paladius",
+      "paldex": "198",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 180,
+      "combiPriority": 180,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 6,
+        "mining": 6
+      }
+    },
+    {
+      "key": "blackcentaur",
+      "name": "Necromus",
+      "paldex": "199",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 190,
+      "combiPriority": 190,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 6,
+        "mining": 6
+      }
+    },
+    {
+      "key": "cubeturtle_neutral",
+      "name": "Tetroise Primo",
+      "paldex": "142B",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 200,
+      "combiPriority": 200,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "mining": 6
+      }
+    },
+    {
+      "key": "winggolem_fire",
+      "name": "Knocklem Ignis",
+      "paldex": "159B",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 210,
+      "combiPriority": 210,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 5,
+        "mining": 7,
+        "transporting": 7
+      }
+    },
+    {
+      "key": "lilyqueen_dark",
+      "name": "Lyleen Noct",
+      "paldex": "186B",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 220,
+      "combiPriority": 220,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 5,
+        "gathering": 6,
+        "medicine": 7
+      }
+    },
+    {
+      "key": "lotusdragon",
+      "name": "Ophydia",
+      "paldex": "175",
+      "types": [
+        "Grass",
+        "Water"
+      ],
+      "combiRank": 230,
+      "combiPriority": 230,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 5,
+        "planting": 7
+      }
+    },
+    {
+      "key": "lilyqueen",
+      "name": "Lyleen",
+      "paldex": "186",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 240,
+      "combiPriority": 240,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 7,
+        "handiwork": 5,
+        "gathering": 6,
+        "medicine": 5
+      }
+    },
+    {
+      "key": "grassgolem_dark",
+      "name": "Dualith Noct",
+      "paldex": "138B",
+      "types": [
+        "Ground",
+        "Dark"
+      ],
+      "combiRank": 250,
+      "combiPriority": 250,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 3,
+        "gathering": 3,
+        "lumbering": 5,
+        "mining": 6,
+        "transporting": 6
+      }
+    },
+    {
+      "key": "winggolem",
+      "name": "Knocklem",
+      "paldex": "159",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 260,
+      "combiPriority": 260,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 4,
+        "mining": 7,
+        "transporting": 7
+      }
+    },
+    {
+      "key": "whitedeer_dark",
+      "name": "Celesdir Noct",
+      "paldex": "157B",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 270,
+      "combiPriority": 270,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 4,
+        "lumbering": 8
+      }
+    },
+    {
+      "key": "monochromequeen",
+      "name": "Solenne",
+      "paldex": "182",
+      "types": [
+        "Dark",
+        "Neutral"
+      ],
+      "combiRank": 280,
+      "combiPriority": 280,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 8,
+        "gathering": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "kabukiman",
+      "name": "Renjishi",
+      "paldex": "183",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 290,
+      "combiPriority": 290,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 8,
+        "handiwork": 6,
+        "gathering": 5,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "ghostdragon",
+      "name": "Eidrolon",
+      "paldex": "171",
+      "types": [
+        "Dragon",
+        "Dark"
+      ],
+      "combiRank": 300,
+      "combiPriority": 300,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "transporting": 6
+      }
+    },
+    {
+      "key": "moonqueen",
+      "name": "Selyne",
+      "paldex": "190",
+      "types": [
+        "Dark",
+        "Neutral"
+      ],
+      "combiRank": 360,
+      "combiPriority": 360,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 7,
+        "medicine": 6,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "icenarwhal_fire",
+      "name": "Whalaska Ignis",
+      "paldex": "151B",
+      "types": [
+        "Ice",
+        "Fire"
+      ],
+      "combiRank": 370,
+      "combiPriority": 370,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 5,
+        "cooling": 6
+      }
+    },
+    {
+      "key": "volcanodragon_ice",
+      "name": "Moldron Cryst",
+      "paldex": "105B",
+      "types": [
+        "Ice",
+        "Ground"
+      ],
+      "combiRank": 380,
+      "combiPriority": 380,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "mining": 5,
+        "cooling": 5
+      }
+    },
+    {
+      "key": "foxexorcist",
+      "name": "Flaracle",
+      "paldex": "174",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 390,
+      "combiPriority": 390,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 7,
+        "handiwork": 6,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "darkmechadragon",
+      "name": "Xenolord",
+      "paldex": "196",
+      "types": [
+        "Dark",
+        "Dragon"
+      ],
+      "combiRank": 400,
+      "combiPriority": 400,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "kingbahamut",
+      "name": "Blazamut",
+      "paldex": "137",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 410,
+      "combiPriority": 410,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 6,
+        "mining": 7
+      }
+    },
+    {
+      "key": "bluethunderhorse",
+      "name": "Azurmane",
+      "paldex": "161",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 420,
+      "combiPriority": 420,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 5
+      }
+    },
+    {
+      "key": "nightbluehorse_neutral",
+      "name": "Starryon Primo",
+      "paldex": "130B",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 430,
+      "combiPriority": 430,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 7
+      }
+    },
+    {
+      "key": "grassminotaur_ice",
+      "name": "Elgrove Cryst",
+      "paldex": "81B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 440,
+      "combiPriority": 440,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 3,
+        "mining": 3,
+        "cooling": 5,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "horus_water",
+      "name": "Faleris Aqua",
+      "paldex": "188B",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 450,
+      "combiPriority": 450,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 6,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "rockbeast_ice",
+      "name": "Pierdon Cryst",
+      "paldex": "131B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 460,
+      "combiPriority": 460,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "mining": 5,
+        "cooling": 6
+      }
+    },
+    {
+      "key": "whitetiger_ground",
+      "name": "Cryolinx Terra",
+      "paldex": "132B",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 470,
+      "combiPriority": 470,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 2,
+        "lumbering": 6,
+        "mining": 5,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "anubis",
+      "name": "Anubis",
+      "paldex": "139",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 480,
+      "combiPriority": 480,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 6,
+        "mining": 6,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "blackmetaldragon",
+      "name": "Astegon",
+      "paldex": "158",
+      "types": [
+        "Dragon",
+        "Dark"
+      ],
+      "combiRank": 490,
+      "combiPriority": 490,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 3,
+        "mining": 7
+      }
+    },
+    {
+      "key": "horus",
+      "name": "Faleris",
+      "paldex": "188",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 500,
+      "combiPriority": 500,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 6,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "grassgolem",
+      "name": "Dualith",
+      "paldex": "138",
+      "types": [
+        "Ground",
+        "Grass"
+      ],
+      "combiRank": 510,
+      "combiPriority": 510,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "gathering": 3,
+        "lumbering": 5,
+        "mining": 6,
+        "transporting": 6
+      }
+    },
+    {
+      "key": "clownrabbit",
+      "name": "Dupin",
+      "paldex": "176",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 520,
+      "combiPriority": 520,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 7,
+        "handiwork": 5,
+        "medicine": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "thiefbird",
+      "name": "Roujay",
+      "paldex": "177",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 530,
+      "combiPriority": 530,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 5,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "kirin_ice",
+      "name": "Univolt Cryst",
+      "paldex": "54B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 540,
+      "combiPriority": 540,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 3,
+        "cooling": 6
+      }
+    },
+    {
+      "key": "blackgriffon",
+      "name": "Shadowbeak",
+      "paldex": "189",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 550,
+      "combiPriority": 550,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "whiteshielddragon",
+      "name": "Silvegis",
+      "paldex": "160",
+      "types": [
+        "Dragon"
+      ],
+      "combiRank": 560,
+      "combiPriority": 560,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "lumbering": 6
+      }
+    },
+    {
+      "key": "whitedeer",
+      "name": "Celesdir",
+      "paldex": "157",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 570,
+      "combiPriority": 570,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 4,
+        "lumbering": 7
+      }
+    },
+    {
+      "key": "thunderbird_ice",
+      "name": "Beakon Cryst",
+      "paldex": "96B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 580,
+      "combiPriority": 580,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 2,
+        "cooling": 5,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "umihebi",
+      "name": "Jormuntide",
+      "paldex": "121",
+      "types": [
+        "Dragon",
+        "Water"
+      ],
+      "combiRank": 590,
+      "combiPriority": 590,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 7
+      }
+    },
+    {
+      "key": "volcanicmonster_ice",
+      "name": "Reptyro Cryst",
+      "paldex": "129B",
+      "types": [
+        "Ice",
+        "Ground"
+      ],
+      "combiRank": 600,
+      "combiPriority": 600,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "mining": 5,
+        "cooling": 5
+      }
+    },
+    {
+      "key": "yeti_grass",
+      "name": "Wumpo Botan",
+      "paldex": "134B",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 610,
+      "combiPriority": 610,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "handiwork": 3,
+        "lumbering": 5,
+        "transporting": 6
+      }
+    },
+    {
+      "key": "nightlady",
+      "name": "Bellanoir",
+      "paldex": "195",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 620,
+      "combiPriority": 620,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 5,
+        "medicine": 5,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "herculesbeetle_ground",
+      "name": "Warsect Terra",
+      "paldex": "113B",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 630,
+      "combiPriority": 630,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 2,
+        "mining": 5,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "darkscorpion_ground",
+      "name": "Menasting Terra",
+      "paldex": "99B",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 640,
+      "combiPriority": 640,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 3,
+        "mining": 6
+      }
+    },
+    {
+      "key": "whitemoth_neutral",
+      "name": "Sibelyx Primo",
+      "paldex": "116B",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 650,
+      "combiPriority": 650,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "medicine": 3,
+        "farming": 4
+      }
+    },
+    {
+      "key": "icenarwhal",
+      "name": "Whalaska",
+      "paldex": "151",
+      "types": [
+        "Ice",
+        "Water"
+      ],
+      "combiRank": 710,
+      "combiPriority": 710,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 5,
+        "cooling": 6
+      }
+    },
+    {
+      "key": "ghostanglerfish_fire",
+      "name": "Ghangler Ignis",
+      "paldex": "97B",
+      "types": [
+        "Fire",
+        "Water"
+      ],
+      "combiRank": 720,
+      "combiPriority": 720,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 5,
+        "watering": 5,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "goldenhorse",
+      "name": "Gildane",
+      "paldex": "154",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 730,
+      "combiPriority": 730,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 5
+      }
+    },
+    {
+      "key": "suzaku_water",
+      "name": "Suzaku Aqua",
+      "paldex": "122B",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 740,
+      "combiPriority": 740,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 6
+      }
+    },
+    {
+      "key": "volcanodragon",
+      "name": "Moldron",
+      "paldex": "105",
+      "types": [
+        "Fire",
+        "Ground"
+      ],
+      "combiRank": 750,
+      "combiPriority": 750,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 5,
+        "mining": 5
+      }
+    },
+    {
+      "key": "mushroomlady",
+      "name": "Mycora",
+      "paldex": "179",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 760,
+      "combiPriority": 760,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 6,
+        "handiwork": 4,
+        "gathering": 4,
+        "medicine": 6
+      }
+    },
+    {
+      "key": "lazydragon_electric",
+      "name": "Relaxaurus Lux",
+      "paldex": "94B",
+      "types": [
+        "Dragon",
+        "Electric"
+      ],
+      "combiRank": 770,
+      "combiPriority": 770,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 4,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "grimgirl",
+      "name": "Splatterina",
+      "paldex": "153",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 780,
+      "combiPriority": 780,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 6,
+        "lumbering": 3,
+        "medicine": 5,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "tetroise",
+      "name": "Tetroise",
+      "paldex": "142",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 790,
+      "combiPriority": 790,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "mining": 4
+      }
+    },
+    {
+      "key": "amaterasuwolf_dark",
+      "name": "Kitsun Noct",
+      "paldex": "111B",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 800,
+      "combiPriority": 800,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 4
+      }
+    },
+    {
+      "key": "sleeverabbit",
+      "name": "Lapure",
+      "paldex": "170",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 810,
+      "combiPriority": 810,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 6,
+        "gathering": 5
+      }
+    },
+    {
+      "key": "flowerdoll_fire",
+      "name": "Petallia Ignis",
+      "paldex": "89B",
+      "types": [
+        "Grass",
+        "Fire"
+      ],
+      "combiRank": 820,
+      "combiPriority": 820,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 4,
+        "handiwork": 3,
+        "gathering": 3,
+        "medicine": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "yeti",
+      "name": "Wumpo",
+      "paldex": "134",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 830,
+      "combiPriority": 830,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 3,
+        "lumbering": 5,
+        "cooling": 5,
+        "transporting": 6
+      }
+    },
+    {
+      "key": "ronin_dark",
+      "name": "Bushi Noct",
+      "paldex": "85B",
+      "types": [
+        "Fire",
+        "Dark"
+      ],
+      "combiRank": 840,
+      "combiPriority": 840,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 2,
+        "handiwork": 2,
+        "gathering": 1,
+        "lumbering": 5,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "scorpionman_electric",
+      "name": "Prixter Lux",
+      "paldex": "141B",
+      "types": [
+        "Electric",
+        "Ground"
+      ],
+      "combiRank": 850,
+      "combiPriority": 850,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 3,
+        "gathering": 2,
+        "lumbering": 4,
+        "medicine": 2
+      }
+    },
+    {
+      "key": "snowpeafowl",
+      "name": "Frostplume",
+      "paldex": "114",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 860,
+      "combiPriority": 860,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2,
+        "cooling": 4
+      }
+    },
+    {
+      "key": "sekhmet",
+      "name": "Sekhmet",
+      "paldex": "140",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 870,
+      "combiPriority": 870,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 6,
+        "mining": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "ghostanglerfish",
+      "name": "Ghangler",
+      "paldex": "97",
+      "types": [
+        "Dark",
+        "Water"
+      ],
+      "combiRank": 880,
+      "combiPriority": 880,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 5,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "lanternbutler",
+      "name": "Loomen",
+      "paldex": "180",
+      "types": [
+        "Dark",
+        "Fire"
+      ],
+      "combiRank": 890,
+      "combiPriority": 890,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 4,
+        "handiwork": 4,
+        "medicine": 4
+      }
+    },
+    {
+      "key": "fengyundeeper_electric",
+      "name": "Fenglope Lux",
+      "paldex": "83B",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 900,
+      "combiPriority": 900,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 5,
+        "lumbering": 4
+      }
+    },
+    {
+      "key": "hadesbird_electric",
+      "name": "Helzephyr Lux",
+      "paldex": "80B",
+      "types": [
+        "Dark",
+        "Electric"
+      ],
+      "combiRank": 960,
+      "combiPriority": 960,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 4,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "snakegirl",
+      "name": "Venusa",
+      "paldex": "178",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 970,
+      "combiPriority": 970,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 6,
+        "gathering": 6,
+        "medicine": 5,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "candleghost",
+      "name": "Sootseer",
+      "paldex": "135",
+      "types": [
+        "Dark",
+        "Fire"
+      ],
+      "combiRank": 980,
+      "combiPriority": 980,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 3,
+        "handiwork": 3,
+        "gathering": 2,
+        "mining": 3,
+        "farming": 2
+      }
+    },
+    {
+      "key": "whitealiendragon",
+      "name": "Xenogard",
+      "paldex": "146",
+      "types": [
+        "Dragon"
+      ],
+      "combiRank": 990,
+      "combiPriority": 990,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "mining": 4
+      }
+    },
+    {
+      "key": "kingsunfish_thunder",
+      "name": "Solmora Lux",
+      "paldex": "169B",
+      "types": [
+        "Water",
+        "Electric"
+      ],
+      "combiRank": 1000,
+      "combiPriority": 1000,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 4,
+        "electric": 6
+      }
+    },
+    {
+      "key": "darkflamefox",
+      "name": "Majex",
+      "paldex": "115",
+      "types": [
+        "Dark",
+        "Fire"
+      ],
+      "combiRank": 1010,
+      "combiPriority": 1010,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 4,
+        "handiwork": 5,
+        "medicine": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "elecpanda",
+      "name": "Grizzbolt",
+      "paldex": "185",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 1020,
+      "combiPriority": 1020,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 5,
+        "handiwork": 4,
+        "lumbering": 3,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "plesiosaur",
+      "name": "Braloha",
+      "paldex": "110",
+      "types": [
+        "Grass",
+        "Ground"
+      ],
+      "combiRank": 1030,
+      "combiPriority": 1030,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 5,
+        "gathering": 5,
+        "mining": 3
+      }
+    },
+    {
+      "key": "whitetiger",
+      "name": "Cryolinx",
+      "paldex": "132",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 1040,
+      "combiPriority": 1040,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 3,
+        "lumbering": 4,
+        "cooling": 4,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "redarmorbird",
+      "name": "Ragnahawk",
+      "paldex": "104",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 1050,
+      "combiPriority": 1050,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 4,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "volcanicmonster",
+      "name": "Reptyro",
+      "paldex": "129",
+      "types": [
+        "Fire",
+        "Ground"
+      ],
+      "combiRank": 1060,
+      "combiPriority": 1060,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 5,
+        "mining": 5
+      }
+    },
+    {
+      "key": "grassmammoth_ice",
+      "name": "Mammorest Cryst",
+      "paldex": "87B",
+      "types": [
+        "Ice",
+        "Ground"
+      ],
+      "combiRank": 1070,
+      "combiPriority": 1070,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 5,
+        "mining": 4,
+        "cooling": 5
+      }
+    },
+    {
+      "key": "sakurasaurus_water",
+      "name": "Broncherry Aqua",
+      "paldex": "108B",
+      "types": [
+        "Grass",
+        "Water"
+      ],
+      "combiRank": 1080,
+      "combiPriority": 1080,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 5
+      }
+    },
+    {
+      "key": "lazydragon",
+      "name": "Relaxaurus",
+      "paldex": "94",
+      "types": [
+        "Dragon",
+        "Water"
+      ],
+      "combiRank": 1090,
+      "combiPriority": 1090,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 3,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "iceseal_ground",
+      "name": "Polapup Terra",
+      "paldex": "72B",
+      "types": [
+        "Ice",
+        "Ground"
+      ],
+      "combiRank": 1100,
+      "combiPriority": 1100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "mining": 4,
+        "cooling": 4
+      }
+    },
+    {
+      "key": "rockbeast",
+      "name": "Pierdon",
+      "paldex": "131",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 1110,
+      "combiPriority": 1110,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "mining": 5
+      }
+    },
+    {
+      "key": "darkscorpion",
+      "name": "Menasting",
+      "paldex": "99",
+      "types": [
+        "Dark",
+        "Ground"
+      ],
+      "combiRank": 1120,
+      "combiPriority": 1120,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "lumbering": 3,
+        "mining": 5
+      }
+    },
+    {
+      "key": "hadesbird",
+      "name": "Helzephyr",
+      "paldex": "80",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1130,
+      "combiPriority": 1130,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "transporting": 4
+      }
+    },
+    {
+      "key": "mysterymask",
+      "name": "Omascul",
+      "paldex": "150",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1140,
+      "combiPriority": 1140,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 5
+      }
+    },
+    {
+      "key": "nightbluehorse",
+      "name": "Starryon",
+      "paldex": "130",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1150,
+      "combiPriority": 1150,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 5
+      }
+    },
+    {
+      "key": "grassrabbitman",
+      "name": "Verdash",
+      "paldex": "152",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1160,
+      "combiPriority": 1160,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 4,
+        "handiwork": 5,
+        "gathering": 5,
+        "lumbering": 3,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "mummypal",
+      "name": "Gildra",
+      "paldex": "120",
+      "types": [
+        "Dark",
+        "Ground"
+      ],
+      "combiRank": 1170,
+      "combiPriority": 1170,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 5,
+        "medicine": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "moonchild",
+      "name": "Wistella",
+      "paldex": "181",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1180,
+      "combiPriority": 1180,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 6,
+        "medicine": 6,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "sumodog",
+      "name": "Bulldosu",
+      "paldex": "156",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 1190,
+      "combiPriority": 1190,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "mining": 4,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "suzaku",
+      "name": "Suzaku",
+      "paldex": "122",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 1200,
+      "combiPriority": 1200,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 5
+      }
+    },
+    {
+      "key": "skydragon",
+      "name": "Quivern",
+      "paldex": "124",
+      "types": [
+        "Dragon"
+      ],
+      "combiRank": 1210,
+      "combiPriority": 1210,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 2,
+        "gathering": 3,
+        "mining": 4,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "bluedragon_ice",
+      "name": "Azurobe Cryst",
+      "paldex": "41B",
+      "types": [
+        "Ice",
+        "Dragon"
+      ],
+      "combiRank": 1220,
+      "combiPriority": 1220,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "cooling": 4
+      }
+    },
+    {
+      "key": "ghostrabbit",
+      "name": "Nitemary",
+      "paldex": "148",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1230,
+      "combiPriority": 1230,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "tropicalostrich",
+      "name": "Palumba",
+      "paldex": "106",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1240,
+      "combiPriority": 1240,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 4,
+        "gathering": 4,
+        "mining": 5
+      }
+    },
+    {
+      "key": "badcatgirl",
+      "name": "Nyafia",
+      "paldex": "143",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1250,
+      "combiPriority": 1250,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 4,
+        "gathering": 4,
+        "lumbering": 2,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "icewitch",
+      "name": "Icelyn",
+      "paldex": "119",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 1260,
+      "combiPriority": 1260,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 5,
+        "medicine": 4,
+        "cooling": 5,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "manticore_dark",
+      "name": "Blazehowl Noct",
+      "paldex": "112B",
+      "types": [
+        "Fire",
+        "Dark"
+      ],
+      "combiRank": 1270,
+      "combiPriority": 1270,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 5,
+        "lumbering": 3
+      }
+    },
+    {
+      "key": "herculesbeetle",
+      "name": "Warsect",
+      "paldex": "113",
+      "types": [
+        "Ground",
+        "Grass"
+      ],
+      "combiRank": 1280,
+      "combiPriority": 1280,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "handiwork": 3,
+        "lumbering": 4,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "werewolf_ice",
+      "name": "Loupmoon Cryst",
+      "paldex": "56B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 1290,
+      "combiPriority": 1290,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 4,
+        "cooling": 4
+      }
+    },
+    {
+      "key": "skydragon_grass",
+      "name": "Quivern Botan",
+      "paldex": "124B",
+      "types": [
+        "Dragon",
+        "Grass"
+      ],
+      "combiRank": 1300,
+      "combiPriority": 1300,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 5,
+        "handiwork": 2,
+        "gathering": 4,
+        "mining": 3,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "baphomet_dark",
+      "name": "Incineram Noct",
+      "paldex": "91B",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1310,
+      "combiPriority": 1310,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 3,
+        "mining": 4,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "ghostrabbit_grass",
+      "name": "Nitemary Botan",
+      "paldex": "148B",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1320,
+      "combiPriority": 1320,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 3,
+        "handiwork": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "tentacleturtle_ground",
+      "name": "Turtacle Terra",
+      "paldex": "37B",
+      "types": [
+        "Water",
+        "Ground"
+      ],
+      "combiRank": 1330,
+      "combiPriority": 1330,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 2,
+        "mining": 3,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "grassmammoth",
+      "name": "Mammorest",
+      "paldex": "87",
+      "types": [
+        "Grass",
+        "Ground"
+      ],
+      "combiRank": 1340,
+      "combiPriority": 1340,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 4,
+        "lumbering": 4,
+        "mining": 4
+      }
+    },
+    {
+      "key": "redflowerbird",
+      "name": "Tropicaw",
+      "paldex": "173",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1350,
+      "combiPriority": 1350,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 5,
+        "gathering": 5
+      }
+    },
+    {
+      "key": "manticore",
+      "name": "Blazehowl",
+      "paldex": "112",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 1360,
+      "combiPriority": 1360,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 5,
+        "lumbering": 3
+      }
+    },
+    {
+      "key": "kingsunfish",
+      "name": "Solmora",
+      "paldex": "169",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 1370,
+      "combiPriority": 1370,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 4
+      }
+    },
+    {
+      "key": "sakurasaurus",
+      "name": "Broncherry",
+      "paldex": "108",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1380,
+      "combiPriority": 1380,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 5
+      }
+    },
+    {
+      "key": "blueberryfairy",
+      "name": "Prunelia",
+      "paldex": "147",
+      "types": [
+        "Grass",
+        "Dark"
+      ],
+      "combiRank": 1390,
+      "combiPriority": 1390,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "handiwork": 1,
+        "gathering": 2,
+        "medicine": 3,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "thunderfluffybird",
+      "name": "Dynamoff",
+      "paldex": "172",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 1400,
+      "combiPriority": 1400,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 6,
+        "gathering": 3,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "pandagirl",
+      "name": "Leafan",
+      "paldex": "90",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1410,
+      "combiPriority": 1410,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "handiwork": 3,
+        "gathering": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "swordcutlassfish",
+      "name": "Skutlass",
+      "paldex": "128",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 1420,
+      "combiPriority": 1420,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 4,
+        "gathering": 1,
+        "lumbering": 4
+      }
+    },
+    {
+      "key": "birddragon_ice",
+      "name": "Vanwyrm Cryst",
+      "paldex": "64B",
+      "types": [
+        "Ice",
+        "Dark"
+      ],
+      "combiRank": 1430,
+      "combiPriority": 1430,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "cooling": 2,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "grasspanda_electric",
+      "name": "Mossanda Lux",
+      "paldex": "102B",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 1440,
+      "combiPriority": 1440,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 4,
+        "handiwork": 3,
+        "lumbering": 4,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "mushroomdragon_dark",
+      "name": "Shroomer Noct",
+      "paldex": "118B",
+      "types": [
+        "Grass",
+        "Dark"
+      ],
+      "combiRank": 1450,
+      "combiPriority": 1450,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 3,
+        "handiwork": 3,
+        "gathering": 3,
+        "lumbering": 2
+      }
+    },
+    {
+      "key": "sifudog",
+      "name": "Dogen",
+      "paldex": "155",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 1460,
+      "combiPriority": 1460,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 4,
+        "gathering": 3,
+        "lumbering": 3,
+        "medicine": 2,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "baphomet",
+      "name": "Incineram",
+      "paldex": "91",
+      "types": [
+        "Fire",
+        "Dark"
+      ],
+      "combiRank": 1470,
+      "combiPriority": 1470,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 3,
+        "handiwork": 2,
+        "mining": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "violetfairy",
+      "name": "Vaelet",
+      "paldex": "66",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1480,
+      "combiPriority": 1480,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "handiwork": 3,
+        "gathering": 3,
+        "medicine": 3,
+        "transporting": 2,
+        "farming": 2
+      }
+    },
+    {
+      "key": "foxmage_dark",
+      "name": "Wixen Noct",
+      "paldex": "78B",
+      "types": [
+        "Fire",
+        "Dark"
+      ],
+      "combiRank": 1490,
+      "combiPriority": 1490,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 4,
+        "handiwork": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "elecsnail_ground",
+      "name": "Snock Lux",
+      "paldex": "163B",
+      "types": [
+        "Electric",
+        "Ground"
+      ],
+      "combiRank": 1500,
+      "combiPriority": 1500,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 4
+      }
+    },
+    {
+      "key": "scorpionman",
+      "name": "Prixter",
+      "paldex": "141",
+      "types": [
+        "Dark",
+        "Ground"
+      ],
+      "combiRank": 1510,
+      "combiPriority": 1510,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2,
+        "lumbering": 4,
+        "medicine": 2
+      }
+    },
+    {
+      "key": "mushroomdragon",
+      "name": "Shroomer",
+      "paldex": "118",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1520,
+      "combiPriority": 1520,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "handiwork": 2,
+        "gathering": 3,
+        "lumbering": 2,
+        "farming": 3
+      }
+    },
+    {
+      "key": "kingalpaca_ice",
+      "name": "Kingpaca Cryst",
+      "paldex": "21B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 1530,
+      "combiPriority": 1530,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 2,
+        "cooling": 4
+      }
+    },
+    {
+      "key": "onighostgirl",
+      "name": "Bakemi",
+      "paldex": "168",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1540,
+      "combiPriority": 1540,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 3,
+        "medicine": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "drillgame",
+      "name": "Digtoise",
+      "paldex": "107",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 1550,
+      "combiPriority": 1550,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "mining": 4
+      }
+    },
+    {
+      "key": "ronin",
+      "name": "Bushi",
+      "paldex": "85",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 1560,
+      "combiPriority": 1560,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 2,
+        "handiwork": 2,
+        "gathering": 1,
+        "lumbering": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "catvampire",
+      "name": "Felbat",
+      "paldex": "65",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1570,
+      "combiPriority": 1570,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "medicine": 3
+      }
+    },
+    {
+      "key": "cactusdoll_dark",
+      "name": "Needoll Noct",
+      "paldex": "100B",
+      "types": [
+        "Dark",
+        "Grass"
+      ],
+      "combiRank": 1580,
+      "combiPriority": 1580,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 3,
+        "gathering": 3,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "swordcutlassfish_fire",
+      "name": "Skutlass Ignis",
+      "paldex": "128B",
+      "types": [
+        "Water",
+        "Fire"
+      ],
+      "combiRank": 1590,
+      "combiPriority": 1590,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 3,
+        "watering": 2,
+        "gathering": 2,
+        "lumbering": 3
+      }
+    },
+    {
+      "key": "thunderdog_ice",
+      "name": "Rayhound Cryst",
+      "paldex": "98B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 1600,
+      "combiPriority": 1600,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "cooling": 3
+      }
+    },
+    {
+      "key": "blackpuppy_ice",
+      "name": "Smokie Cryst",
+      "paldex": "149B",
+      "types": [
+        "Dark",
+        "Ice"
+      ],
+      "combiRank": 1610,
+      "combiPriority": 1610,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 2,
+        "cooling": 2
+      }
+    },
+    {
+      "key": "lazycatfish_gold",
+      "name": "Dumud Gild",
+      "paldex": "109B",
+      "types": [
+        "Ground",
+        "Water"
+      ],
+      "combiRank": 1620,
+      "combiPriority": 1620,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 2,
+        "mining": 2,
+        "transporting": 1,
+        "farming": 4
+      }
+    },
+    {
+      "key": "octopusgirl_neutral",
+      "name": "Gloopie Primo",
+      "paldex": "48B",
+      "types": [
+        "Water",
+        "Neutral"
+      ],
+      "combiRank": 1630,
+      "combiPriority": 1630,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 2,
+        "handiwork": 2,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "fairydragon_water",
+      "name": "Elphidran Aqua",
+      "paldex": "63B",
+      "types": [
+        "Dragon",
+        "Water"
+      ],
+      "combiRank": 1640,
+      "combiPriority": 1640,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 4,
+        "lumbering": 3
+      }
+    },
+    {
+      "key": "birddragon",
+      "name": "Vanwyrm",
+      "paldex": "64",
+      "types": [
+        "Fire",
+        "Dark"
+      ],
+      "combiRank": 1650,
+      "combiPriority": 1650,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 2,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "iceseal",
+      "name": "Polapup",
+      "paldex": "72",
+      "types": [
+        "Ice",
+        "Water"
+      ],
+      "combiRank": 1660,
+      "combiPriority": 1660,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 3,
+        "cooling": 4
+      }
+    },
+    {
+      "key": "amaterasuwolf",
+      "name": "Kitsun",
+      "paldex": "111",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 1670,
+      "combiPriority": 1670,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 3
+      }
+    },
+    {
+      "key": "brownrabbit",
+      "name": "Lapiron",
+      "paldex": "165",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 1680,
+      "combiPriority": 1680,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 3,
+        "gathering": 4,
+        "mining": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "thunderbird",
+      "name": "Beakon",
+      "paldex": "96",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 1690,
+      "combiPriority": 1690,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 4,
+        "gathering": 2,
+        "transporting": 5
+      }
+    },
+    {
+      "key": "venusflytrap",
+      "name": "Carnibora",
+      "paldex": "136",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1700,
+      "combiPriority": 1700,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 6,
+        "handiwork": 4,
+        "gathering": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "ghostbeast",
+      "name": "Maraith",
+      "paldex": "117",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1710,
+      "combiPriority": 1710,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 4,
+        "mining": 4
+      }
+    },
+    {
+      "key": "flowerdoll",
+      "name": "Petallia",
+      "paldex": "89",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1720,
+      "combiPriority": 1720,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 4,
+        "handiwork": 3,
+        "gathering": 3,
+        "medicine": 4,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "purplespider",
+      "name": "Tarantriss",
+      "paldex": "71",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1730,
+      "combiPriority": 1730,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 3,
+        "gathering": 3,
+        "medicine": 2,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "mimicdog",
+      "name": "Mimog",
+      "paldex": "144",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 1740,
+      "combiPriority": 1740,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 1,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "eleclizard",
+      "name": "Slowatt",
+      "paldex": "167",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 1750,
+      "combiPriority": 1750,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 3
+      }
+    },
+    {
+      "key": "blackpuppy",
+      "name": "Smokie",
+      "paldex": "149",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1760,
+      "combiPriority": 1760,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "hoodghost",
+      "name": "Hoodle",
+      "paldex": "166",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1770,
+      "combiPriority": 1770,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "elecsnail",
+      "name": "Snock",
+      "paldex": "163",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 1780,
+      "combiPriority": 1780,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 4
+      }
+    },
+    {
+      "key": "queenbee",
+      "name": "Elizabee",
+      "paldex": "68",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1790,
+      "combiPriority": 1790,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 4,
+        "handiwork": 4,
+        "gathering": 4,
+        "lumbering": 3,
+        "medicine": 4
+      }
+    },
+    {
+      "key": "catmage_fire",
+      "name": "Katress Ignis",
+      "paldex": "79B",
+      "types": [
+        "Dark",
+        "Fire"
+      ],
+      "combiRank": 1800,
+      "combiPriority": 1800,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 3,
+        "handiwork": 3,
+        "medicine": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "whitemoth",
+      "name": "Sibelyx",
+      "paldex": "116",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 1810,
+      "combiPriority": 1810,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "medicine": 3,
+        "cooling": 3,
+        "farming": 3
+      }
+    },
+    {
+      "key": "darkalien",
+      "name": "Xenovader",
+      "paldex": "145",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1820,
+      "combiPriority": 1820,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "bluedragon",
+      "name": "Azurobe",
+      "paldex": "41",
+      "types": [
+        "Water",
+        "Dragon"
+      ],
+      "combiRank": 1830,
+      "combiPriority": 1830,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 4
+      }
+    },
+    {
+      "key": "serpent_ground",
+      "name": "Surfent Terra",
+      "paldex": "75B",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 1840,
+      "combiPriority": 1840,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 3
+      }
+    },
+    {
+      "key": "captainpenguin_black",
+      "name": "Penking Lux",
+      "paldex": "18B",
+      "types": [
+        "Water",
+        "Electric"
+      ],
+      "combiRank": 1850,
+      "combiPriority": 1850,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 2,
+        "electric": 3,
+        "handiwork": 2,
+        "mining": 3,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "kendofrog_dark",
+      "name": "Croajiro Noct",
+      "paldex": "9B",
+      "types": [
+        "Water",
+        "Dark"
+      ],
+      "combiRank": 1860,
+      "combiPriority": 1860,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 1,
+        "handiwork": 2,
+        "gathering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "firekirin_dark",
+      "name": "Pyrin Noct",
+      "paldex": "93B",
+      "types": [
+        "Fire",
+        "Dark"
+      ],
+      "combiRank": 1870,
+      "combiPriority": 1870,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 4,
+        "lumbering": 3
+      }
+    },
+    {
+      "key": "gorilla_ground",
+      "name": "Gorirat Terra",
+      "paldex": "74B",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 1880,
+      "combiPriority": 1880,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 2,
+        "mining": 3,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "flowerdinosaur_electric",
+      "name": "Dinossom Lux",
+      "paldex": "84B",
+      "types": [
+        "Electric",
+        "Dragon"
+      ],
+      "combiRank": 1890,
+      "combiPriority": 1890,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 3,
+        "lumbering": 4
+      }
+    },
+    {
+      "key": "longcat",
+      "name": "Valentail",
+      "paldex": "162",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 1900,
+      "combiPriority": 1900,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "raijindaughter_water",
+      "name": "Dazzi Noct",
+      "paldex": "92B",
+      "types": [
+        "Dark",
+        "Electric"
+      ],
+      "combiRank": 1910,
+      "combiPriority": 1910,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "electric": 1,
+        "handiwork": 1,
+        "medicine": 1,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "thunderdog",
+      "name": "Rayhound",
+      "paldex": "98",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 1920,
+      "combiPriority": 1920,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 4
+      }
+    },
+    {
+      "key": "icedeer",
+      "name": "Reindrix",
+      "paldex": "101",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 1930,
+      "combiPriority": 1930,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "lumbering": 3,
+        "cooling": 3
+      }
+    },
+    {
+      "key": "berrygoat_dark",
+      "name": "Caprity Noct",
+      "paldex": "34B",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 1940,
+      "combiPriority": 1940,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 2,
+        "farming": 1
+      }
+    },
+    {
+      "key": "weaseldragon_fire",
+      "name": "Chillet Ignis",
+      "paldex": "103B",
+      "types": [
+        "Fire",
+        "Dragon"
+      ],
+      "combiRank": 1950,
+      "combiPriority": 1950,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 4,
+        "gathering": 3
+      }
+    },
+    {
+      "key": "fengyundeeper",
+      "name": "Fenglope",
+      "paldex": "83",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 1960,
+      "combiPriority": 1960,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "lumbering": 3
+      }
+    },
+    {
+      "key": "icefox",
+      "name": "Foxcicle",
+      "paldex": "95",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 1970,
+      "combiPriority": 1970,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "cooling": 4,
+        "farming": 3
+      }
+    },
+    {
+      "key": "firekirin",
+      "name": "Pyrin",
+      "paldex": "93",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 1980,
+      "combiPriority": 1980,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 4,
+        "lumbering": 2
+      }
+    },
+    {
+      "key": "leafprincess",
+      "name": "Lullu",
+      "paldex": "125",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 1990,
+      "combiPriority": 1990,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "handiwork": 3,
+        "gathering": 2,
+        "medicine": 3
+      }
+    },
+    {
+      "key": "dandeliongirl",
+      "name": "Souffline",
+      "paldex": "164",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2000,
+      "combiPriority": 2000,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 2,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "mutant",
+      "name": "Lunaris",
+      "paldex": "82",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2010,
+      "combiPriority": 2010,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 4,
+        "gathering": 2,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "grassminotaur",
+      "name": "Elgrove",
+      "paldex": "81",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2020,
+      "combiPriority": 2020,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "gathering": 2,
+        "lumbering": 3,
+        "mining": 2,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "sweetssheep_ground",
+      "name": "Woolipop Terra",
+      "paldex": "39B",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 2030,
+      "combiPriority": 2030,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "farming": 1
+      }
+    },
+    {
+      "key": "catmage",
+      "name": "Katress",
+      "paldex": "79",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2040,
+      "combiPriority": 2040,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 3,
+        "medicine": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "robinhood_ground",
+      "name": "Robinquill Terra",
+      "paldex": "76B",
+      "types": [
+        "Grass",
+        "Ground"
+      ],
+      "combiRank": 2050,
+      "combiPriority": 2050,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 3,
+        "gathering": 3,
+        "lumbering": 2,
+        "medicine": 2,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "grasspanda",
+      "name": "Mossanda",
+      "paldex": "102",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2060,
+      "combiPriority": 2060,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "handiwork": 2,
+        "lumbering": 4,
+        "transporting": 4
+      }
+    },
+    {
+      "key": "captainpenguin",
+      "name": "Penking",
+      "paldex": "18",
+      "types": [
+        "Water",
+        "Ice"
+      ],
+      "combiRank": 2070,
+      "combiPriority": 2070,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "handiwork": 2,
+        "mining": 3,
+        "cooling": 2,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "foxmage",
+      "name": "Wixen",
+      "paldex": "78",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2080,
+      "combiPriority": 2080,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 3,
+        "handiwork": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "pinklizard",
+      "name": "Lovander",
+      "paldex": "69",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2090,
+      "combiPriority": 2090,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 3,
+        "mining": 2,
+        "medicine": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "flowerdinosaur",
+      "name": "Dinossom",
+      "paldex": "84",
+      "types": [
+        "Grass",
+        "Dragon"
+      ],
+      "combiRank": 2100,
+      "combiPriority": 2100,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "lumbering": 3
+      }
+    },
+    {
+      "key": "werewolf",
+      "name": "Loupmoon",
+      "paldex": "56",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2110,
+      "combiPriority": 2110,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 2
+      }
+    },
+    {
+      "key": "naughtycat",
+      "name": "Grintale",
+      "paldex": "70",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2120,
+      "combiPriority": 2120,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 3
+      }
+    },
+    {
+      "key": "icecrocodile",
+      "name": "Munchill",
+      "paldex": "86",
+      "types": [
+        "Ice",
+        "Water"
+      ],
+      "combiRank": 2130,
+      "combiPriority": 2130,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "cooling": 3,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "gorilla",
+      "name": "Gorirat",
+      "paldex": "74",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2140,
+      "combiPriority": 2140,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 2,
+        "lumbering": 3,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "mopking",
+      "name": "Sweepa",
+      "paldex": "36",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 2150,
+      "combiPriority": 2150,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2,
+        "cooling": 3
+      }
+    },
+    {
+      "key": "featherostrich",
+      "name": "Dazemu",
+      "paldex": "123",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 2210,
+      "combiPriority": 2210,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "kingalpaca",
+      "name": "Kingpaca",
+      "paldex": "21",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2220,
+      "combiPriority": 2220,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "guardiandog",
+      "name": "Yakumo",
+      "paldex": "127",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2230,
+      "combiPriority": 2230,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "stuffedshark_fire",
+      "name": "Finsider Ignis",
+      "paldex": "88B",
+      "types": [
+        "Water",
+        "Fire"
+      ],
+      "combiRank": 2240,
+      "combiPriority": 2240,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 2,
+        "watering": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "ghostblackcat",
+      "name": "Wispaw",
+      "paldex": "50",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2250,
+      "combiPriority": 2250,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 2,
+        "lumbering": 1,
+        "medicine": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "robinhood",
+      "name": "Robinquill",
+      "paldex": "76",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2260,
+      "combiPriority": 2260,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 2,
+        "handiwork": 3,
+        "gathering": 3,
+        "lumbering": 2,
+        "medicine": 1,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "kirin",
+      "name": "Univolt",
+      "paldex": "54",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 2270,
+      "combiPriority": 2270,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 3,
+        "lumbering": 1
+      }
+    },
+    {
+      "key": "fairydragon",
+      "name": "Elphidran",
+      "paldex": "63",
+      "types": [
+        "Dragon"
+      ],
+      "combiRank": 2280,
+      "combiPriority": 2280,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "lumbering": 3
+      }
+    },
+    {
+      "key": "lazycatfish",
+      "name": "Dumud",
+      "paldex": "109",
+      "types": [
+        "Ground",
+        "Water"
+      ],
+      "combiRank": 2290,
+      "combiPriority": 2290,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "mining": 2,
+        "transporting": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "blueplatypus_fire",
+      "name": "Fuack Ignis",
+      "paldex": "5B",
+      "types": [
+        "Water",
+        "Fire"
+      ],
+      "combiRank": 2300,
+      "combiPriority": 2300,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 2,
+        "watering": 2,
+        "handiwork": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "smallarmadillo",
+      "name": "Kikit",
+      "paldex": "126",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 2310,
+      "combiPriority": 2310,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "mining": 1
+      }
+    },
+    {
+      "key": "flamebuffalo",
+      "name": "Arsox",
+      "paldex": "58",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2320,
+      "combiPriority": 2320,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 3,
+        "lumbering": 2
+      }
+    },
+    {
+      "key": "weaseldragon",
+      "name": "Chillet",
+      "paldex": "103",
+      "types": [
+        "Ice",
+        "Dragon"
+      ],
+      "combiRank": 2330,
+      "combiPriority": 2330,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1,
+        "cooling": 2
+      }
+    },
+    {
+      "key": "catbat",
+      "name": "Tombat",
+      "paldex": "52",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2340,
+      "combiPriority": 2340,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2,
+        "mining": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "soldierbee",
+      "name": "Beegarde",
+      "paldex": "67",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2350,
+      "combiPriority": 2350,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 2,
+        "handiwork": 2,
+        "gathering": 3,
+        "lumbering": 2,
+        "medicine": 2,
+        "transporting": 2,
+        "farming": 3
+      }
+    },
+    {
+      "key": "elecpomeranian",
+      "name": "Puffolt",
+      "paldex": "62",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 2360,
+      "combiPriority": 2360,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "darkcrow",
+      "name": "Cawgnito",
+      "paldex": "57",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2370,
+      "combiPriority": 2370,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "lumbering": 2,
+        "farming": 1
+      }
+    },
+    {
+      "key": "flyingmanta_thunder",
+      "name": "Celaray Lux",
+      "paldex": "7B",
+      "types": [
+        "Water",
+        "Electric"
+      ],
+      "combiRank": 2380,
+      "combiPriority": 2380,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 1,
+        "electric": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "smallyeti",
+      "name": "Snugloo",
+      "paldex": "133",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 2390,
+      "combiPriority": 2390,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 2,
+        "mining": 3,
+        "cooling": 3,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "raijindaughter",
+      "name": "Dazzi",
+      "paldex": "92",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 2400,
+      "combiPriority": 2400,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 3,
+        "handiwork": 2,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "tentacleturtle",
+      "name": "Turtacle",
+      "paldex": "37",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2410,
+      "combiPriority": 2410,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "mining": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "cactusdoll",
+      "name": "Needoll",
+      "paldex": "100",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2420,
+      "combiPriority": 2420,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 3,
+        "gathering": 3,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "sharkkid_fire",
+      "name": "Gobfin Ignis",
+      "paldex": "55B",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2430,
+      "combiPriority": 2430,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 2,
+        "handiwork": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "serpent",
+      "name": "Surfent",
+      "paldex": "75",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2440,
+      "combiPriority": 2440,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 3,
+        "farming": 2
+      }
+    },
+    {
+      "key": "stuffedshark",
+      "name": "Finsider",
+      "paldex": "88",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2450,
+      "combiPriority": 2450,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "pinkrabbit_grass",
+      "name": "Ribbuny Botan",
+      "paldex": "44B",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2460,
+      "combiPriority": 2460,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "planting": 2,
+        "handiwork": 2,
+        "gathering": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "kelpie_fire",
+      "name": "Kelpsea Ignis",
+      "paldex": "43B",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2470,
+      "combiPriority": 2470,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "fluffybird",
+      "name": "Muffly",
+      "paldex": "59",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 2480,
+      "combiPriority": 2480,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "cooling": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "penguin_electric",
+      "name": "Pengullet Lux",
+      "paldex": "17B",
+      "types": [
+        "Water",
+        "Electric"
+      ],
+      "combiRank": 2490,
+      "combiPriority": 2490,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 1,
+        "electric": 2,
+        "handiwork": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "kitsunebi_ice",
+      "name": "Foxparks Cryst",
+      "paldex": "29B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 2500,
+      "combiPriority": 2500,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "cooling": 2
+      }
+    },
+    {
+      "key": "windchimes_ice",
+      "name": "Hangyu Cryst",
+      "paldex": "38B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 2510,
+      "combiPriority": 2510,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "handiwork": 3,
+        "gathering": 2,
+        "cooling": 2,
+        "transporting": 3
+      }
+    },
+    {
+      "key": "clionetwins",
+      "name": "Amione",
+      "paldex": "47",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2520,
+      "combiPriority": 2520,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 1,
+        "handiwork": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "octopusgirl",
+      "name": "Gloopie",
+      "paldex": "48",
+      "types": [
+        "Water",
+        "Dark"
+      ],
+      "combiRank": 2530,
+      "combiPriority": 2530,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "handiwork": 2,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "negativeoctopus_neutral",
+      "name": "Killamari Primo",
+      "paldex": "30B",
+      "types": [
+        "Neutral",
+        "Water"
+      ],
+      "combiRank": 2540,
+      "combiPriority": 2540,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "watering": 1,
+        "gathering": 1,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "sharkkid",
+      "name": "Gobfin",
+      "paldex": "55",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2550,
+      "combiPriority": 2550,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "handiwork": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "hawkbird",
+      "name": "Nitewing",
+      "paldex": "51",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2560,
+      "combiPriority": 2560,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "eagle",
+      "name": "Galeclaw",
+      "paldex": "49",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2570,
+      "combiPriority": 2570,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 2
+      }
+    },
+    {
+      "key": "deer_ground",
+      "name": "Eikthyrdeer Terra",
+      "paldex": "32B",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 2580,
+      "combiPriority": 2580,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 2
+      }
+    },
+    {
+      "key": "jellyfishghost",
+      "name": "Jellroy",
+      "paldex": "46",
+      "types": [
+        "Water",
+        "Dark"
+      ],
+      "combiRank": 2590,
+      "combiPriority": 2590,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "handiwork": 1,
+        "medicine": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "kendofrog",
+      "name": "Croajiro",
+      "paldex": "9",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2600,
+      "combiPriority": 2600,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 1,
+        "handiwork": 1,
+        "gathering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "berrygoat",
+      "name": "Caprity",
+      "paldex": "34",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2610,
+      "combiPriority": 2610,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 2,
+        "farming": 1
+      }
+    },
+    {
+      "key": "cutebutterfly",
+      "name": "Cinnamoth",
+      "paldex": "61",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2620,
+      "combiPriority": 2620,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 2,
+        "gathering": 2,
+        "medicine": 2
+      }
+    },
+    {
+      "key": "leafmomonga",
+      "name": "Herbil",
+      "paldex": "10",
+      "types": [
+        "Grass",
+        "Neutral"
+      ],
+      "combiRank": 2630,
+      "combiPriority": 2630,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 1,
+        "gathering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "lizardman_fire",
+      "name": "Leezpunk Ignis",
+      "paldex": "73B",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2640,
+      "combiPriority": 2640,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 2,
+        "handiwork": 2,
+        "gathering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "jellyfishfairy",
+      "name": "Jelliette",
+      "paldex": "45",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2650,
+      "combiPriority": 2650,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 2,
+        "handiwork": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "flowerrabbit",
+      "name": "Flopie",
+      "paldex": "77",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2660,
+      "combiPriority": 2660,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 2,
+        "handiwork": 2,
+        "gathering": 2,
+        "medicine": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "lizardman",
+      "name": "Leezpunk",
+      "paldex": "73",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2670,
+      "combiPriority": 2670,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 2,
+        "gathering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "garm",
+      "name": "Direhowl",
+      "paldex": "33",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2680,
+      "combiPriority": 2680,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1
+      }
+    },
+    {
+      "key": "littlebriarrose",
+      "name": "Bristla",
+      "paldex": "60",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2690,
+      "combiPriority": 2690,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 2,
+        "handiwork": 2,
+        "gathering": 2,
+        "medicine": 2,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "lavagirl",
+      "name": "Flambelle",
+      "paldex": "25",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2700,
+      "combiPriority": 2700,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 1,
+        "handiwork": 1,
+        "transporting": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "deer",
+      "name": "Eikthyrdeer",
+      "paldex": "32",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2710,
+      "combiPriority": 2710,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "lumbering": 2
+      }
+    },
+    {
+      "key": "alpaca",
+      "name": "Melpaca",
+      "paldex": "20",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2720,
+      "combiPriority": 2720,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "farming": 2
+      }
+    },
+    {
+      "key": "colorfulbird",
+      "name": "Tocotoco",
+      "paldex": "53",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2730,
+      "combiPriority": 2730,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1
+      }
+    },
+    {
+      "key": "flyingmanta",
+      "name": "Celaray",
+      "paldex": "7",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2740,
+      "combiPriority": 2740,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "bastet_ice",
+      "name": "Mau Cryst",
+      "paldex": "27B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 2750,
+      "combiPriority": 2750,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "cooling": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "pinkcat",
+      "name": "Cattiva",
+      "paldex": "2",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2760,
+      "combiPriority": 2760,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 1,
+        "gathering": 1,
+        "mining": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "negativeoctopus",
+      "name": "Killamari",
+      "paldex": "30",
+      "types": [
+        "Dark",
+        "Water"
+      ],
+      "combiRank": 2770,
+      "combiPriority": 2770,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 1,
+        "gathering": 1,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "windchimes",
+      "name": "Hangyu",
+      "paldex": "38",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 2780,
+      "combiPriority": 2780,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 1,
+        "gathering": 1,
+        "transporting": 2
+      }
+    },
+    {
+      "key": "cutemole",
+      "name": "Fuddler",
+      "paldex": "31",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 2790,
+      "combiPriority": 2790,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 1,
+        "mining": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "cowpal",
+      "name": "Mozzarina",
+      "paldex": "40",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2800,
+      "combiPriority": 2800,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "farming": 2
+      }
+    },
+    {
+      "key": "kelpie",
+      "name": "Kelpsea",
+      "paldex": "43",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2810,
+      "combiPriority": 2810,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "sweetssheep",
+      "name": "Woolipop",
+      "paldex": "39",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2820,
+      "combiPriority": 2820,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "farming": 1
+      }
+    },
+    {
+      "key": "monkey_fire",
+      "name": "Tanzee Ignis",
+      "paldex": "23B",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2830,
+      "combiPriority": 2830,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "kindling": 1,
+        "handiwork": 1,
+        "lumbering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "mopbaby",
+      "name": "Swee",
+      "paldex": "35",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 2840,
+      "combiPriority": 2840,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1,
+        "cooling": 1
+      }
+    },
+    {
+      "key": "hedgehog_ice",
+      "name": "Jolthog Cryst",
+      "paldex": "15B",
+      "types": [
+        "Ice"
+      ],
+      "combiRank": 2850,
+      "combiPriority": 2850,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "cooling": 1
+      }
+    },
+    {
+      "key": "pinkrabbit",
+      "name": "Ribbuny",
+      "paldex": "44",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2860,
+      "combiPriority": 2860,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 1,
+        "gathering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "flamebambi",
+      "name": "Rooby",
+      "paldex": "26",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2870,
+      "combiPriority": 2870,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "boar",
+      "name": "Rushoar",
+      "paldex": "28",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 2880,
+      "combiPriority": 2880,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "mining": 1
+      }
+    },
+    {
+      "key": "woolfox",
+      "name": "Cremis",
+      "paldex": "8",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 2890,
+      "combiPriority": 2890,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1,
+        "farming": 2
+      }
+    },
+    {
+      "key": "monkey",
+      "name": "Tanzee",
+      "paldex": "23",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 2900,
+      "combiPriority": 2900,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 1,
+        "handiwork": 1,
+        "gathering": 1,
+        "lumbering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "dreamdemon",
+      "name": "Daedream",
+      "paldex": "22",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2910,
+      "combiPriority": 2910,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 1,
+        "gathering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "nightfox",
+      "name": "Nox",
+      "paldex": "24",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2920,
+      "combiPriority": 2920,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1
+      }
+    },
+    {
+      "key": "samuraidog",
+      "name": "Pupperai",
+      "paldex": "13",
+      "types": [
+        "Ground"
+      ],
+      "combiRank": 2930,
+      "combiPriority": 2930,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1,
+        "lumbering": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "wizardowl",
+      "name": "Hoocrates",
+      "paldex": "19",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 2940,
+      "combiPriority": 2940,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1
+      }
+    },
+    {
+      "key": "plantslime",
+      "name": "Gumoss",
+      "paldex": "12",
+      "types": [
+        "Grass",
+        "Ground"
+      ],
+      "combiRank": 2950,
+      "combiPriority": 2950,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 1
+      }
+    },
+    {
+      "key": "penguin",
+      "name": "Pengullet",
+      "paldex": "17",
+      "types": [
+        "Water",
+        "Ice"
+      ],
+      "combiRank": 2960,
+      "combiPriority": 2960,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 1,
+        "handiwork": 1,
+        "cooling": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "cloverfairy",
+      "name": "Clovee",
+      "paldex": "14",
+      "types": [
+        "Grass",
+        "Neutral"
+      ],
+      "combiRank": 2970,
+      "combiPriority": 2970,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 1,
+        "gathering": 1
+      }
+    },
+    {
+      "key": "blueplatypus",
+      "name": "Fuack",
+      "paldex": "5",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 2980,
+      "combiPriority": 2980,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 1,
+        "handiwork": 1,
+        "transporting": 1
+      }
+    },
+    {
+      "key": "kitsunebi",
+      "name": "Foxparks",
+      "paldex": "29",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 2990,
+      "combiPriority": 2990,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "kindling": 1
+      }
+    },
+    {
+      "key": "negativekoala",
+      "name": "Depresso",
+      "paldex": "16",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 3000,
+      "combiPriority": 3000,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 1,
+        "mining": 1,
+        "transporting": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "eleccat",
+      "name": "Sparkit",
+      "paldex": "42",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 3010,
+      "combiPriority": 3010,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 1,
+        "handiwork": 1,
+        "transporting": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "carbunclo",
+      "name": "Lifmunk",
+      "paldex": "4",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 3020,
+      "combiPriority": 3020,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "planting": 1,
+        "handiwork": 1,
+        "gathering": 1,
+        "lumbering": 1,
+        "medicine": 1
+      }
+    },
+    {
+      "key": "hedgehog",
+      "name": "Jolthog",
+      "paldex": "15",
+      "types": [
+        "Electric"
+      ],
+      "combiRank": 3030,
+      "combiPriority": 3030,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "electric": 1
+      }
+    },
+    {
+      "key": "bastet",
+      "name": "Mau",
+      "paldex": "27",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 3040,
+      "combiPriority": 3040,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "sheepball",
+      "name": "Lamball",
+      "paldex": "1",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 3050,
+      "combiPriority": 3050,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "handiwork": 1,
+        "transporting": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "cutefox",
+      "name": "Vixy",
+      "paldex": "6",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 3060,
+      "combiPriority": 3060,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "ganesha",
+      "name": "Teafant",
+      "paldex": "11",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 3070,
+      "combiPriority": 3070,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "watering": 1
+      }
+    },
+    {
+      "key": "chickenpal",
+      "name": "Chikipi",
+      "paldex": "3",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 3080,
+      "combiPriority": 3080,
+      "breedable": true,
+      "uniqueOnly": false,
+      "work": {
+        "gathering": 1,
+        "farming": 1
+      }
+    },
+    {
+      "key": "yakushimamonster001_blue",
+      "name": "Blue Slime",
+      "paldex": "",
+      "types": [
+        "Water"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "transporting": 1
+      }
+    },
+    {
+      "key": "yakushimamonster003",
+      "name": "Cave Bat",
+      "paldex": "",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 1
+      }
+    },
+    {
+      "key": "yakushimaboss001_small",
+      "name": "Demon Eye",
+      "paldex": "",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "transporting": 1
+      }
+    },
+    {
+      "key": "yakushimamonster002",
+      "name": "Enchanted Sword",
+      "paldex": "",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "lumbering": 1
+      }
+    },
+    {
+      "key": "yakushimaboss001",
+      "name": "Eye of Cthulhu",
+      "paldex": "",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "transporting": 4
+      }
+    },
+    {
+      "key": "yakushimamonster001",
+      "name": "Green Slime",
+      "paldex": "",
+      "types": [
+        "Grass"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "transporting": 1
+      }
+    },
+    {
+      "key": "yakushimamonster003_purple",
+      "name": "Illuminant Bat",
+      "paldex": "",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "gathering": 1
+      }
+    },
+    {
+      "key": "yakushimamonster001_pink",
+      "name": "Illuminant Slime",
+      "paldex": "",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "transporting": 1
+      }
+    },
+    {
+      "key": "yakushimamonster001_purple",
+      "name": "Purple Slime",
+      "paldex": "",
+      "types": [
+        "Dark"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "transporting": 1
+      }
+    },
+    {
+      "key": "yakushimamonster001_rainbow",
+      "name": "Rainbow Slime",
+      "paldex": "",
+      "types": [
+        "Neutral"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "transporting": 1
+      }
+    },
+    {
+      "key": "yakushimamonster001_red",
+      "name": "Red Slime",
+      "paldex": "",
+      "types": [
+        "Fire"
+      ],
+      "combiRank": 3100,
+      "combiPriority": 3100,
+      "breedable": true,
+      "uniqueOnly": true,
+      "work": {
+        "transporting": 1
+      }
+    }
+  ],
+  "uniqueCombos": [
+    {
+      "parents": [
+        "lazydragon",
+        "eleccat"
+      ],
+      "child": "lazydragon_electric"
+    },
+    {
+      "parents": [
+        "baphomet",
+        "ghostbeast"
+      ],
+      "child": "baphomet_dark"
+    },
+    {
+      "parents": [
+        "bastet",
+        "penguin"
+      ],
+      "child": "bastet_ice"
+    },
+    {
+      "parents": [
+        "birddragon",
+        "icefox"
+      ],
+      "child": "birddragon_ice"
+    },
+    {
+      "parents": [
+        "deer",
+        "windchimes"
+      ],
+      "child": "deer_ground"
+    },
+    {
+      "parents": [
+        "fairydragon",
+        "serpent"
+      ],
+      "child": "fairydragon_water"
+    },
+    {
+      "parents": [
+        "firekirin",
+        "catmage"
+      ],
+      "child": "firekirin_dark"
+    },
+    {
+      "parents": [
+        "grassmammoth",
+        "yeti"
+      ],
+      "child": "grassmammoth_ice"
+    },
+    {
+      "parents": [
+        "grasspanda",
+        "elecpanda"
+      ],
+      "child": "grasspanda_electric"
+    },
+    {
+      "parents": [
+        "flowerdinosaur",
+        "thunderdog"
+      ],
+      "child": "flowerdinosaur_electric"
+    },
+    {
+      "parents": [
+        "hedgehog",
+        "penguin"
+      ],
+      "child": "hedgehog_ice"
+    },
+    {
+      "parents": [
+        "icehorse",
+        "hadesbird"
+      ],
+      "child": "icehorse_dark"
+    },
+    {
+      "parents": [
+        "kingalpaca",
+        "icedeer"
+      ],
+      "child": "kingalpaca_ice"
+    },
+    {
+      "parents": [
+        "lilyqueen",
+        "darkscorpion"
+      ],
+      "child": "lilyqueen_dark"
+    },
+    {
+      "parents": [
+        "lizardman",
+        "lavagirl"
+      ],
+      "child": "lizardman_fire"
+    },
+    {
+      "parents": [
+        "manticore",
+        "catvampire"
+      ],
+      "child": "manticore_dark"
+    },
+    {
+      "parents": [
+        "robinhood",
+        "cutemole"
+      ],
+      "child": "robinhood_ground"
+    },
+    {
+      "parents": [
+        "sakurasaurus",
+        "blueplatypus"
+      ],
+      "child": "sakurasaurus_water"
+    },
+    {
+      "parents": [
+        "serpent",
+        "lazycatfish"
+      ],
+      "child": "serpent_ground"
+    },
+    {
+      "parents": [
+        "sharkkid",
+        "flamebambi"
+      ],
+      "child": "sharkkid_fire"
+    },
+    {
+      "parents": [
+        "suzaku",
+        "umihebi"
+      ],
+      "child": "suzaku_water"
+    },
+    {
+      "parents": [
+        "volcanicmonster",
+        "icefox"
+      ],
+      "child": "volcanicmonster_ice"
+    },
+    {
+      "parents": [
+        "windchimes",
+        "mopbaby"
+      ],
+      "child": "windchimes_ice"
+    },
+    {
+      "parents": [
+        "umihebi",
+        "manticore"
+      ],
+      "child": "umihebi_fire"
+    },
+    {
+      "parents": [
+        "nightlady",
+        "nightlady_dark"
+      ],
+      "child": "nightlady"
+    },
+    {
+      "parents": [
+        "catmage",
+        "foxmage"
+      ],
+      "child": "foxmage_dark"
+    },
+    {
+      "parents": [
+        "catmage",
+        "foxmage"
+      ],
+      "child": "catmage_fire"
+    },
+    {
+      "parents": [
+        "gorilla",
+        "smallarmadillo"
+      ],
+      "child": "gorilla_ground"
+    },
+    {
+      "parents": [
+        "weaseldragon",
+        "flamebuffalo"
+      ],
+      "child": "weaseldragon_fire"
+    },
+    {
+      "parents": [
+        "skydragon",
+        "leafprincess"
+      ],
+      "child": "skydragon_grass"
+    },
+    {
+      "parents": [
+        "hadesbird",
+        "thunderbird"
+      ],
+      "child": "hadesbird_electric"
+    },
+    {
+      "parents": [
+        "ronin",
+        "candleghost"
+      ],
+      "child": "ronin_dark"
+    },
+    {
+      "parents": [
+        "darkscorpion",
+        "winggolem"
+      ],
+      "child": "darkscorpion_ground"
+    },
+    {
+      "parents": [
+        "kitsunebi",
+        "icefox"
+      ],
+      "child": "kitsunebi_ice"
+    },
+    {
+      "parents": [
+        "raijindaughter",
+        "mysterymask"
+      ],
+      "child": "raijindaughter_water"
+    },
+    {
+      "parents": [
+        "whitetiger",
+        "featherostrich"
+      ],
+      "child": "whitetiger_ground"
+    },
+    {
+      "parents": [
+        "fengyundeeper",
+        "bluethunderhorse"
+      ],
+      "child": "fengyundeeper_electric"
+    },
+    {
+      "parents": [
+        "berrygoat",
+        "purplespider"
+      ],
+      "child": "berrygoat_dark"
+    },
+    {
+      "parents": [
+        "werewolf",
+        "mopking"
+      ],
+      "child": "werewolf_ice"
+    },
+    {
+      "parents": [
+        "horus",
+        "umihebi"
+      ],
+      "child": "horus_water"
+    },
+    {
+      "parents": [
+        "pinkrabbit",
+        "littlebriarrose"
+      ],
+      "child": "pinkrabbit_grass"
+    },
+    {
+      "parents": [
+        "herculesbeetle",
+        "drillgame"
+      ],
+      "child": "herculesbeetle_ground"
+    },
+    {
+      "parents": [
+        "amaterasuwolf",
+        "badcatgirl"
+      ],
+      "child": "amaterasuwolf_dark"
+    },
+    {
+      "parents": [
+        "goldenhorse",
+        "deer_ground"
+      ],
+      "child": "whitedeer"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster001_blue"
+      ],
+      "child": "yakushimamonster001_blue"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster001_red"
+      ],
+      "child": "yakushimamonster001_red"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster001_purple"
+      ],
+      "child": "yakushimamonster001_purple"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster001_pink"
+      ],
+      "child": "yakushimamonster001_pink"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster001_rainbow"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster002"
+      ],
+      "child": "yakushimamonster002"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster003"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster003_purple"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimamonster001_red"
+      ],
+      "child": "yakushimamonster001_purple"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimamonster001_purple"
+      ],
+      "child": "yakushimamonster001_purple"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimamonster001_pink"
+      ],
+      "child": "yakushimamonster001_pink"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimamonster001_rainbow"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimamonster002"
+      ],
+      "child": "yakushimamonster002"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimamonster003"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimamonster003_purple"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_blue",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_red",
+        "yakushimamonster001_purple"
+      ],
+      "child": "yakushimamonster001_purple"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_red",
+        "yakushimamonster001_pink"
+      ],
+      "child": "yakushimamonster001_pink"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_red",
+        "yakushimamonster001_rainbow"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_red",
+        "yakushimamonster002"
+      ],
+      "child": "yakushimamonster002"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_red",
+        "yakushimamonster003"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_red",
+        "yakushimamonster003_purple"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_red",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_red",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_purple",
+        "yakushimamonster001_pink"
+      ],
+      "child": "yakushimamonster001_pink"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_purple",
+        "yakushimamonster001_rainbow"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_purple",
+        "yakushimamonster002"
+      ],
+      "child": "yakushimamonster002"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_purple",
+        "yakushimamonster003"
+      ],
+      "child": "yakushimamonster003_purple"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_purple",
+        "yakushimamonster003_purple"
+      ],
+      "child": "yakushimamonster003_purple"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_purple",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_purple",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_pink",
+        "yakushimamonster001_rainbow"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_pink",
+        "yakushimamonster002"
+      ],
+      "child": "yakushimamonster002"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_pink",
+        "yakushimamonster003"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_pink",
+        "yakushimamonster003_purple"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_pink",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_pink",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_rainbow",
+        "yakushimamonster002"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_rainbow",
+        "yakushimamonster003"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_rainbow",
+        "yakushimamonster003_purple"
+      ],
+      "child": "yakushimamonster001_rainbow"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_rainbow",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster001_rainbow",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimamonster002",
+        "yakushimamonster003"
+      ],
+      "child": "yakushimamonster002"
+    },
+    {
+      "parents": [
+        "yakushimamonster002",
+        "yakushimamonster003_purple"
+      ],
+      "child": "yakushimamonster002"
+    },
+    {
+      "parents": [
+        "yakushimamonster002",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster002",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimamonster003",
+        "yakushimamonster003_purple"
+      ],
+      "child": "yakushimamonster003_purple"
+    },
+    {
+      "parents": [
+        "yakushimamonster003",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster003",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimamonster003_purple",
+        "yakushimaboss001"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "yakushimamonster003_purple",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001_small"
+    },
+    {
+      "parents": [
+        "yakushimaboss001",
+        "yakushimaboss001_small"
+      ],
+      "child": "yakushimaboss001"
+    },
+    {
+      "parents": [
+        "negativeoctopus",
+        "pinkrabbit"
+      ],
+      "child": "negativeoctopus_neutral"
+    },
+    {
+      "parents": [
+        "penguin",
+        "eleccat"
+      ],
+      "child": "penguin_electric"
+    },
+    {
+      "parents": [
+        "captainpenguin",
+        "thunderdog"
+      ],
+      "child": "captainpenguin_black"
+    },
+    {
+      "parents": [
+        "flyingmanta",
+        "kirin"
+      ],
+      "child": "flyingmanta_thunder"
+    },
+    {
+      "parents": [
+        "blueplatypus",
+        "lavagirl"
+      ],
+      "child": "blueplatypus_fire"
+    },
+    {
+      "parents": [
+        "lazycatfish",
+        "deer_ground"
+      ],
+      "child": "lazycatfish_gold"
+    },
+    {
+      "parents": [
+        "tentacleturtle",
+        "drillgame"
+      ],
+      "child": "tentacleturtle_ground"
+    },
+    {
+      "parents": [
+        "kendofrog",
+        "ronin_dark"
+      ],
+      "child": "kendofrog_dark"
+    },
+    {
+      "parents": [
+        "bluedragon",
+        "snowpeafowl"
+      ],
+      "child": "bluedragon_ice"
+    },
+    {
+      "parents": [
+        "icenarwhal",
+        "weaseldragon_fire"
+      ],
+      "child": "icenarwhal_fire"
+    },
+    {
+      "parents": [
+        "ghostanglerfish",
+        "candleghost"
+      ],
+      "child": "ghostanglerfish_fire"
+    },
+    {
+      "parents": [
+        "stuffedshark",
+        "sharkkid_fire"
+      ],
+      "child": "stuffedshark_fire"
+    },
+    {
+      "parents": [
+        "monkey",
+        "lavagirl"
+      ],
+      "child": "monkey_fire"
+    },
+    {
+      "parents": [
+        "kirin",
+        "snowpeafowl"
+      ],
+      "child": "kirin_ice"
+    },
+    {
+      "parents": [
+        "thunderdog",
+        "icefox"
+      ],
+      "child": "thunderdog_ice"
+    },
+    {
+      "parents": [
+        "thunderbird",
+        "snowpeafowl"
+      ],
+      "child": "thunderbird_ice"
+    },
+    {
+      "parents": [
+        "sweetssheep",
+        "smallarmadillo"
+      ],
+      "child": "sweetssheep_ground"
+    },
+    {
+      "parents": [
+        "scorpionman",
+        "hadesbird_electric"
+      ],
+      "child": "scorpionman_electric"
+    },
+    {
+      "parents": [
+        "blackpuppy",
+        "icecrocodile"
+      ],
+      "child": "blackpuppy_ice"
+    },
+    {
+      "parents": [
+        "ghostrabbit",
+        "flowerdoll"
+      ],
+      "child": "ghostrabbit_grass"
+    },
+    {
+      "parents": [
+        "nightbluehorse",
+        "whitedeer"
+      ],
+      "child": "nightbluehorse_neutral"
+    },
+    {
+      "parents": [
+        "octopusgirl",
+        "longcat"
+      ],
+      "child": "octopusgirl_neutral"
+    },
+    {
+      "parents": [
+        "whitemoth",
+        "sleeverabbit"
+      ],
+      "child": "whitemoth_neutral"
+    },
+    {
+      "parents": [
+        "winggolem",
+        "redarmorbird"
+      ],
+      "child": "winggolem_fire"
+    },
+    {
+      "parents": [
+        "flowerdoll",
+        "ronin"
+      ],
+      "child": "flowerdoll_fire"
+    },
+    {
+      "parents": [
+        "whitedeer",
+        "amaterasuwolf_dark"
+      ],
+      "child": "whitedeer_dark"
+    },
+    {
+      "parents": [
+        "iceseal",
+        "serpent_ground"
+      ],
+      "child": "iceseal_ground"
+    },
+    {
+      "parents": [
+        "kingsunfish",
+        "eleclizard"
+      ],
+      "child": "kingsunfish_thunder"
+    },
+    {
+      "parents": [
+        "grassgolem",
+        "candleghost"
+      ],
+      "child": "grassgolem_dark"
+    },
+    {
+      "parents": [
+        "tetroise",
+        "whitedeer"
+      ],
+      "child": "cubeturtle_neutral"
+    },
+    {
+      "parents": [
+        "ghostdragon",
+        "suzaku"
+      ],
+      "child": "ghostdragon_fire"
+    },
+    {
+      "parents": [
+        "volcanodragon",
+        "volcanicmonster_ice"
+      ],
+      "child": "volcanodragon_ice"
+    },
+    {
+      "parents": [
+        "rockbeast",
+        "yeti"
+      ],
+      "child": "rockbeast_ice"
+    },
+    {
+      "parents": [
+        "swordcutlassfish",
+        "sharkkid_fire"
+      ],
+      "child": "swordcutlassfish_fire"
+    },
+    {
+      "parents": [
+        "elecsnail",
+        "tentacleturtle_ground"
+      ],
+      "child": "elecsnail_ground"
+    },
+    {
+      "parents": [
+        "cactusdoll",
+        "blueberryfairy"
+      ],
+      "child": "cactusdoll_dark"
+    },
+    {
+      "parents": [
+        "grassminotaur",
+        "rockbeast_ice"
+      ],
+      "child": "grassminotaur_ice"
+    },
+    {
+      "parents": [
+        "icehorse",
+        "icehorse"
+      ],
+      "child": "icehorse"
+    },
+    {
+      "parents": [
+        "jetdragon",
+        "jetdragon"
+      ],
+      "child": "jetdragon"
+    },
+    {
+      "parents": [
+        "saintcentaur",
+        "saintcentaur"
+      ],
+      "child": "saintcentaur"
+    },
+    {
+      "parents": [
+        "blackcentaur",
+        "blackcentaur"
+      ],
+      "child": "blackcentaur"
+    },
+    {
+      "parents": [
+        "lilyqueen",
+        "lilyqueen"
+      ],
+      "child": "lilyqueen"
+    },
+    {
+      "parents": [
+        "horus",
+        "horus"
+      ],
+      "child": "horus"
+    },
+    {
+      "parents": [
+        "elecpanda",
+        "elecpanda"
+      ],
+      "child": "elecpanda"
+    },
+    {
+      "parents": [
+        "thunderdragonman",
+        "thunderdragonman"
+      ],
+      "child": "thunderdragonman"
+    },
+    {
+      "parents": [
+        "blackgriffon",
+        "blackgriffon"
+      ],
+      "child": "blackgriffon"
+    },
+    {
+      "parents": [
+        "nightlady_dark",
+        "nightlady_dark"
+      ],
+      "child": "nightlady_dark"
+    },
+    {
+      "parents": [
+        "kingbahamut_dragon",
+        "kingbahamut_dragon"
+      ],
+      "child": "kingbahamut_dragon"
+    },
+    {
+      "parents": [
+        "mimicdog",
+        "mimicdog"
+      ],
+      "child": "mimicdog"
+    },
+    {
+      "parents": [
+        "moonqueen",
+        "moonqueen"
+      ],
+      "child": "moonqueen"
+    },
+    {
+      "parents": [
+        "darkalien",
+        "darkalien"
+      ],
+      "child": "darkalien"
+    },
+    {
+      "parents": [
+        "whitealiendragon",
+        "whitealiendragon"
+      ],
+      "child": "whitealiendragon"
+    },
+    {
+      "parents": [
+        "darkmechadragon",
+        "darkmechadragon"
+      ],
+      "child": "darkmechadragon"
+    },
+    {
+      "parents": [
+        "snowtigerbeastman",
+        "snowtigerbeastman"
+      ],
+      "child": "snowtigerbeastman"
+    },
+    {
+      "parents": [
+        "yakushimamonster001",
+        "yakushimamonster001"
+      ],
+      "child": "yakushimamonster001"
+    },
+    {
+      "parents": [
+        "yakushimamonster003",
+        "yakushimamonster003"
+      ],
+      "child": "yakushimamonster003"
+    },
+    {
+      "parents": [
+        "poseidonorca",
+        "poseidonorca"
+      ],
+      "child": "poseidonorca"
+    },
+    {
+      "parents": [
+        "legenddeer",
+        "legenddeer"
+      ],
+      "child": "legenddeer"
+    },
+    {
+      "parents": [
+        "blueskydragon",
+        "blueskydragon"
+      ],
+      "child": "blueskydragon"
+    },
+    {
+      "parents": [
+        "flowerprince",
+        "flowerprince"
+      ],
+      "child": "flowerprince"
+    },
+    {
+      "parents": [
+        "mothman",
+        "mothman"
+      ],
+      "child": "mothman"
+    },
+    {
+      "parents": [
+        "lazydragon_electric",
+        "lazydragon_electric"
+      ],
+      "child": "lazydragon_electric"
+    },
+    {
+      "parents": [
+        "grasspanda_electric",
+        "grasspanda_electric"
+      ],
+      "child": "grasspanda_electric"
+    },
+    {
+      "parents": [
+        "kingwhale",
+        "kingwhale"
+      ],
+      "child": "kingwhale"
+    },
+    {
+      "parents": [
+        "worldtreedragon",
+        "worldtreedragon"
+      ],
+      "child": "worldtreedragon"
+    }
+  ]
+}

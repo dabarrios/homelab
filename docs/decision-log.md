@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-09-05 - Make PALS Search Catalogs Application-Owned
+
+Problem: production live-save decoding generated 1,620 owned roster rows successfully, but target-species autocomplete was empty. The data store loaded species, breeding ranks, unique combinations, and work suitability exclusively from ignored `django/local` or `django/data` files that existed only on the development machine. Passives happened to fall back to parser-tool metadata, which was also an inappropriate machine-local dependency outside the container build.
+
+Decision: version canonical reference catalogs with the PALS application. Bundle a normalized, pinned Palworld 1.0 snapshot containing 299 species, breeding ranks, work suitability, and 164 special combinations, plus the pinned 114-entry passive catalog. Preserve environment overrides for controlled reference-data testing and refreshes. Keep decoded rosters, passive inventory counts, uploads, reports, user overrides, and live-sync state in ignored runtime storage.
+
+Search and planner catalogs now exist before a save is uploaded and include unowned species/passives. Ownership continues to affect recommendations and counts, not whether a target is searchable. Include upstream licenses, notices, source commits, and normalization notes beside the snapshots.
+
+Verification: the canonical snapshot has 299 unique species keys and 164 valid special-combination records whose parents and children all resolve. All 53 Django PALS tests and all 19 frontend tests pass. The authenticated production options API returns 299 species, 115 passives, and the separately decoded 1,620-row owned roster; Jetragon is searchable. Relaxaurus plus Sparkit resolves to Relaxaurus Lux. Both production containers remain healthy.
+
 ## 2026-09-05 - Support Windows/WSL and Linux Container Save Decoding
 
 Decision: retain the existing Windows network-drive and WSL parser workflow for direct local development, selected automatically on Windows or explicitly with `PALWORLD_PARSER_RUNTIME=wsl`. Add a Docker parser runtime for Linux deployments. The dashboard copies the live save into its writable workspace, asks a pinned `jokerwho/palworld-server-tool:0.12.2` sidecar to decode the copy, then runs the existing analyzer inside Django. The source save is mounted read-only and is never passed to a mutating parser command.

@@ -22,7 +22,8 @@ DATA_ROOT = LOCAL_ROOT / "data"
 REPORTS_ROOT = LOCAL_ROOT / "reports"
 ROSTER = DATA_ROOT / "pal_roster.csv"
 PASSIVE_INVENTORY = DATA_ROOT / "passive_inventory.csv"
-BREEDING = DATA_ROOT / "breeding" / "pals.json"
+REFERENCE_ROOT = Path(__file__).resolve().parents[1] / "reference_data"
+BREEDING = Path(os.environ.get("PALWORLD_BREEDING_DATA", REFERENCE_ROOT / "pals.json"))
 WORK_OVERRIDES = DATA_ROOT / "work_suitability_overrides.json"
 PALPEDIA_WORK = DATA_ROOT / "palpedia_work_suitability.json"
 ANALYZER = Path(__file__).with_name("analyze_pal_breeding.py")
@@ -49,7 +50,7 @@ if LIVE_STATE_FILE.exists():
         pass
 PAL_IMAGES = PARSER_ASSETS / "pals"
 LOCAL_PAL_IMAGES = LOCAL_ROOT / "assets" / "pals"
-SKILL_METADATA = PARSER_ASSETS / "skill.json"
+SKILL_METADATA = Path(os.environ.get("PALWORLD_SKILL_METADATA", REFERENCE_ROOT / "skill.json"))
 TARGET_ONLY = "target_only"
 LEAST_JUNK = "least_junk"
 GOLD_PASSIVES = {
