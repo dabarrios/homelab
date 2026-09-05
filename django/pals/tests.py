@@ -186,6 +186,38 @@ class IvAlphaOnlyTest(SimpleTestCase):
 
 
 class PassiveColorOverrideTest(SimpleTestCase):
+    def test_data_store_includes_metadata_passives_not_owned_in_roster(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            breeding = root / "pals.json"
+            roster = root / "pal_roster.csv"
+            passive_inventory = root / "passive_inventory.csv"
+            skill = root / "skill.json"
+            breeding.write_text('{"pals": [], "uniqueCombos": [], "dataVersion": "test", "generatedAt": ""}', encoding="utf-8")
+            roster.write_text("owner,passives\nDavid,Legend\n", encoding="utf-8")
+            passive_inventory.write_text("passive_id,passive_name,count,pals\nLegend,Legend,1,\n", encoding="utf-8")
+            skill.write_text(
+                '{"en": {"WorldTree_MoveSpeed": {"name": "Dimensional Leap", "desc": "Movement Speed +50%"}}}',
+                encoding="utf-8",
+            )
+
+            with patch.object(optimizer, "BREEDING", breeding), patch.object(optimizer, "ROSTER", roster), patch.object(optimizer, "PASSIVE_INVENTORY", passive_inventory), patch.object(optimizer, "SKILL_METADATA", skill), patch.object(optimizer, "PASSIVE_COLOR_OVERRIDES_FILE", root / "overrides.json"):
+                store = optimizer.DataStore()
+
+        self.assertIn("Dimensional Leap", store.passives)
+        self.assertIn("Legend", store.passives)
+        self.assertEqual(store.passive_meta["Dimensional Leap"]["id"], "WorldTree_MoveSpeed")
+
+    def test_element_boost_tiers_are_classified_from_passive_id(self):
+        self.assertEqual(
+            optimizer.passive_tone("Divine Dragon", "ElementBoost_Dragon_2_PAL", "30% increase in Dragon attack damage."),
+            "gold",
+        )
+        self.assertEqual(
+            optimizer.passive_tone("Blood of the Dragon", "ElementBoost_Dragon_1_PAL", "10% increase in Dragon attack damage."),
+            "positive",
+        )
+
     def test_passive_color_override_replaces_default_tone(self):
         with TemporaryDirectory() as tmp:
             path = Path(tmp) / "passive_color_overrides.json"

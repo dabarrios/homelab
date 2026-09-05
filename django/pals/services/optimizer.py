@@ -263,11 +263,37 @@ def save_passive_color_overrides(overrides: dict[str, str]) -> None:
     PASSIVE_COLOR_OVERRIDES_FILE.write_text(json.dumps(cleaned, indent=2), encoding="utf-8")
 
 
+def passive_metadata_by_name() -> dict[str, dict[str, str]]:
+    if not SKILL_METADATA.exists():
+        return {}
+    try:
+        skill_data = json.loads(SKILL_METADATA.read_text(encoding="utf-8")).get("en", {})
+    except (OSError, json.JSONDecodeError):
+        return {}
+    by_name = {}
+    for passive_id, skill in skill_data.items():
+        if not isinstance(skill, dict):
+            continue
+        name = str(skill.get("name") or "").strip()
+        if not name:
+            continue
+        by_name[name] = {
+            "id": str(passive_id),
+            "desc": str(skill.get("desc") or ""),
+            "tone": passive_tone(name, str(passive_id), str(skill.get("desc") or "")),
+        }
+    return by_name
+
+
 def passive_tone(name: str, passive_id: str = "", desc: str = "") -> str:
     lowered = f"{passive_id} {desc}".lower()
     pid = passive_id or ""
     if name in NORMAL_PASSIVES or pid in {"PAL_conceited", "CraftSpeed_up1"}:
         return "neutral"
+    if re.match(r"ElementBoost_[A-Za-z]+_2_PAL$", pid):
+        return "gold"
+    if re.match(r"ElementBoost_[A-Za-z]+_1_PAL$", pid):
+        return "positive"
     if name in BLUE_PASSIVES or pid.startswith("MutationPal_") or pid == "CraftSpeed_up3" or pid.startswith("RideJumpCount_Increase"):
         return "positive"
     if name in NEGATIVE_PASSIVES or pid.endswith("_down1") or pid.endswith("_down2") or pid.endswith("_down3"):
@@ -286,18 +312,13 @@ def passive_tone(name: str, passive_id: str = "", desc: str = "") -> str:
     return "neutral"
 
 def build_passive_meta(passives: list[str]) -> dict[str, dict[str, str]]:
-    by_id: dict[str, dict[str, str]] = {}
-    if SKILL_METADATA.exists():
-        skill_data = json.loads(SKILL_METADATA.read_text(encoding="utf-8")).get("en", {})
-        by_id = {key: value for key, value in skill_data.items() if isinstance(value, dict)}
-
-    by_name: dict[str, dict[str, str]] = {}
+    by_name = passive_metadata_by_name()
     if PASSIVE_INVENTORY.exists():
         with PASSIVE_INVENTORY.open(newline="", encoding="utf-8-sig") as f:
             for row in csv.DictReader(f):
                 name = row.get("passive_name", "")
                 passive_id = row.get("passive_id", "")
-                skill = by_id.get(passive_id, {})
+                skill = by_name.get(name, {})
                 by_name[name] = {
                     "id": passive_id,
                     "desc": skill.get("desc", ""),
@@ -419,7 +440,9 @@ class DataStore:
         else:
             self.roster = []
         self.species_names = sorted({p.name for p in self.pals.values()})
-        self.passives = sorted({p for r in self.roster for p in split_passives(r.get("passives"))})
+        metadata_passives = set(passive_metadata_by_name())
+        roster_passives = {p for r in self.roster for p in split_passives(r.get("passives"))}
+        self.passives = sorted(metadata_passives | roster_passives)
         self.passive_meta = build_passive_meta(self.passives)
         self.passives_by_owner = {}
         for row in self.roster:
