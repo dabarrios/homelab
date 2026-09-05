@@ -8,8 +8,6 @@ import shutil
 import subprocess
 import zipfile
 from datetime import datetime
-from email.parser import BytesParser
-from email.policy import default
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -66,25 +64,6 @@ def reset_directory(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
-def multipart_files(content_type: str, body: bytes) -> list[tuple[str, bytes]]:
-    message = BytesParser(policy=default).parsebytes(
-        f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode("utf-8") + body
-    )
-    if not message.is_multipart():
-        raise ValueError("Invalid multipart upload or missing boundary")
-    files = []
-    for part in message.iter_parts():
-        filename = part.get_filename()
-        if filename is None:
-            continue
-        payload = part.get_payload(decode=True)
-        if payload is None:
-            continue
-        rel = safe_upload_relative_path(filename)
-        if not rel.suffix and not payload:
-            continue
-        files.append((filename, payload))
-    return files
 
 
 def save_uploaded_files(files: list[tuple[str, bytes]], stamp: str) -> Path:

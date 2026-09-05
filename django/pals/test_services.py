@@ -63,6 +63,23 @@ class BaseServiceTests(SimpleTestCase):
 
 
 class WorkerScoringTests(SimpleTestCase):
+    def test_explicit_role_limits_and_disabled_roles_are_respected(self):
+        targets = bases._planner_targets({"demand": {"mining": 3, "watering": 1}}, {
+            "mining": {"min": 2, "max": 2}, "watering": {"min": 1, "max": 1},
+            "transporting": {"enabled": False},
+        }, 3)
+        candidates = [{"plannerLevels": {"mining": 3, "watering": 2, "transporting": 1}}]
+        slots = bases._allocate_role_slots(targets, candidates, 3)
+        self.assertEqual(slots.count("mining"), 2)
+        self.assertEqual(slots.count("watering"), 1)
+        self.assertNotIn("transporting", slots)
+
+    def test_owned_selection_excludes_used_instances_but_ideal_can_repeat(self):
+        card = {"name": "Worker", "plannerInstanceId": "owned-a", "plannerLevels": {"mining": 3}}
+        used = {"instance:owned-a": 1}
+        self.assertIsNone(bases._best_for_role([card], "mining", used, {"mining"}, True))
+        self.assertIs(bases._best_for_role([card], "mining", used, {"mining"}, False), card)
+
     def test_work_speed_scores_preserve_unicode_passive_names(self):
         from pals.services.breeding_profiles import work_speed_profile_scores
         self.assertEqual(work_speed_profile_scores()["Demon\u2019s Hand"], 90)
@@ -81,6 +98,19 @@ class WorkerScoringTests(SimpleTestCase):
 
 
 class BreedingBoundaryTests(SimpleTestCase):
+    def test_final_routes_cache_donors_once_per_species(self):
+        from pals.services import breeding_search as search
+        parents = [self.state("Male", ["Artisan"]), self.state("Female", ["Serious"])]
+        store = SimpleNamespace(
+            pals={"target": SimpleNamespace(name="Target")},
+            parent_pairs_for_child=lambda key: [("target", "target"), ("target", "target")],
+        )
+        with patch.object(search, "STORE", store), patch.object(search, "top_donors_for_species", wraps=search.top_donors_for_species) as donors:
+            routes = search.final_parent_routes(parents, "target", frozenset(["Artisan", "Serious"]), frozenset())
+        self.assertEqual(donors.call_count, 1)
+        self.assertEqual(len(routes), 2)
+        self.assertEqual(set(routes[0].parents), set(parents))
+
     def state(self, gender, passives, *, label="Owned", base_workers=0, hp=100):
         from pals.services.breeding_state import State
         return State(
@@ -236,23 +266,6 @@ class IvBoundaryTests(SimpleTestCase):
             self.assertIn("Unknown target", ivs.build_iv_plan({"target": "Missing"})["error"])
             self.assertIn("Choose the passives", ivs.build_iv_plan({"target": "Target"})["error"])
 
-class SaveUploadTests(SimpleTestCase):
-    def test_multipart_preserves_binary_bytes_and_relative_filename(self):
-        payload = b'\x00\xff--boundary-in-data\r\n\n\r'
-        body = (
-            b'--boundary\r\nContent-Disposition: form-data; name="files"; filename="Players/player.sav"\r\n'
-            b'Content-Type: application/octet-stream\r\n\r\n' + payload + b'\r\n--boundary--\r\n'
-        )
-        self.assertEqual(saves.multipart_files('multipart/form-data; boundary="boundary"', body), [("Players/player.sav", payload)])
-
-    def test_multipart_ignores_fields_and_accepts_empty_files(self):
-        body = (
-            b'--test\r\nContent-Disposition: form-data; name="note"\r\n\r\nignored\r\n'
-            b'--test\r\nContent-Disposition: form-data; name="files"; filename="empty.sav"\r\n\r\n\r\n--test--\r\n'
-        )
-        self.assertEqual(saves.multipart_files('multipart/form-data; boundary=test', body), [("empty.sav", b'')])
-        with self.assertRaises(ValueError):
-            saves.multipart_files('multipart/form-data', body)
 
 
 class ServiceArchitectureTests(SimpleTestCase):
@@ -321,7 +334,7 @@ class ServiceEndpointTests(SimpleTestCase):
     def test_reload_invalidates_the_domain_cache(self):
         from django.test import RequestFactory
         from pals import views
-        request = RequestFactory().get("/")
+        request = RequestFactory().post("/")
         request.user = SimpleNamespace(is_authenticated=True)
         with patch.object(data.STORE, "reload") as reload, patch.object(bases, "BASE_WORK_CACHE", {"payload": {"old": True}, "mtime": 1}):
             response = views.reload_data(request)

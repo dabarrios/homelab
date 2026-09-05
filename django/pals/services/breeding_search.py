@@ -93,9 +93,14 @@ def final_parent_routes(states: list[State], target_key: str, target: frozenset[
     pairs = STORE.parent_pairs_for_child(target_key)
     donor_cache: dict[str, list[State]] = {}
 
+    def donors_for(key: str) -> list[State]:
+        if key not in donor_cache:
+            donor_cache[key] = top_donors_for_species(states, key, target, allowed, iv_preference=iv_preference)
+        return donor_cache[key]
+
     for left_key, right_key in pairs:
-        left = donor_cache.setdefault(left_key, top_donors_for_species(states, left_key, target, allowed, iv_preference=iv_preference))
-        right = donor_cache.setdefault(right_key, top_donors_for_species(states, right_key, target, allowed, iv_preference=iv_preference))
+        left = donors_for(left_key)
+        right = donors_for(right_key)
         if not left or not right:
             continue
         if left_key == right_key:

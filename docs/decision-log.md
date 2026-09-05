@@ -1,5 +1,22 @@
 # Decision Log
 
+## 2026-09-05 - Simplify Planner Internals and Protect API Writes
+
+Decision: address the four inspected refactoring targets without changing planner ranking or response shapes.
+
+- `breeding_search.py` now checks its donor cache before computing donors. The former `setdefault()` arguments repeated sorting even on cache hits. Cache lifetime remains one final-route search.
+- `work.py` uses one metadata builder for species, size, icon, work entries, and source information across suitability, ideal-worker, and owned-worker cards. Each caller retains its own fields and level calculations.
+- `bases.py` separates target configuration, candidate construction, scoring, candidate selection, and role-slot allocation into private helpers. `build_base_planner()` is now 61 lines, down from 233; the ranking tuples and slot-allocation order are unchanged.
+- `tool.js` uses `postJson()` for the seven JSON POST callers. The shared request function attaches the template's CSRF token to unsafe requests and restricts requests to the same origin. Multipart uploads use the same request and error handling.
+
+Remove all PALS `csrf_exempt` decorators and change the state-changing reload endpoint to POST. Render the token in page metadata, outside the persisted tool form. This completes the previously recorded CSRF follow-up. Existing open pages need refreshing to receive the token.
+
+Upload boundary: use Django's parsed `request.FILES`, since CSRF middleware parses multipart requests before the view runs. The browser sends relative paths in a separate JSON `relativePaths` form field; ordinary multipart clients may omit it and use sanitized filenames. ZIP contents retain their directory structure through the existing ZIP extractor. Delete the now-unused custom MIME parser. Raw binary uploads remain supported with a valid CSRF token. External POST clients now require CSRF credentials as well as authentication; reload clients must use POST.
+
+Verification: captured and compared 2,435 outputs across all local owners, bases, both planner modes, default and constrained settings, all work skills, and species/owned worker cards. Every output matches exactly. All 45 Django tests and 13 JavaScript tests pass, including donor cache reuse, role limits, owned-instance exclusion, missing/invalid CSRF tokens on every POST endpoint, valid JSON requests, and binary/path-preserving uploads. No original saves were modified; live decoding and browser interaction were not exercised.
+
+The cached final-parent search also matches all 180 Shroomer Noct routes from the previous implementation on David's local roster. Python compilation, JavaScript syntax, and diff checks pass.
+
 ## 2026-09-05 - Verify Cleanup and Allow Repeat Breeding
 
 Resumed the interrupted cleanup and verified that all intended deletions and both bug fixes persisted. Before further changes, all 33 Django tests and three Bases renderer tests passed. No application imports of the removed optimizer facade or standalone HTTP server remain. The documented CSRF follow-up remains separate work.

@@ -254,6 +254,27 @@ def work_recommendations(cards: list[dict], selected_work: str, include_self_bre
     return recommendations
 
 
+def _work_card_metadata(pal: dict, entries: list[dict], source: dict | None, *, fallback_name: str = "") -> dict:
+    name = pal.get("name", fallback_name)
+    size = pal_size_for(name)
+    return {
+        "key": pal.get("key", ""),
+        "name": name,
+        "types": pal.get("types", []),
+        "icon": icon_url_for_key(pal.get("key", "")),
+        "size": size,
+        "sizeGroup": SIZE_GROUPS.get(size, "Unknown Size"),
+        "sizeKnown": size != "Unknown",
+        "work": entries,
+        "workCount": len(entries),
+        "workCondensationSource": "verified" if source else "projected",
+        "workCondensationSourceDetail": (source or {}).get("source", ""),
+        "workCondensationSourceUrl": (source or {}).get("url", ""),
+        "breedable": bool(pal.get("breedable", True)),
+        "uniqueOnly": bool(pal.get("uniqueOnly", False)),
+    }
+
+
 def work_suitability_payload(owner: str = "", selected_work: str = "", include_self_breeders: bool = True) -> dict:
     if selected_work not in WORK_LABELS:
         return {
@@ -273,7 +294,6 @@ def work_suitability_payload(owner: str = "", selected_work: str = "", include_s
         if level <= 0:
             continue
         name = pal.get("name", "")
-        size = pal_size_for(name)
         entries = work_entries(work, name)
         condensed_levels = fully_condensed_work_levels(work, name)
         projected_levels = projected_fully_condensed_work_levels(work)
@@ -281,26 +301,13 @@ def work_suitability_payload(owner: str = "", selected_work: str = "", include_s
         requires_seed = requires_owned_seed_for_breeding(pal.get("key", ""))
         owned_count = counts.get(name, 0)
         cards.append({
-            "key": pal.get("key", ""),
-            "name": name,
-            "types": pal.get("types", []),
-            "icon": icon_url_for_key(pal.get("key", "")),
-            "size": size,
-            "sizeGroup": SIZE_GROUPS.get(size, "Unknown Size"),
-            "sizeKnown": size != "Unknown",
+            **_work_card_metadata(pal, entries, work_source),
             "selectedWork": selected_work,
             "selectedWorkLabel": WORK_LABELS[selected_work],
             "selectedLevel": level,
             "selectedFullyCondensedLevel": condensed_levels.get(selected_work),
             "selectedProjectedFullyCondensedLevel": projected_levels.get(selected_work),
-            "work": entries,
-            "workCount": len(entries),
-            "workCondensationSource": "verified" if work_source else "projected",
-            "workCondensationSourceDetail": (work_source or {}).get("source", ""),
-            "workCondensationSourceUrl": (work_source or {}).get("url", ""),
             "ownedCount": owned_count,
-            "breedable": bool(pal.get("breedable", True)),
-            "uniqueOnly": bool(pal.get("uniqueOnly", False)),
             "requiresOwnedSeed": requires_seed,
             "unavailableReason": f"It looks like you need to tame or capture {name} first. Once you own one, come back and self-breed it." if requires_seed and not owned_count else "",
         })
@@ -348,27 +355,14 @@ def work_card_for_pal(pal: dict, owner_counts: dict[str, int], selected_work: st
     entries = work_entries(work, name)
     selected_level = as_int(work.get(selected_work)) if selected_work else max((as_int(work.get(k)) for k in WORK_LABELS), default=0)
     return {
-        "key": pal.get("key", ""),
-        "name": name,
-        "types": pal.get("types", []),
-        "icon": icon_url_for_key(pal.get("key", "")),
-        "size": pal_size_for(name),
-        "sizeGroup": SIZE_GROUPS.get(pal_size_for(name), "Unknown Size"),
-        "sizeKnown": pal_size_for(name) != "Unknown",
+        **_work_card_metadata(pal, entries, work_source),
         "selectedWork": selected_work,
         "selectedWorkLabel": WORK_LABELS.get(selected_work, ""),
         "selectedLevel": selected_level,
         "selectedFullyCondensedLevel": condensed_levels.get(selected_work) if selected_work else None,
         "selectedProjectedFullyCondensedLevel": projected_levels.get(selected_work) if selected_work else None,
-        "work": entries,
         "workLevels": {entry["key"]: entry for entry in entries},
-        "workCount": len(entries),
-        "workCondensationSource": "verified" if work_source else "projected",
-        "workCondensationSourceDetail": (work_source or {}).get("source", ""),
-        "workCondensationSourceUrl": (work_source or {}).get("url", ""),
         "ownedCount": owner_counts.get(name, 0),
-        "breedable": bool(pal.get("breedable", True)),
-        "uniqueOnly": bool(pal.get("uniqueOnly", False)),
         "requiresOwnedSeed": requires_owned_seed_for_breeding(pal.get("key", "")),
     }
 
@@ -536,25 +530,12 @@ def work_card_for_owned_row(row: dict[str, str], *, display_location: str | None
     location = display_location if display_location is not None else (row.get("location", "") or "")
     score_parts = passive_work_score_parts(passives, pal.get("types", []))
     return {
-        "key": pal.get("key", ""),
-        "name": pal.get("name", species),
-        "types": pal.get("types", []),
-        "icon": icon_url_for_key(pal.get("key", "")),
-        "size": pal_size_for(pal.get("name", species)),
-        "sizeGroup": SIZE_GROUPS.get(pal_size_for(pal.get("name", species)), "Unknown Size"),
-        "sizeKnown": pal_size_for(pal.get("name", species)) != "Unknown",
+        **_work_card_metadata(pal, entries, work_source, fallback_name=species),
         "selectedWork": "",
         "selectedWorkLabel": "",
         "selectedLevel": max(levels.values(), default=0),
-        "work": entries,
         "workLevels": {entry["key"]: entry for entry in entries},
-        "workCount": len(entries),
-        "workCondensationSource": "verified" if work_source else "projected",
-        "workCondensationSourceDetail": (work_source or {}).get("source", ""),
-        "workCondensationSourceUrl": (work_source or {}).get("url", ""),
         "ownedCount": 1,
-        "breedable": bool(pal.get("breedable", True)),
-        "uniqueOnly": bool(pal.get("uniqueOnly", False)),
         "plannerPassives": sorted(passives),
         "plannerPassiveSpeedScore": score_parts["total"],
         "plannerPassiveScoreParts": score_parts,

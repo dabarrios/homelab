@@ -4,12 +4,10 @@ import json
 import mimetypes
 import zipfile
 from datetime import datetime
-from pathlib import Path
 
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from .services import bases as bases_service
@@ -149,7 +147,7 @@ def owned_target_pals(request):
 
 
 @login_required
-@require_GET
+@require_POST
 def reload_data(request):
     data_service.STORE.reload()
     bases_service.clear_base_work_cache()
@@ -173,23 +171,31 @@ def pal_asset(request, name: str):
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def upload_save(request):
-    if not request.body:
-        return json_error("No file data received")
     data_service.UPLOADS.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     content_type = request.META.get("CONTENT_TYPE", "")
     try:
-        files = saves_service.multipart_files(request.META.get("CONTENT_TYPE", ""), request.body) if content_type.startswith("multipart/form-data") else []
+        if content_type.startswith("multipart/form-data"):
+            uploads = [file for _, items in request.FILES.lists() for file in items]
+            paths = json.loads(request.POST.get("relativePaths", "null"))
+            if paths is None:
+                paths = [file.name for file in uploads]
+            if not isinstance(paths, list) or len(paths) != len(uploads) or not all(isinstance(name, str) for name in paths):
+                return json_error("Invalid upload paths")
+            files = [(name, file.read()) for name, file in zip(paths, uploads)]
+        else:
+            files = [(request.META.get("HTTP_X_FILENAME", "Level.sav"), request.body)] if request.body else []
         if not files:
-            files = [(request.META.get("HTTP_X_FILENAME", "Level.sav"), request.body)]
+            return json_error("No file data received")
         upload_dir = saves_service.save_uploaded_files(files, stamp)
         uploaded_files = [p for p in upload_dir.rglob("*") if p.is_file()]
         if len(uploaded_files) == 1 and uploaded_files[0].suffix.lower() == ".zip":
             upload_dir = saves_service.expand_zip_upload(uploaded_files[0], stamp)
         return JsonResponse(saves_service.run_decode_from_save_dir(upload_dir, str(upload_dir.relative_to(data_service.ROOT))))
+    except json.JSONDecodeError:
+        return json_error("Invalid upload paths")
     except zipfile.BadZipFile:
         return json_error("Uploaded .zip is not a valid zip file")
     except Exception as exc:
@@ -197,7 +203,6 @@ def upload_save(request):
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def upload_level(request):
     if not request.body:
@@ -210,7 +215,6 @@ def upload_level(request):
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def live_save_refresh(request):
     try:
@@ -221,14 +225,12 @@ def live_save_refresh(request):
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def optimize(request):
     return JsonResponse(breeding_service.build_plan(json_payload(request)))
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def profile_passives(request):
     result = breeding_service.profile_passives_payload(json_payload(request))
@@ -236,14 +238,12 @@ def profile_passives(request):
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def improve_ivs(request):
     return JsonResponse(ivs_service.build_iv_plan(json_payload(request)))
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def base_labels(request):
     payload = json_payload(request)
@@ -262,7 +262,6 @@ def base_labels(request):
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def implant_inventory(request):
     payload = json_payload(request)
@@ -281,7 +280,6 @@ def implant_inventory(request):
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def passive_colors(request):
     payload = json_payload(request)
@@ -303,7 +301,6 @@ def passive_colors(request):
 
 
 @login_required
-@csrf_exempt
 @require_POST
 def base_planner(request):
     return JsonResponse(bases_service.build_base_planner(json_payload(request)))

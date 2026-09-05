@@ -266,20 +266,7 @@ def planner_auto_target(skill: str, demand_count: int, demand: dict[str, int]) -
     return min(AUTO_TARGET_CAPS.get(skill, 3), max(1, math.ceil(demand_count / 2)))
 
 
-def build_base_planner(payload: dict) -> dict:
-    base_id = payload.get("baseId", "")
-    owner = payload.get("owner", "")
-    settings = payload.get("settings") or {}
-    planner_mode = payload.get("plannerMode") if payload.get("plannerMode") in {"ideal", "right_now"} else "ideal"
-    owned_only = planner_mode == "right_now"
-    max_workers = min(15, max(1, as_int(payload.get("maxWorkers"), 15)))
-    bases_payload = base_work_sites_payload()
-    if not bases_payload.get("ok"):
-        return bases_payload
-    base = next((item for item in bases_payload.get("bases", []) if item.get("id") == base_id), None) or (bases_payload.get("bases") or [None])[0]
-    if not base:
-        return {"ok": False, "error": "No bases were found in the decoded save.", "bases": []}
-
+def _planner_targets(base: dict, settings: dict, max_workers: int) -> dict:
     demand = dict(base.get("demand") or {})
     if any(demand.get(k, 0) for k in ("mining", "farming", "planting", "gathering", "lumbering")):
         demand["transporting"] = max(demand.get("transporting", 0), 1)
@@ -311,7 +298,10 @@ def build_base_planner(payload: dict) -> dict:
             "explicitMin": explicit_min,
             "explicitMax": explicit_max,
         }
+    return targets
 
+
+def _planner_candidates(owner: str, targets: dict, owned_only: bool) -> tuple[list[dict], set[str]]:
     owner_counts = owned_species_counts(owner)
     owner_work_levels = best_owned_work_levels(owner)
     candidates = []
@@ -345,32 +335,38 @@ def build_base_planner(payload: dict) -> dict:
                 continue
             card["plannerLevels"] = levels
             candidates.append(card)
+    return candidates, enabled_skills
 
-    def best_for_role(skill: str, used_counts: dict[str, int]) -> dict | None:
-        pool = [card for card in candidates if as_int(card.get("plannerLevels", {}).get(skill)) > 0]
-        if owned_only:
-            used_instances = {key for key, value in used_counts.items() if key.startswith("instance:") and value > 0}
-            pool = [card for card in pool if f"instance:{card.get('plannerInstanceId', '')}" not in used_instances]
-        if not pool:
-            return None
-        def score(card: dict) -> tuple:
-            levels = card.get("plannerLevels", {})
-            role_level = as_int(levels.get(skill))
-            extra_enabled = sum(as_int(levels.get(other)) for other in enabled_skills if other != skill)
-            off_role_count = sum(1 for other, level in levels.items() if other != skill and level > 0)
-            owned_bonus = 1 if card.get("ownedCount") else 0
-            repeat_penalty = used_counts.get(card.get("name", ""), 0)
-            score_parts = card.get("plannerPassiveScoreParts") or {}
-            direct_speed = as_int(score_parts.get("directSpeed"))
-            uptime = as_int(score_parts.get("uptime"))
-            operations = as_int(score_parts.get("operations"))
-            harmful = as_int(score_parts.get("harmful"))
-            total_passive_score = as_int(score_parts.get("total"))
-            current_base_bonus = 1 if str(card.get("plannerLocation", "")).startswith("Base") else 0
-            size_penalty = SIZE_ORDER.get(card.get("size"), 3)
-            return (role_level, direct_speed, uptime, operations, -harmful, total_passive_score, current_base_bonus, owned_bonus, -repeat_penalty, -off_role_count, extra_enabled, -size_penalty, card.get("name", ""))
-        return max(pool, key=score)
 
+def _candidate_score(card: dict, skill: str, used_counts: dict[str, int], enabled_skills: set[str]) -> tuple:
+    levels = card.get("plannerLevels", {})
+    role_level = as_int(levels.get(skill))
+    extra_enabled = sum(as_int(levels.get(other)) for other in enabled_skills if other != skill)
+    off_role_count = sum(1 for other, level in levels.items() if other != skill and level > 0)
+    owned_bonus = 1 if card.get("ownedCount") else 0
+    repeat_penalty = used_counts.get(card.get("name", ""), 0)
+    score_parts = card.get("plannerPassiveScoreParts") or {}
+    direct_speed = as_int(score_parts.get("directSpeed"))
+    uptime = as_int(score_parts.get("uptime"))
+    operations = as_int(score_parts.get("operations"))
+    harmful = as_int(score_parts.get("harmful"))
+    total_passive_score = as_int(score_parts.get("total"))
+    current_base_bonus = 1 if str(card.get("plannerLocation", "")).startswith("Base") else 0
+    size_penalty = SIZE_ORDER.get(card.get("size"), 3)
+    return (role_level, direct_speed, uptime, operations, -harmful, total_passive_score, current_base_bonus, owned_bonus, -repeat_penalty, -off_role_count, extra_enabled, -size_penalty, card.get("name", ""))
+
+
+def _best_for_role(candidates: list[dict], skill: str, used_counts: dict[str, int], enabled_skills: set[str], owned_only: bool) -> dict | None:
+    pool = [card for card in candidates if as_int(card.get("plannerLevels", {}).get(skill)) > 0]
+    if owned_only:
+        used_instances = {key for key, value in used_counts.items() if key.startswith("instance:") and value > 0}
+        pool = [card for card in pool if f"instance:{card.get('plannerInstanceId', '')}" not in used_instances]
+    if not pool:
+        return None
+    return max(pool, key=lambda card: _candidate_score(card, skill, used_counts, enabled_skills))
+
+
+def _allocate_role_slots(targets: dict, candidates: list[dict], max_workers: int) -> list[str]:
     role_slots: list[str] = []
     role_weights = {
         "mining": 14,
@@ -455,12 +451,32 @@ def build_base_planner(payload: dict) -> dict:
         if not key:
             break
         add_role(key)
+    return role_slots
+
+
+def build_base_planner(payload: dict) -> dict:
+    base_id = payload.get("baseId", "")
+    owner = payload.get("owner", "")
+    settings = payload.get("settings") or {}
+    planner_mode = payload.get("plannerMode") if payload.get("plannerMode") in {"ideal", "right_now"} else "ideal"
+    owned_only = planner_mode == "right_now"
+    max_workers = min(15, max(1, as_int(payload.get("maxWorkers"), 15)))
+    bases_payload = base_work_sites_payload()
+    if not bases_payload.get("ok"):
+        return bases_payload
+    base = next((item for item in bases_payload.get("bases", []) if item.get("id") == base_id), None) or (bases_payload.get("bases") or [None])[0]
+    if not base:
+        return {"ok": False, "error": "No bases were found in the decoded save.", "bases": []}
+
+    targets = _planner_targets(base, settings, max_workers)
+    candidates, enabled_skills = _planner_candidates(owner, targets, owned_only)
+    role_slots = _allocate_role_slots(targets, candidates, max_workers)
 
     selected = []
     covered = {key: 0 for key in WORK_LABELS}
     used_counts: dict[str, int] = {}
     for idx, skill in enumerate(role_slots[:max_workers], 1):
-        card = best_for_role(skill, used_counts)
+        card = _best_for_role(candidates, skill, used_counts, enabled_skills, owned_only)
         if not card:
             continue
         item = json.loads(json.dumps(card))

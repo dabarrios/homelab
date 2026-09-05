@@ -67,7 +67,14 @@ function assetUrl(path) {
 }
 
 async function api(path, fetchOptions = {}) {
-  const response = await fetch(apiUrl(path), fetchOptions);
+  const headers = new Headers(fetchOptions.headers);
+  const method = (fetchOptions.method || 'GET').toUpperCase();
+  if (!['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!token) throw new Error('Refresh this page before submitting changes.');
+    headers.set('X-CSRFToken', token);
+  }
+  const response = await fetch(apiUrl(path), {...fetchOptions, headers, credentials: 'same-origin', mode: 'same-origin'});
   const text = await response.text();
   let payload;
   try {
@@ -77,6 +84,14 @@ async function api(path, fetchOptions = {}) {
   }
   if (!response.ok || payload.error) throw new Error(payload.error || `${response.status} ${response.statusText}`);
   return payload;
+}
+
+function postJson(path, payload) {
+  return api(path, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload),
+  });
 }
 
 function setText(selector, text) {
@@ -1662,11 +1677,7 @@ async function addInventoryPassive(panel) {
 }
 
 async function saveInventoryPassive(passive, patch) {
-  const response = await api('/implant-inventory', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({passive, ...patch}),
-  });
+  const response = await postJson('/implant-inventory', {passive, ...patch});
   options.implantInventory = response.inventory || {};
   renderImplantInventories();
 }
@@ -1713,11 +1724,7 @@ function renderPassiveColorSuggestions(panel) {
 }
 
 async function savePassiveColor(passive, tone, remove = false) {
-  const response = await api('/passive-colors', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({passive, tone, delete: remove}),
-  });
+  const response = await postJson('/passive-colors', {passive, tone, delete: remove});
   options.passiveColorOverrides = response.overrides || {};
   options.passiveMeta = response.passiveMeta || options.passiveMeta || {};
   refreshPassiveColorSurfaces();
@@ -2356,11 +2363,7 @@ async function saveBaseLabel() {
   const base = selectedBaseOption();
   if (!base) return;
   const label = ($('#baseLabel')?.value || '').trim();
-  const result = await api('/base-labels', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({baseId: base.id, label}),
-  });
+  const result = await postJson('/base-labels', {baseId: base.id, label});
   options.baseSites = await api('/base-work-sites');
   fillOptions();
   setText('#baseLabelHint', result.ok ? 'Base name saved.' : 'Base name was not saved.');
@@ -2461,36 +2464,28 @@ async function submitTool(event) {
     if (moduleKey === 'breeding') {
       const customProfile = customProfileByValue(data.breedingProfile);
       const finalPassives = customProfile ? customProfile.passives : splitList(data.passives);
-      result = await api('/optimize', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          owner: data.owner || 'David',
-          target: data.target,
-          passives: finalPassives,
-          includeImplants: Boolean(data.includeImplants),
-          includeInsomnia: Boolean(data.includeInsomnia),
-          breedAnyway: Boolean(data.breedAnyway),
-          implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
-          genderPreference: data.genderPreference || 'any',
-          breedingProfile: customProfile ? 'manual' : data.breedingProfile || 'manual',
-          routePreference: 'best_overall',
-        }),
+      result = await postJson('/optimize', {
+        owner: data.owner || 'David',
+        target: data.target,
+        passives: finalPassives,
+        includeImplants: Boolean(data.includeImplants),
+        includeInsomnia: Boolean(data.includeInsomnia),
+        breedAnyway: Boolean(data.breedAnyway),
+        implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
+        genderPreference: data.genderPreference || 'any',
+        breedingProfile: customProfile ? 'manual' : data.breedingProfile || 'manual',
+        routePreference: 'best_overall',
       });
     } else if (moduleKey === 'ivs') {
       const finalPassives = splitList(data.passives);
-      result = await api('/improve-ivs', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          owner: data.owner || 'David',
-          target: data.target,
-          passives: finalPassives,
-          implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
-          genderPreference: data.genderPreference || 'any',
-          ivGoal: 'perfect',
-          requireAlpha: Boolean(data.requireAlpha),
-        }),
+      result = await postJson('/improve-ivs', {
+        owner: data.owner || 'David',
+        target: data.target,
+        passives: finalPassives,
+        implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
+        genderPreference: data.genderPreference || 'any',
+        ivGoal: 'perfect',
+        requireAlpha: Boolean(data.requireAlpha),
       });
     } else if (moduleKey === 'work') {
       const includeSelf = data.includeSelfBreeders ? '1' : '0';
@@ -2499,16 +2494,12 @@ async function submitTool(event) {
       const includeSelf = data.includeSelfBreeders ? '1' : '0';
       result = await api(`/ranch-drops?owner=${encodeURIComponent(data.owner || 'David')}&includeSelfBreeders=${includeSelf}`);
     } else if (moduleKey === 'bases') {
-      result = await api('/base-planner', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          owner: data.owner || 'David',
-          baseId: data.baseId || '',
-          plannerMode: data.plannerMode || 'ideal',
-          maxWorkers: Number(data.maxWorkers || 15),
-          settings: {},
-        }),
+      result = await postJson('/base-planner', {
+        owner: data.owner || 'David',
+        baseId: data.baseId || '',
+        plannerMode: data.plannerMode || 'ideal',
+        maxWorkers: Number(data.maxWorkers || 15),
+        settings: {},
       });
     }
     renderResult(result);
@@ -2590,11 +2581,7 @@ async function loadLiveStatus() {
 
 async function refreshLiveSave() {
   setLiveStatus('Syncing save...', 'active');
-  const result = await api('/live-save/refresh', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({force: true}),
-  });
+  const result = await postJson('/live-save/refresh', {force: true});
   setLiveStatus(result.ok ? `Synced ${result.rosterCount || 0} Pals` : result.error || 'Sync failed', result.ok ? 'good' : 'bad');
   options = await api('/options');
   ranchDropsCache = null;
@@ -2604,17 +2591,11 @@ async function refreshLiveSave() {
 async function uploadSave(file) {
   if (!file) return;
   const form = new FormData();
-  form.append('files', file, file.webkitRelativePath || file.name);
+  form.append('files', file, file.name);
+  form.append('relativePaths', JSON.stringify([file.webkitRelativePath || file.name]));
   setLiveStatus('Uploading save...', 'active', file.name);
-  const response = await fetch(apiUrl('/upload-save'), {method: 'POST', body: form});
-  const text = await response.text();
-  let result;
-  try {
-    result = text ? JSON.parse(text) : {};
-  } catch {
-    throw new Error(text.slice(0, 240).trim() || `${response.status} ${response.statusText}`);
-  }
-  if (!response.ok || !result.ok) throw new Error(result.error || 'Upload failed.');
+  const result = await api('/upload-save', {method: 'POST', body: form});
+  if (!result.ok) throw new Error(result.error || 'Upload failed.');
   setLiveStatus(`Imported ${result.rosterCount || 0} Pals`, 'good', file.name);
   options = await api('/options');
   ranchDropsCache = null;

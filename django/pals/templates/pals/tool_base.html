@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %}PALS · {{ title }}{% endblock %}
 {% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
 <link rel="stylesheet" href="{% static "pals/css/tool.css" %}">
 {% endblock %}
 {% block page_class %}tool-page{% endblock %}
