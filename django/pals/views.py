@@ -128,7 +128,7 @@ def work_suitability(request):
 @login_required
 @require_GET
 def ranch_drops(request):
-    return JsonResponse(optimizer.ranch_drops_payload(
+    return JsonResponse(ranch_service.ranch_drops_payload(
         owner=request.GET.get("owner", ""),
         include_self_breeders=request.GET.get("includeSelfBreeders", "1") not in {"0", "false", "False"},
     ))

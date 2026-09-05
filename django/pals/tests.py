@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
-from pals.services import data, optimizer, work
+from pals.services import data, optimizer, ranch, work
 
 
 class PalsRouteTest(TestCase):
@@ -68,6 +68,57 @@ class PalsRouteTest(TestCase):
         payload = response.json()
         self.assertIs(payload["configured"], False)
         self.assertEqual(payload["path"], "")
+
+
+    def test_ranch_api_passes_filters_to_ranch_service(self):
+        self.client.force_login(self.user)
+        with patch.object(ranch, "ranch_drops_payload", return_value={"items": []}) as payload:
+            response = self.client.get(reverse("pals:api_ranch_drops"), {
+                "owner": "Alice", "includeSelfBreeders": "0",
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"items": []})
+        payload.assert_called_once_with(owner="Alice", include_self_breeders=False)
+
+
+class RanchDropsTest(SimpleTestCase):
+    def test_drop_matching_requires_farming_and_ranch_text(self):
+        pal = {
+            "name": "Test Pal", "work": {"farming": 1},
+            "partnerSkill": {"desc": "At a Ranch, produces various seeds."},
+            "drops": [{"name": "Wheat Seed"}, {"name": "Milk"}, None],
+        }
+        with patch.object(work, "STORE", SimpleNamespace(palpedia_work={})):
+            self.assertEqual(ranch.ranch_drop_names_for_pal(pal), {"Wheat Seed"})
+            self.assertEqual(ranch.ranch_drop_names_for_pal({**pal, "work": {}}), set())
+            self.assertEqual(ranch.ranch_drop_names_for_pal({**pal, "partnerSkill": {"desc": "Drops Milk."}}), set())
+
+    def test_owner_ranking_and_self_breeder_fallback(self):
+        def pal(key, level, drop):
+            return {
+                "key": key, "name": key, "work": {"farming": level},
+                "partnerSkill": {"desc": f"Produces {drop} at a Ranch."},
+                "drops": [{"name": drop}],
+            }
+
+        store = SimpleNamespace(
+            roster=[{"owner": "Alice", "species": "Seed"}],
+            breeding_data={"pals": [pal("Seed", 1, "Milk"), pal("Open", 3, "Milk"), pal("Only", 1, "Wool")]},
+            palpedia_work={},
+            parent_pairs_for_child=lambda key: [("a", "b")] if key == "Open" else [(key, key)],
+        )
+        with patch.object(ranch, "STORE", store), patch.object(work, "STORE", store), patch.object(work, "WORK_SUITABILITY_OVERRIDES", {}), patch.object(work, "icon_url_for_key", return_value=None):
+            included = ranch.ranch_drops_payload("Alice", True)
+            excluded = ranch.ranch_drops_payload("Alice", False)
+            other_owner = ranch.ranch_drops_payload("Bob", True)
+
+        self.assertEqual(included["items"][0]["best"]["name"], "Seed")
+        self.assertEqual(other_owner["items"][0]["best"]["name"], "Open")
+        self.assertEqual(excluded["items"][0]["best"]["name"], "Open")
+        self.assertEqual(excluded["items"][0]["count"], 2)
+        self.assertEqual(excluded["items"][1]["best"]["name"], "Only")
+        self.assertEqual(excluded["totalPals"], 3)
+        self.assertEqual(excluded["totalItems"], 2)
 
 
 class WorkSpeedProfileTest(SimpleTestCase):

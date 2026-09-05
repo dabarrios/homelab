@@ -26,3 +26,15 @@ The Django work suitability endpoint now calls `work.py` directly. `optimizer.py
 Shared work cards and owned-worker scoring remain with the base planner for now. Next, extract those helpers into `work.py` to support moving ranch drops into `ranch.py`, then move base planning, breeding search, and IV planning into their respective modules.
 
 Verification: all 130 work suitability payloads across the current owners, work skills (including no selection), and self-breeder settings matched the pre-extraction output exactly. All 12 PALS tests pass, including a new isolated work suitability test covering ownership, self-breeder filtering, and verified versus projected condensation levels. The test run also exposed earlier extraction gaps: restored the `BreedPal` compatibility export and moved save/data test patches to their owning modules so they exercise their intended fixtures.
+
+## 2026-09-04 - Extract Ranch Drops
+
+Decision: `ranch.py` owns item-text normalization, ranch drop discovery, item grouping, and candidate ranking through `ranch_drops_payload()`. Move the shared `work_card_for_pal()` helper into `work.py`, allowing ranch and base planning to reuse it. Ranch depends only on `data.py` and `work.py`; it does not import the optimizer.
+
+The Django ranch endpoint now calls `ranch.py` directly. `optimizer.py` re-exports the moved functions for its legacy HTTP handler and existing callers. Ranch module status now reports the implemented service as ready.
+
+Preserve the existing selection contract: ownership takes priority in ranking; excluding self-breeders changes the recommended candidate but retains the complete candidate list. If every candidate for an item requires self-breeding, the recommendation falls back to that list.
+
+Verification: all 15 PALS tests pass, including ranch drop matching, owner ranking, self-breeder fallback, and authenticated endpoint filter forwarding. All 10 ranch payloads across current owners and self-breeder settings, plus 598 shared work cards with and without farming selected, matched pre-extraction outputs exactly.
+
+Remaining boundary: owned-worker scoring and base planning still live in `optimizer.py`. Ranch breeding-profile passive selection remains with the breeding search because it depends on that search. Next, extract base planning and its worker helpers; breeding and IV planning follow separately.

@@ -337,5 +337,39 @@ def work_suitability_payload(owner: str = "", selected_work: str = "", include_s
     }
 
 
+def work_card_for_pal(pal: dict, owner_counts: dict[str, int], selected_work: str = "") -> dict:
+    work = work_for_pal(pal)
+    name = pal.get("name", "")
+    condensed_levels = fully_condensed_work_levels(work, name)
+    projected_levels = projected_fully_condensed_work_levels(work)
+    work_source = work_source_for(name)
+    entries = work_entries(work, name)
+    selected_level = as_int(work.get(selected_work)) if selected_work else max((as_int(work.get(k)) for k in WORK_LABELS), default=0)
+    return {
+        "key": pal.get("key", ""),
+        "name": name,
+        "types": pal.get("types", []),
+        "icon": icon_url_for_key(pal.get("key", "")),
+        "size": pal_size_for(name),
+        "sizeGroup": SIZE_GROUPS.get(pal_size_for(name), "Unknown Size"),
+        "sizeKnown": pal_size_for(name) != "Unknown",
+        "selectedWork": selected_work,
+        "selectedWorkLabel": WORK_LABELS.get(selected_work, ""),
+        "selectedLevel": selected_level,
+        "selectedFullyCondensedLevel": condensed_levels.get(selected_work) if selected_work else None,
+        "selectedProjectedFullyCondensedLevel": projected_levels.get(selected_work) if selected_work else None,
+        "work": entries,
+        "workLevels": {entry["key"]: entry for entry in entries},
+        "workCount": len(entries),
+        "workCondensationSource": "verified" if work_source else "projected",
+        "workCondensationSourceDetail": (work_source or {}).get("source", ""),
+        "workCondensationSourceUrl": (work_source or {}).get("url", ""),
+        "ownedCount": owner_counts.get(name, 0),
+        "breedable": bool(pal.get("breedable", True)),
+        "uniqueOnly": bool(pal.get("uniqueOnly", False)),
+        "requiresOwnedSeed": requires_owned_seed_for_breeding(pal.get("key", "")),
+    }
+
+
 def module_status() -> dict[str, str]:
     return {"state": "ready", "message": "Work suitability data and recommendations are available."}
