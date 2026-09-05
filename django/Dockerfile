@@ -26,6 +26,7 @@ COPY --from=docker_cli /usr/local/libexec/docker/cli-plugins/docker-compose /usr
 COPY --chown=app:app manage.py ./
 COPY --chown=app:app config ./config
 COPY --chown=app:app gsc ./gsc
+COPY --chown=app:app pals ./pals
 COPY --chown=app:app docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN DJANGO_SECRET_KEY=build-only-static-key DJANGO_DEBUG=false DJANGO_SECURE_SSL_REDIRECT=false DJANGO_SECURE_COOKIES=false \
     /opt/venv/bin/python manage.py collectstatic --noinput && \

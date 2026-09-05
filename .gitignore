@@ -8,6 +8,8 @@ django/db.sqlite3
 django/local/
 django/staticfiles/
 django/data/
+# Legacy runtime directory from before the Django project rename
+homelab/
 local/
 tmp/
 **/__pycache__/

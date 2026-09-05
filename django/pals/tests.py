@@ -36,7 +36,9 @@ class PalsRouteTest(TestCase):
                 response = self.client.get(reverse(route))
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, "window.PALS_API_BASE")
-                self.assertContains(response, "pals/js/tool.js")
+                self.assertRegex(
+                    response.content.decode(), r"pals/js/tool(?:\.[0-9a-f]+)?\.js"
+                )
                 self.assertNotContains(response, "module-rail")
                 self.assertNotContains(response, "modeBreed")
 
