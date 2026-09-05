@@ -861,6 +861,7 @@ function showEmptyState() {
 }
 
 function renderPalNode(node, isRoot = false, plan = null) {
+  isRoot = isRoot && Boolean(node.parents?.length);
   const role = isRoot ? 'FINAL EGG' : node.parents?.length ? 'BREED FIRST' : 'OWNED';
   const roleClass = role === 'OWNED' ? 'owned' : role === 'FINAL EGG' ? 'target' : 'breed';
   const roleIcon = roleClass === 'owned' ? lucideIconHtml('circle-check', 'badge-svg') : '';
@@ -2006,8 +2007,9 @@ function renderBreeding(data) {
     <section class="result-group">
       ${profileNotice}
       <div class="group-heading">
-        <h3>Recommended Route</h3>
+        <h3>${group.slug === 'existing_target' ? 'Best Existing Target' : 'Recommended Route'}</h3>
         <p>${escapeHtml(group.description || 'Best practical option from the current search.')}</p>
+        ${group.slug === 'existing_target' ? '<p>No complete breeding route found for the requested passives.</p>' : ''}
       </div>
         <article class="route-card">
           <div class="route-header">

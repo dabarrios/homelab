@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-09-05 - Preserve Actual Passives on Owned Breeding Results
+
+Verified report: David's local roster contains a male Enchanted Sword at Box 1, slot 20 with only Burly Body and IVs 92/29/38. Replaying the requested Idiosyncratic/Reload Master goal with Stronghold Strategist/Vanguard planned as implants returns `achievable=false`, no complete routes, and one `existing_target` fallback. Its serialized passives correctly contain only Burly Body, with both natural target passives missing.
+
+Cause: the frontend selected the first nonempty group, including incomplete owned candidates, and rendered its first result as a final egg. Root rendering substituted `finalPassives` for the owned Pal's actual passives. This was a display error, not corrupted roster data or an implant calculation error.
+
+Decision: only nodes with breeding parents may receive final-egg rendering. Standalone owned results retain their actual passives and OWNED role. Label the existing-target fallback Best Existing Target and explicitly state that no complete breeding route was found. Preserve planned offspring and implant-ready behavior.
+
+Verification: all 16 frontend tests pass, including new coverage for the reported fallback, complete owned roots, and final offspring with owned parents. JavaScript syntax and diff checks pass. Reproduction used local decoded data read-only; no original saves were modified, and no server was started. Browser visual verification was not performed.
+
 ## 2026-09-05 - Simplify Planner Internals and Protect API Writes
 
 Decision: address the four inspected refactoring targets without changing planner ranking or response shapes.

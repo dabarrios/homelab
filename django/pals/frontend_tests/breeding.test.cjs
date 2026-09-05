@@ -23,6 +23,67 @@ function renderer(extra = {}) {
 const owned = {species: 'Owned match', parents: []};
 const route = {species: 'Shroomer Noct', parents: [{species: 'Male'}, {species: 'Female'}]};
 
+function cardRenderer() {
+  const context = renderer({
+    readyFinishCandidates: () => [],
+    passiveTone: () => 'neutral',
+    lucideIconHtml: () => '',
+    genderLabel: () => ({symbol: ''}),
+    speciesInitials: () => 'ES',
+    renderTypeChips: () => '',
+    formatIv: value => value,
+  });
+  for (const name of ['locationText', 'displayPassives', 'displayJunk', 'passiveBarHtml', 'renderPassiveBars', 'renderPalNode', 'renderBreedTree']) {
+    const start = source.indexOf(`function ${name}(`);
+    assert.ok(start >= 0, name);
+    vm.runInContext(source.slice(start, source.indexOf('\n}', start) + 2), context);
+  }
+  return context;
+}
+
+const sword = {
+  species: 'Enchanted Sword', box: 1, slot: 20, parents: [],
+  passives: ['Burly Body'], desired: [], junk: ['Burly Body'],
+  hpIv: 92, attackIv: 29, defenseIv: 38,
+};
+const swordPlan = {
+  finalPassives: ['Idiosyncratic', 'Reload Master', 'Stronghold Strategist', 'Vanguard'],
+  implantPassives: ['Stronghold Strategist', 'Vanguard'],
+};
+
+test('incomplete owned fallback shows actual passives and identifies the missing route', () => {
+  const html = cardRenderer().renderBreeding({...swordPlan, achievable: false, groups: [
+    {slug: 'recommended', results: []},
+    {slug: 'existing_target', results: [sword]},
+  ]});
+  assert.match(html, /Best Existing Target/);
+  assert.match(html, /No complete breeding route found/);
+  assert.match(html, /Box 1, slot 20/);
+  assert.match(html, /Burly Body/);
+  assert.match(html, /OWNED/);
+  assert.doesNotMatch(html, /Idiosyncratic|Reload Master|Stronghold Strategist|Vanguard|FINAL EGG|Recommended Route/);
+});
+
+test('complete owned root still shows its actual passives', () => {
+  const html = cardRenderer().renderPalNode({...sword, passives: ['Idiosyncratic', 'Reload Master', 'Burly Body']}, true, swordPlan);
+  assert.match(html, /Burly Body/);
+  assert.match(html, /Idiosyncratic/);
+  assert.match(html, /OWNED/);
+  assert.doesNotMatch(html, /FINAL EGG|implant-plan/);
+});
+
+test('planned offspring retains final goal and implants while its owned parents stay factual', () => {
+  const html = cardRenderer().renderBreedTree({...sword, parents: [sword, sword]}, true, swordPlan);
+  assert.match(html, /FINAL EGG/);
+  assert.match(html, /Idiosyncratic/);
+  assert.match(html, /Reload Master/);
+  assert.match(html, /Stronghold Strategist/);
+  assert.match(html, /Vanguard/);
+  assert.equal((html.match(/implant-plan/g) || []).length, 1);
+  assert.equal((html.match(/<span>OWNED<\/span>/g) || []).length, 2);
+  assert.match(html, /Burly Body/);
+});
+
 test('breed anyway renders parents even when an owned or implant-ready match exists', () => {
   const html = renderer().renderBreeding({breedAnyway: true, groups: [{results: [owned, route]}]});
   assert.match(html, /Pair: Male \+ Female/);
