@@ -2988,6 +2988,22 @@
     align-content: start;
 }
 
+.base-worker-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
+}
+
+.base-worker-card .group-heading,
+.base-worker-details {
+    overflow-wrap: anywhere;
+}
+
+.base-worker-details {
+    display: grid;
+    gap: 4px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
 .work-rec-card {
     border-color: #9bc8e8;
 }

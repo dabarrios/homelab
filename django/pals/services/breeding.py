@@ -12,7 +12,7 @@ from .breeding_state import (
     ready_to_finish_states,
     target_complete,
 )
-from .data import STORE, canonical_passives
+from .data import STORE, as_bool, canonical_passives
 from .ivs import available_implant_passives
 from .work import WORK_SPEED_PASSIVE_SCORE
 
@@ -33,6 +33,7 @@ def build_plan(payload: dict) -> dict:
     iv_preference = "none"
     route_preference = payload.get("routePreference") or "best_overall"
     breeding_profile = payload.get("breedingProfile") or "manual"
+    breed_anyway = as_bool(payload.get("breedAnyway"))
     owned = owned_states_for_owner(owner)
     work_speed_profile = None
     profile_route = None
@@ -64,6 +65,12 @@ def build_plan(payload: dict) -> dict:
         clean_routes.append(profile_route)
         practical_routes.append(profile_route)
         fastest_routes.append(profile_route)
+    if breed_anyway:
+        # Search compaction may discard repeat offspring in favor of an owned match.
+        direct_routes = final_parent_routes(owned, target_key, target, allowed, iv_preference=iv_preference)
+        clean_routes = [s for s in clean_routes + direct_routes if s.parents and not (s.passives - target - allowed)]
+        practical_routes = [s for s in practical_routes + direct_routes if s.parents]
+        fastest_routes = [s for s in fastest_routes + direct_routes if s.parents]
     owned_target_states = [s for s in owned if s.species_key == target_key]
     owned_matching_target_states = [s for s in owned_target_states if target_complete(s, target)]
     owned_matching_target_for_gender = gender_filtered(owned_matching_target_states, gender_preference)
@@ -133,6 +140,8 @@ def build_plan(payload: dict) -> dict:
     }
 
     recommended_pool = owned_matching_target_for_gender or owned_matching_target_states or []
+    if breed_anyway:
+        recommended_pool = []
     recommended_states = [s for s in recommended_pool + all_route_states if s.species_key == target_key and target_complete(s, target)]
     if route_preference == "continue_progress" and progress_group["results"]:
         recommended = progress_group["results"][:3]
@@ -177,8 +186,9 @@ def build_plan(payload: dict) -> dict:
         clean_group,
         fastest_group,
         practical_group,
-        existing_group,
     ])
+    if not breed_anyway:
+        groups.append(existing_group)
     return {
         "target": STORE.pals[target_key].name,
         "owner": owner,
@@ -191,6 +201,7 @@ def build_plan(payload: dict) -> dict:
         "ivPreference": iv_preference,
         "routePreference": route_preference,
         "breedingProfile": breeding_profile,
+        "breedAnyway": breed_anyway,
         "achievable": achievable,
         "profileIdealPassives": profile_ideal,
         "profileSelectedPassives": profile_selected,

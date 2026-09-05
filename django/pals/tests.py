@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
-from pals.services import data, ivs, optimizer, ranch, work
+from pals.services import breeding_profiles, breeding_state, data, ivs, ranch, work
 
 
 class PalsRouteTest(TestCase):
@@ -123,7 +123,7 @@ class RanchDropsTest(SimpleTestCase):
 
 class WorkSpeedProfileTest(SimpleTestCase):
     def state(self, passives):
-        return optimizer.State(
+        return breeding_state.State(
             species_key="target",
             species="Target Pal",
             passives=frozenset(passives),
@@ -144,7 +144,7 @@ class WorkSpeedProfileTest(SimpleTestCase):
     @patch("pals.services.breeding_profiles.final_parent_routes", return_value=[])
     @patch("pals.services.breeding_profiles.species_types_for_key", return_value=["Neutral"])
     def test_include_insomnia_uses_implant_slot_and_drops_lowest_speed(self, *_):
-        result = optimizer.best_work_speed_profile(
+        result = breeding_profiles.best_work_speed_profile(
             [
                 self.state([
                     "Lucky",
@@ -168,7 +168,7 @@ class WorkSpeedProfileTest(SimpleTestCase):
     @patch("pals.services.breeding_profiles.final_parent_routes", return_value=[])
     @patch("pals.services.breeding_profiles.species_types_for_key", return_value=["Neutral"])
     def test_insomnia_is_not_added_without_checkbox(self, *_):
-        result = optimizer.best_work_speed_profile(
+        result = breeding_profiles.best_work_speed_profile(
             [
                 self.state([
                     "Lucky",
@@ -191,7 +191,7 @@ class WorkSpeedProfileTest(SimpleTestCase):
 
 class IvAlphaOnlyTest(SimpleTestCase):
     def state(self, passives, *, is_alpha=False):
-        return optimizer.State(
+        return breeding_state.State(
             species_key="jet",
             species="Jetragon",
             passives=frozenset(passives),
@@ -215,14 +215,14 @@ class IvAlphaOnlyTest(SimpleTestCase):
         store = SimpleNamespace(
             name_to_key={"jetragon": "jet"},
             passives=passives,
-            pals={"jet": optimizer.BreedPal("jet", "Jetragon", 1, 1, True, False)},
+            pals={"jet": data.BreedPal("jet", "Jetragon", 1, 1, True, False)},
         )
 
         with patch.object(ivs, "STORE", store), patch(
             "pals.services.ivs.owned_states_for_owner",
             return_value=[self.state(passives)],
         ):
-            result = optimizer.build_iv_plan({
+            result = ivs.build_iv_plan({
                 "owner": "David",
                 "target": "Jetragon",
                 "passives": passives,
@@ -253,7 +253,7 @@ class PassiveColorOverrideTest(SimpleTestCase):
             )
 
             with patch.object(data, "BREEDING", breeding), patch.object(data, "ROSTER", roster), patch.object(data, "PASSIVE_INVENTORY", passive_inventory), patch.object(data, "SKILL_METADATA", skill), patch.object(data, "PASSIVE_COLOR_OVERRIDES_FILE", root / "overrides.json"):
-                store = optimizer.DataStore()
+                store = data.DataStore()
 
         self.assertIn("Dimensional Leap", store.passives)
         self.assertIn("Legend", store.passives)
@@ -261,11 +261,11 @@ class PassiveColorOverrideTest(SimpleTestCase):
 
     def test_element_boost_tiers_are_classified_from_passive_id(self):
         self.assertEqual(
-            optimizer.passive_tone("Divine Dragon", "ElementBoost_Dragon_2_PAL", "30% increase in Dragon attack damage."),
+            data.passive_tone("Divine Dragon", "ElementBoost_Dragon_2_PAL", "30% increase in Dragon attack damage."),
             "gold",
         )
         self.assertEqual(
-            optimizer.passive_tone("Blood of the Dragon", "ElementBoost_Dragon_1_PAL", "10% increase in Dragon attack damage."),
+            data.passive_tone("Blood of the Dragon", "ElementBoost_Dragon_1_PAL", "10% increase in Dragon attack damage."),
             "positive",
         )
 
@@ -275,7 +275,7 @@ class PassiveColorOverrideTest(SimpleTestCase):
             path.write_text('{"Serenity": "positive"}', encoding="utf-8")
 
             with patch.object(data, "PASSIVE_COLOR_OVERRIDES_FILE", path):
-                meta = optimizer.build_passive_meta(["Serenity"])
+                meta = data.build_passive_meta(["Serenity"])
 
         self.assertEqual(meta["Serenity"]["tone"], "positive")
         self.assertEqual(meta["Serenity"]["toneSource"], "override")

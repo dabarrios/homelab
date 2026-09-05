@@ -20,7 +20,6 @@ ROOT = Path(settings.BASE_DIR) if settings is not None and settings.configured e
 LOCAL_ROOT = Path(os.environ.get("PALWORLD_LOCAL_ROOT", ROOT / "local" / "pals"))
 DATA_ROOT = LOCAL_ROOT / "data"
 REPORTS_ROOT = LOCAL_ROOT / "reports"
-WEB = ROOT / "web"
 ROSTER = DATA_ROOT / "pal_roster.csv"
 PASSIVE_INVENTORY = DATA_ROOT / "passive_inventory.csv"
 BREEDING = DATA_ROOT / "breeding" / "pals.json"

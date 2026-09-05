@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import shutil
 import subprocess
 import zipfile
 from datetime import datetime
+from email.parser import BytesParser
+from email.policy import default
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -66,25 +67,19 @@ def reset_directory(path: Path) -> None:
 
 
 def multipart_files(content_type: str, body: bytes) -> list[tuple[str, bytes]]:
-    match = re.search(r"boundary=(?:\"([^\"]+)\"|([^;]+))", content_type or "")
-    if not match:
-        raise ValueError("Missing multipart boundary")
-    boundary = (match.group(1) or match.group(2)).encode("utf-8")
+    message = BytesParser(policy=default).parsebytes(
+        f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode("utf-8") + body
+    )
+    if not message.is_multipart():
+        raise ValueError("Invalid multipart upload or missing boundary")
     files = []
-    for part in body.split(b"--" + boundary):
-        part = part.strip(b"\r\n")
-        if not part or part == b"--" or part.endswith(b"--") and len(part) == 2:
+    for part in message.iter_parts():
+        filename = part.get_filename()
+        if filename is None:
             continue
-        if b"\r\n\r\n" not in part:
+        payload = part.get_payload(decode=True)
+        if payload is None:
             continue
-        raw_headers, data = part.split(b"\r\n\r\n", 1)
-        headers = raw_headers.decode("latin-1", errors="ignore")
-        disposition = next((line for line in headers.split("\r\n") if line.lower().startswith("content-disposition:")), "")
-        filename_match = re.search(r'filename="((?:\\"|[^"])*)"', disposition)
-        if not filename_match:
-            continue
-        filename = filename_match.group(1).replace('\\"', '"')
-        payload = data.rstrip(b"\r\n")
         rel = safe_upload_relative_path(filename)
         if not rel.suffix and not payload:
             continue

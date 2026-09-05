@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from django.test import SimpleTestCase
 
-from pals.services import bases, data, optimizer, saves, work
+from pals.services import bases, data, saves, work
 
 
 class BaseServiceTests(SimpleTestCase):
@@ -135,8 +135,86 @@ class BreedingBoundaryTests(SimpleTestCase):
         self.assertEqual(result[0]["missing"], [])
         self.assertEqual(result[0]["suggestedCakes"], 1)
 
+class BreedAnywayTests(SimpleTestCase):
+    state = BreedingBoundaryTests.state
+
+    def setUp(self):
+        from pals.services import breeding, breeding_search, breeding_serialization
+        self.breeding = breeding
+        self.passives = ["Lavish Hospitality", "Service-Minded"]
+        self.parents = [
+            self.state("Male", self.passives, label="Owned male"),
+            self.state("Female", [], label="Owned female"),
+        ]
+        store = SimpleNamespace(
+            name_to_key={"target": "target"},
+            pals={"target": SimpleNamespace(name="Target")},
+            parent_pairs_for_child=lambda key: [("target", "target")],
+            child_for=lambda a, b: "target",
+        )
+        for module, name, value in [
+            (breeding, "STORE", store), (breeding_search, "STORE", store),
+            (breeding, "owned_states_for_owner", lambda owner: self.parents),
+            (breeding_serialization, "icon_url_for_key", lambda key: None),
+            (breeding_serialization, "species_types_for_key", lambda key: []),
+        ]:
+            patcher = patch.object(module, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def plan(self, **options):
+        return self.breeding.build_plan({"target": "Target", "passives": self.passives, **options})
+
+    def test_default_still_recommends_owned_match(self):
+        result = self.plan()
+        self.assertFalse(result["breedAnyway"])
+        self.assertFalse(result["results"][0]["parents"])
+
+    def test_breed_anyway_returns_owned_pair_instead_of_owned_match(self):
+        result = self.plan(breedAnyway=True)
+        self.assertTrue(result["achievable"])
+        self.assertEqual(result["alreadyOwned"]["count"], 1)
+        pair = result["results"][0]["parents"]
+        self.assertEqual(len(pair), 2)
+        self.assertTrue(all(not parent["parents"] for parent in pair))
+        self.assertEqual({parent["gender"] for parent in pair}, {"Male", "Female"})
+        self.assertTrue(all(route["parents"] for group in result["groups"] for route in group["results"]))
+
+    def test_single_owned_match_is_not_a_breeding_pair(self):
+        self.parents = self.parents[:1]
+        result = self.plan(breedAnyway=True)
+        self.assertFalse(result["achievable"])
+        self.assertEqual(result["results"], [])
+        self.assertTrue(all(not group["results"] for group in result["groups"]))
+
+    def test_same_gender_pals_are_not_a_breeding_pair(self):
+        from dataclasses import replace
+        self.parents[1] = replace(self.parents[1], gender="Male")
+        self.assertFalse(self.plan(breedAnyway=True)["achievable"])
+
+    def test_continue_progress_and_gender_preference_still_require_parents(self):
+        result = self.plan(breedAnyway=True, routePreference="continue_progress", genderPreference="Female")
+        self.assertTrue(result["results"][0]["parents"])
+        self.assertEqual(result["results"][0]["displayGender"], "Female")
+
+    def test_false_string_does_not_enable_breed_anyway(self):
+        self.assertFalse(self.plan(breedAnyway="false")["breedAnyway"])
+
+
 class IvBoundaryTests(SimpleTestCase):
     state = BreedingBoundaryTests.state
+
+    def test_perfect_alpha_is_complete_even_when_non_alpha_is_owned(self):
+        from dataclasses import replace
+        from pals.services import ivs
+        normal = replace(self.state("Male", ["Artisan"]), attack_iv=100, defense_iv=100, iv_total=300)
+        alpha = replace(normal, is_alpha=True, label="Alpha")
+        store = SimpleNamespace(name_to_key={"target": "target"}, pals={"target": SimpleNamespace(name="Target")})
+        with patch.object(ivs, "STORE", store), patch.object(ivs, "owned_states_for_owner", return_value=[normal, alpha]), patch.object(ivs, "icon_url_for_key", return_value=None):
+            result = ivs.build_iv_plan({"target": "Target", "passives": ["Artisan"], "requireAlpha": True})
+        self.assertEqual(result["alphaOnly"]["state"], "complete")
+        self.assertTrue(result["alphaOnly"]["ownedMatch"]["isAlpha"])
+        self.assertEqual(result["alphaOnly"]["missing"], [])
 
     def test_implants_relax_natural_pool_without_changing_parent_passives(self):
         from pals.services import ivs
@@ -158,6 +236,25 @@ class IvBoundaryTests(SimpleTestCase):
             self.assertIn("Unknown target", ivs.build_iv_plan({"target": "Missing"})["error"])
             self.assertIn("Choose the passives", ivs.build_iv_plan({"target": "Target"})["error"])
 
+class SaveUploadTests(SimpleTestCase):
+    def test_multipart_preserves_binary_bytes_and_relative_filename(self):
+        payload = b'\x00\xff--boundary-in-data\r\n\n\r'
+        body = (
+            b'--boundary\r\nContent-Disposition: form-data; name="files"; filename="Players/player.sav"\r\n'
+            b'Content-Type: application/octet-stream\r\n\r\n' + payload + b'\r\n--boundary--\r\n'
+        )
+        self.assertEqual(saves.multipart_files('multipart/form-data; boundary="boundary"', body), [("Players/player.sav", payload)])
+
+    def test_multipart_ignores_fields_and_accepts_empty_files(self):
+        body = (
+            b'--test\r\nContent-Disposition: form-data; name="note"\r\n\r\nignored\r\n'
+            b'--test\r\nContent-Disposition: form-data; name="files"; filename="empty.sav"\r\n\r\n\r\n--test--\r\n'
+        )
+        self.assertEqual(saves.multipart_files('multipart/form-data; boundary=test', body), [("empty.sav", b'')])
+        with self.assertRaises(ValueError):
+            saves.multipart_files('multipart/form-data', body)
+
+
 class ServiceArchitectureTests(SimpleTestCase):
     def test_service_import_graph_is_acyclic_and_domains_do_not_import_facade(self):
         import ast
@@ -166,10 +263,9 @@ class ServiceArchitectureTests(SimpleTestCase):
         graph = {}
         for name, tree in modules.items():
             graph[name] = {n.module for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.level == 1 and n.module in modules}
-            if name != "optimizer":
-                self.assertNotIn("optimizer", graph[name])
-            if name not in {"optimizer", "legacy_http"}:
-                self.assertNotIn("legacy_http", graph[name])
+            dependencies = {n.module for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.level == 1}
+            self.assertNotIn("optimizer", dependencies)
+            self.assertNotIn("legacy_http", dependencies)
         visited = set()
         def visit(name, active):
             self.assertNotIn(name, active, f"Circular imports: {active} -> {name}")
@@ -181,19 +277,11 @@ class ServiceArchitectureTests(SimpleTestCase):
         for name in graph:
             visit(name, [])
 
-    def test_compatibility_exports_share_store_cache_and_function_identity(self):
+    def test_services_share_store_and_register_one_cache_hook(self):
         import importlib
-        from pals.services import breeding, ivs, legacy_http
-        for name in ["bases", "breeding", "breeding_state", "breeding_search", "breeding_profiles", "ivs", "work", "ranch", "saves", "legacy_http", "optimizer"]:
+        for name in ["bases", "breeding", "breeding_state", "breeding_search", "breeding_profiles", "ivs", "work", "ranch", "saves"]:
             module = importlib.import_module("pals.services." + name)
             self.assertIs(module.STORE, data.STORE)
-        self.assertIs(optimizer.BASE_WORK_CACHE, bases.BASE_WORK_CACHE)
-        self.assertIs(optimizer.build_plan, breeding.build_plan)
-        self.assertIs(optimizer.profile_passives_payload, breeding.profile_passives_payload)
-        self.assertIs(optimizer.build_iv_plan, ivs.build_iv_plan)
-        self.assertIs(optimizer.build_base_planner, bases.build_base_planner)
-        self.assertIs(optimizer.Handler, legacy_http.Handler)
-        self.assertIs(optimizer.main, legacy_http.main)
         self.assertEqual(saves._refresh_hooks.count(bases.clear_base_work_cache), 1)
 
     def test_fresh_domain_imports_do_not_start_server_or_sync(self):
@@ -206,9 +294,9 @@ import django
 django.setup()
 from unittest.mock import patch
 with patch("http.server.ThreadingHTTPServer", side_effect=AssertionError("server started")), patch("threading.Thread.start", side_effect=AssertionError("thread started")):
-    from pals.services import ivs, breeding, bases, optimizer, legacy_http
-    assert optimizer.STORE is ivs.STORE is breeding.STORE is bases.STORE
-    assert optimizer.BASE_WORK_CACHE is bases.BASE_WORK_CACHE
+    from pals.services import ivs, breeding, bases, work, saves
+    assert work.STORE is ivs.STORE is breeding.STORE is bases.STORE
+    assert saves._refresh_hooks.count(bases.clear_base_work_cache) == 1
 '''
         result = subprocess.run([sys.executable, "-c", code], cwd=Path(data.__file__).parents[2], capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -240,14 +328,3 @@ class ServiceEndpointTests(SimpleTestCase):
             reload.assert_called_once_with()
             self.assertEqual(bases.BASE_WORK_CACHE, {"payload": None, "mtime": None})
         self.assertEqual(response.status_code, 200)
-
-    def test_legacy_handler_delegates_without_opening_a_socket(self):
-        from unittest.mock import Mock
-        from pals.services import legacy_http
-        handler = legacy_http.Handler.__new__(legacy_http.Handler)
-        handler.path = "/api/base-work-sites"
-        handler.send_json = Mock()
-        with patch.object(legacy_http, "base_work_sites_payload", return_value={"ok": True, "bases": []}) as planner:
-            handler.do_GET()
-        planner.assert_called_once_with()
-        handler.send_json.assert_called_once_with({"ok": True, "bases": []})

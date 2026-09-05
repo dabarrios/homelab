@@ -1,7 +1,7 @@
 import csv
 import json
 import os
-from collections import defaultdict, Counter
+from collections import defaultdict
 from pathlib import Path
 
 WORK = Path(__file__).resolve().parent
@@ -255,11 +255,6 @@ with open(OUT_PASSIVES, 'w', newline='', encoding='utf-8') as f:
 def pal_label(r):
     nick = f" [{r['nickname']}]" if r['nickname'] else ''
     return f"{r['species']}{nick} L{r['level']} {r['gender']} IV {r['hp_iv']}/{r['attack_iv']}/{r['defense_iv']} stars {r['condensation_stars']} - {r['location']}"
-
-def has_passive(r, name_or_id):
-    ids = set(r['passive_ids'].split(';')) if r['passive_ids'] else set()
-    names = set(r['passives'].split(';')) if r['passives'] else set()
-    return name_or_id in ids or name_or_id in names
 
 high_value_names = [
     'Legend','Swift','Runner','Nimble','Serenity','Impatient','Eternal Engine','Demon God','Musclehead',

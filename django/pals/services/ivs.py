@@ -54,33 +54,6 @@ def save_implant_inventory(inventory: dict) -> None:
     IMPLANT_INVENTORY_FILE.write_text(json.dumps(inventory, indent=2, sort_keys=True), encoding="utf-8")
 
 
-def iv_goal_score(s: State, goal: str) -> tuple:
-    if goal == "attack":
-        return (s.avg_attack_iv, s.avg_iv, s.avg_hp_iv, s.avg_defense_iv)
-    if goal == "survival":
-        return ((s.avg_hp_iv + s.avg_defense_iv) / 2, s.avg_hp_iv, s.avg_defense_iv, s.avg_attack_iv)
-    if goal == "highest":
-        return (s.avg_iv, s.avg_attack_iv, s.avg_hp_iv, s.avg_defense_iv)
-    weakest = min(s.avg_hp_iv, s.avg_attack_iv, s.avg_defense_iv)
-    return (weakest, s.avg_iv, s.avg_attack_iv, s.avg_hp_iv, s.avg_defense_iv)
-
-
-def iv_goal_pair_score(a: State, b: State, goal: str) -> tuple:
-    max_hp = max(a.avg_hp_iv, b.avg_hp_iv)
-    max_attack = max(a.avg_attack_iv, b.avg_attack_iv)
-    max_defense = max(a.avg_defense_iv, b.avg_defense_iv)
-    coverage_avg = (max_hp + max_attack + max_defense) / 3
-    parent_avg = (a.avg_iv + b.avg_iv) / 2
-    if goal == "attack":
-        return (max_attack, coverage_avg, parent_avg, max_hp, max_defense)
-    if goal == "survival":
-        return ((max_hp + max_defense) / 2, max_hp, max_defense, max_attack, coverage_avg, parent_avg)
-    if goal == "highest":
-        return (coverage_avg, parent_avg, max_attack, max_hp, max_defense)
-    weakest = min(max_hp, max_attack, max_defense)
-    return (weakest, coverage_avg, parent_avg, max_attack, max_hp, max_defense)
-
-
 def iv_100_support(a: State, b: State) -> dict[str, int]:
     return {
         "hp": int(round(a.avg_hp_iv) >= 100) + int(round(b.avg_hp_iv) >= 100),
@@ -156,14 +129,6 @@ def serialize_iv_pair(a: State, b: State, target: frozenset[str], required: froz
     }
 
 
-def improves_selected_iv(candidate: State, selected: State) -> bool:
-    return (
-        candidate.avg_hp_iv > selected.avg_hp_iv
-        or candidate.avg_attack_iv > selected.avg_attack_iv
-        or candidate.avg_defense_iv > selected.avg_defense_iv
-    )
-
-
 def build_iv_plan(payload: dict) -> dict:
     owner = (payload.get("owner") or "David").lower()
     target_name = (payload.get("target") or "").strip()
@@ -236,7 +201,7 @@ def build_iv_plan(payload: dict) -> dict:
     ]
     alpha_only = None
     if require_alpha and perfect_matching:
-        owned_match = next((s for s in perfect_matching if not s.is_alpha), perfect_matching[0])
+        owned_match = next((s for s in perfect_matching if s.is_alpha), perfect_matching[0])
         missing = [] if owned_match.is_alpha else ["Alpha"]
         clean_parent_pairs = [pair for pair in serialized_pairs if pair.get("clean") and not pair.get("missing")]
         alpha_only = {

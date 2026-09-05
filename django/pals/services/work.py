@@ -449,10 +449,6 @@ def passive_work_score_parts(passives: frozenset[str], types: list[str]) -> dict
     }
 
 
-def passive_work_speed_score(passives: frozenset[str], types: list[str] | None = None) -> int:
-    return passive_work_score_parts(passives, types or []).get("total", 0)
-
-
 def passive_work_rank_bonus(row: dict[str, str], skill: str) -> int:
     pattern = WORK_RANK_PASSIVE_PATTERNS.get(skill, "")
     if not pattern:

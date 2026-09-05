@@ -171,10 +171,6 @@ function passiveDescription(passive) {
   return options.passiveMeta?.[passive]?.desc || 'No description available.';
 }
 
-function passiveId(passive) {
-  return options.passiveMeta?.[passive]?.id || '';
-}
-
 function formatPassiveDescription(passive) {
   const desc = passiveDescription(passive).replace(/\s*\((?:ToSelf|None)\)/g, '');
   if (/[.!?]$/.test(desc) || desc.length > 90) return [desc];
@@ -1889,11 +1885,11 @@ function initFreshCopyToggle() {
   document.addEventListener('click', event => {
     const button = event.target.closest('[data-show-fresh-copy]');
     if (!button) return;
-    const tree = document.querySelector('[data-fresh-copy-tree]');
-    if (!tree) return;
-    tree.classList.remove('hidden');
-    button.hidden = true;
-    tree.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    const field = document.querySelector('[name="breedAnyway"]');
+    if (!field) return;
+    field.checked = true;
+    field.dispatchEvent(new Event('change', {bubbles: true}));
+    $('#toolForm').requestSubmit();
   });
 }
 
@@ -1980,30 +1976,23 @@ function renderReadyFinishCards(candidates, data) {
 }
 
 function renderBreeding(data) {
-  const groups = data.groups || [];
+  const groups = (data.groups || []).map(group => data.breedAnyway
+    ? {...group, results: (group.results || []).filter(route => route.parents?.length === 2)}
+    : group);
+  if (data.breedAnyway && !groups.some(group => group.results?.length)) {
+    return '<div class="results-empty">No breeding pair or setup route found for these passives in the current search.</div>';
+  }
   if (!groups.length) return renderJson(data);
   const group = groups.find(item => (item.results || []).length) || groups[0];
   const route = (group.results || [])[0];
   if (!route) return '<div class="results-empty">No route found. Try fewer desired passives or upload a fresher save.</div>';
   const readyCandidates = readyFinishCandidates(data);
   const profileNotice = renderProfileResultNotice(data);
-  if (readyCandidates.length) {
+  if (readyCandidates.length && !data.breedAnyway) {
     return `
       <section class="result-group">
         ${profileNotice}
         ${renderReadyFinishCards(readyCandidates, data)}
-        <article class="route-card fresh-copy-card hidden" data-fresh-copy-tree>
-          <div class="route-header">
-            <div>
-              <h3>Fresh Copy</h3>
-              <p>This breeds a new ${escapeHtml(route.species)} with all requested passives.</p>
-            </div>
-            <div class="badges">
-              <span>${escapeHtml(route.steps || 0)} steps</span>
-            </div>
-          </div>
-          <div class="breed-tree">${renderBreedTree(route, true, data)}</div>
-        </article>
       </section>`;
   }
   return `
@@ -2161,10 +2150,6 @@ function renderIvAlphaOnly(data) {
     </section>`;
 }
 
-function finalWorkLevel(card) {
-  return card?.selectedFullyCondensedLevel || card?.selectedProjectedFullyCondensedLevel || card?.selectedLevel || '';
-}
-
 function renderWorkLevelValue(entry, selected = false) {
   const finalLevel = entry.fullyCondensedLevel || entry.projectedFullyCondensedLevel || entry.level || '';
   const finalText = finalLevel && Number(finalLevel) !== Number(entry.level) ? `${entry.level} -> ${finalLevel}` : `${entry.level}`;
@@ -2318,7 +2303,38 @@ function renderRanch(data) {
 
 function renderBases(data) {
   if (data.error) return resultCard('No base plan', escapeHtml(data.error));
-  return renderJson(data);
+  const workers = data.recommendations || [];
+  const gaps = data.gaps || [];
+  const ownedOnly = data.plannerMode === 'right_now';
+  return `
+    <div class="group-heading">
+      <h3>${escapeHtml(data.base?.displayName || 'Base workers')}</h3>
+      <p>${ownedOnly ? 'Right now' : 'Ideal team'} · ${workers.length} / ${escapeHtml(data.maxWorkers || 15)} workers</p>
+    </div>
+    ${gaps.length ? `<div class="owned-notice"><strong>Unfilled roles</strong><span>${gaps.map(gap => `${escapeHtml(gap.label)}: ${escapeHtml(gap.covered)} / ${escapeHtml(gap.wanted)}`).join(' · ')}</span></div>` : ''}
+    ${workers.length ? `<div class="work-card-grid base-worker-grid">${workers.map(card => renderBaseWorker(card, ownedOnly)).join('')}</div>` : '<div class="empty">No workers match the selected roles and owner.</div>'}`;
+}
+
+function renderBaseWorker(card, ownedOnly) {
+  const role = card.plannerRole || card.selectedWork;
+  const work = (card.work || []).map(entry => ({
+    ...entry,
+    level: card.plannerLevels?.[entry.key] ?? entry.level,
+    fullyCondensedLevel: null,
+    projectedFullyCondensedLevel: null,
+  }));
+  const roleLabel = work.find(entry => entry.key === role)?.label || role || 'Worker';
+  return `
+    <article class="work-pal-card compact base-worker-card">
+      <div class="group-heading"><strong>Slot ${escapeHtml(card.plannerSlot)} · ${escapeHtml(roleLabel)}</strong></div>
+      <div class="pal-main">
+        <div class="pal-avatar">${card.icon ? `<img src="${escapeHtml(assetUrl(card.icon))}" alt="">` : escapeHtml(speciesInitials(card.name))}</div>
+        <div class="pal-copy"><h3>${escapeHtml(card.name)}</h3>${renderTypeChips(card.types || [])}</div>
+      </div>
+      ${renderWorkSkillPills(work, role)}
+      ${ownedOnly ? `<div class="base-worker-details"><span>${escapeHtml(card.plannerLocation || 'Unknown location')}</span><span>Level ${escapeHtml(card.plannerLevel ?? 0)} · ${escapeHtml(card.plannerGender || 'Unknown gender')} · ${escapeHtml(card.plannerCondensationStars ?? 0)} stars</span></div>
+        ${(card.plannerPassives || []).length ? `<div class="passive-list">${card.plannerPassives.map(passive => passiveBarHtml(passive)).join('')}</div>` : ''}` : `<div class="node-foot"><span class="role-badge">${card.ownedCount ? `Own: ${escapeHtml(card.ownedCount)}` : 'Not owned'}</span><a class="card-action" href="${escapeHtml(breedUrl(card, role === 'farming' ? 'ranch_drops_focus' : 'work_speed'))}">Breed</a></div>`}
+    </article>`;
 }
 
 function selectedBaseOption() {
@@ -2454,6 +2470,7 @@ async function submitTool(event) {
           passives: finalPassives,
           includeImplants: Boolean(data.includeImplants),
           includeInsomnia: Boolean(data.includeInsomnia),
+          breedAnyway: Boolean(data.breedAnyway),
           implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
           genderPreference: data.genderPreference || 'any',
           breedingProfile: customProfile ? 'manual' : data.breedingProfile || 'manual',
@@ -2502,14 +2519,6 @@ async function submitTool(event) {
     $('#results').textContent = error.message;
     setText('#toolStatus', 'Failed.');
   }
-}
-
-async function reloadOptions() {
-  setText('#toolStatus', 'Reloading...');
-  await api('/reload');
-  options = await api('/options');
-  fillOptions();
-  setText('#toolStatus', `Reloaded ${options.rosterCount || 0} Pals.`);
 }
 
 function applyUrlPrefill() {

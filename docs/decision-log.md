@@ -1,5 +1,35 @@
 # Decision Log
 
+## 2026-09-05 - Verify Cleanup and Allow Repeat Breeding
+
+Resumed the interrupted cleanup and verified that all intended deletions and both bug fixes persisted. Before further changes, all 33 Django tests and three Bases renderer tests passed. No application imports of the removed optimizer facade or standalone HTTP server remain. The documented CSRF follow-up remains separate work.
+
+Decision: add an opt-in `breedAnyway` request flag and a matching Breeding checkbox. Owned target matches remain available as parents and in ownership metadata, but cannot satisfy a repeat-breeding recommendation on their own. Require parent routes in recommended, progress, and alternative groups. Evaluate final parent pairs directly from owned Pals as well as searched states, because search compaction favors existing matches over repeat offspring. Preserve the existing bounded searches, passive/implant settings, and default behavior when the option is off.
+
+The frontend bypasses the implant-ready presentation in this mode and never falls back to an owned-only result when no route exists. The existing fresh-copy action now checks the option and submits a new search. Form persistence and saved setups include the checkbox through the existing generic form handling.
+
+Verification: 39 Django tests and seven JavaScript tests pass, covering an already-owned target with an actual parent pair, a lone target, same-gender parents, Continue Progress, output gender, default behavior, and the fresh-copy action. JavaScript syntax and diff checks pass. Browser visual verification is unavailable in this session.
+
+Read-only local-roster check: David's Shroomer Noct request with Lavish Hospitality and Service-Minded, implants disabled, and `breedAnyway=true` returned three routes despite existing matches. The top route uses owned male Icelyn and female Gloopie Primo, both with zero setup steps. Python compilation also passes. No save decoding or original-save modification was performed.
+
+## 2026-09-04 - Retire Standalone Compatibility Code
+
+Decision: following the completed Django migration and the request to remove unused original-app code, delete `legacy_http.py` and the `optimizer.py` compatibility facade. Repository searches found only compatibility-test callers; those tests now use the owning services. Old external imports and standalone launch commands are intentionally no longer supported. Keep architecture checks for acyclic imports, a single shared store/cache hook, and imports without server/sync startup.
+
+Remove the unused `WEB` path, three obsolete IV scoring helpers, the unused worker-speed wrapper, the analyzer's unused passive helper/import, and three unreferenced JavaScript functions. Keep `analyze_pal_breeding.py`: save decoding still copies and executes it. Replace the outdated home-page migration placeholder. Previous local comparison artifacts that import the retired facade are historical; the committed tests use the current services.
+
+Fix two confirmed bugs with regression coverage: multipart parsing stripped trailing CR/LF bytes from binary uploads (use the standard-library MIME parser while retaining relative filenames), and perfect-IV Alpha selection preferred a non-Alpha even when an eligible Alpha existed.
+
+Audit scope: inspected PALS service callers, frontend function references, upload handling, IV selection, and planner nesting. An AST scan found no exact four-statement Python blocks occurring more than three times; a four-line JavaScript scan found none either. These scans do not establish absence of semantic duplication. Base planning remains the largest function at 233 lines and reaches four control-flow levels; avoid a speculative planner rewrite in this deletion pass.
+
+Follow-up: session-authenticated mutation endpoints still use `csrf_exempt`; restoring CSRF protection requires coordinated frontend token handling and endpoint tests. This pre-existing behavior is outside the legacy removal and two focused fixes above.
+
+## 2026-09-04 - Render Base Worker Results
+
+The Django frontend's `renderBases()` still returned the JSON debug renderer for every successful plan. Replace that placeholder with worker cards using the existing work-card styles. Show assigned slots and roles, plan capacity, and unfilled minimum roles. Right-now cards display actual planner work levels, owned location, level, gender, stars, and passives; ideal cards display planned levels and breeding links. Keep the backend response and planning algorithms unchanged.
+
+Verification: three Node renderer regression tests pass for successful plans, current-worker details, empty results, gaps, and escaped errors. JavaScript syntax and diff checks pass. Visual browser verification remains outstanding.
+
 ## 2026-09-04 - Complete PALS Optimizer Modularization
 
 Decision: finish the extraction while retaining `optimizer.py` as an explicit compatibility facade. Django views now call the owning services directly, including existing data, save, work, and persistence APIs. Planner behavior and response schemas remain unchanged.
