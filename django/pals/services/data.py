@@ -29,6 +29,7 @@ ANALYZER = Path(__file__).with_name("analyze_pal_breeding.py")
 UPLOADS = LOCAL_ROOT / "uploads"
 WORK = Path(os.environ.get("PALWORLD_DECODE_WORK_DIR", LOCAL_ROOT / "decode-work"))
 TOOLS = Path(os.environ.get("PALWORLD_PARSER_TOOLS_DIR", Path.home() / "AppData" / "Local" / "Temp" / "palworld_parser_tools"))
+PARSER_ASSETS = Path(os.environ.get("PALWORLD_PARSER_ASSETS_DIR", TOOLS / "palworld-server-tool" / "web" / "src" / "assets"))
 LIVE_SAVE_ENV = os.environ.get("PALWORLD_LIVE_SAVE_DIR", "").strip()
 LIVE_SAVE_DIR = Path(LIVE_SAVE_ENV) if LIVE_SAVE_ENV else None
 LIVE_LOCK = threading.Lock()
@@ -46,9 +47,9 @@ if LIVE_STATE_FILE.exists():
         LIVE_STATE.update(json.loads(LIVE_STATE_FILE.read_text(encoding="utf-8")))
     except (OSError, json.JSONDecodeError):
         pass
-PAL_IMAGES = TOOLS / "palworld-server-tool" / "web" / "src" / "assets" / "pals"
+PAL_IMAGES = PARSER_ASSETS / "pals"
 LOCAL_PAL_IMAGES = LOCAL_ROOT / "assets" / "pals"
-SKILL_METADATA = TOOLS / "palworld-server-tool" / "web" / "src" / "assets" / "skill.json"
+SKILL_METADATA = PARSER_ASSETS / "skill.json"
 TARGET_ONLY = "target_only"
 LEAST_JUNK = "least_junk"
 GOLD_PASSIVES = {

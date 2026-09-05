@@ -1,5 +1,16 @@
 # Decision Log
 
+## 2026-09-05 - Support Windows/WSL and Linux Container Save Decoding
+
+Decision: retain the existing Windows network-drive and WSL parser workflow for direct local development, selected automatically on Windows or explicitly with `PALWORLD_PARSER_RUNTIME=wsl`. Add a Docker parser runtime for Linux deployments. The dashboard copies the live save into its writable workspace, asks a pinned `jokerwho/palworld-server-tool:0.12.2` sidecar to decode the copy, then runs the existing analyzer inside Django. The source save is mounted read-only and is never passed to a mutating parser command.
+
+The Docker deployment uses `PALWORLD_LIVE_SAVE_HOST_DIR` only for host-side Compose interpolation. Inside the dashboard, stable paths are used: `/palworld-save` for the read-only source, `/data/pals` for persistent application data, and `/work/decode-work` for the parser sidecar's view of the shared workspace. The dashboard image includes parser metadata and image assets from the upstream v0.12.2 commit `3b0e1e96a7500846e3a6fbac66f1c248b4c286e7`. The parser image is pinned to its multi-platform digest.
+
+Rationale: Windows drive-letter paths are meaningful to local Django plus WSL but cannot resolve inside a Linux container. Keeping runtime-specific path translation at the decoder boundary preserves local development while giving the homelab a native Linux parser with reproducible dependencies.
+
+Verification: the dashboard image builds successfully; all 51 Django PALS tests pass, including runtime selection, shared container path construction, and persistent output paths. A forced sync against the read-only mounted homelab save completed successfully, decoded 1,620 roster entries across four owners, and wrote only to the shared `/data/pals` workspace. Both dashboard and parser containers report healthy. The three existing Node frontend suites also pass.
+
+
 ## 2026-09-05 - Add DNA Icons to Implant Badges
 
 Decision: add the existing Lucide `dna` icon before the Implant label in breeding trees, implant-ready cards, and profile result summaries. Reuse the Junk badge's 12px icon sizing and spacing, keeping the purple Implant colors. This explicitly supersedes the previous no-new-icons choice for Implant badges only.
