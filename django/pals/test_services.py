@@ -1,6 +1,7 @@
 """Service boundaries and planner regression tests independent of local save data."""
 
 import json
+import subprocess
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -379,3 +380,44 @@ class ServiceEndpointTests(SimpleTestCase):
             reload.assert_called_once_with()
             self.assertEqual(bases.BASE_WORK_CACHE, {"payload": None, "mtime": None})
         self.assertEqual(response.status_code, 200)
+
+
+class ParserRuntimeTests(SimpleTestCase):
+    def test_result_path_allows_persistent_data_outside_app_root(self):
+        with patch.object(saves, "ROOT", Path("/app")):
+            self.assertEqual(saves.path_for_result(Path("/data/pals/result.csv")), "/data/pals/result.csv")
+            self.assertEqual(saves.path_for_result(Path("/app/local/result.csv")), "local/result.csv")
+
+    def test_runtime_selection_preserves_windows_and_uses_docker_elsewhere(self):
+        with patch.dict("os.environ", {"PALWORLD_PARSER_RUNTIME": "auto"}):
+            with patch.object(saves.os, "name", "nt"):
+                self.assertEqual(saves.parser_runtime(), "wsl")
+            with patch.object(saves.os, "name", "posix"):
+                self.assertEqual(saves.parser_runtime(), "docker")
+
+    def test_explicit_runtime_and_invalid_value(self):
+        with patch.dict("os.environ", {"PALWORLD_PARSER_RUNTIME": "wsl"}):
+            self.assertEqual(saves.parser_runtime(), "wsl")
+        with patch.dict("os.environ", {"PALWORLD_PARSER_RUNTIME": "invalid"}):
+            with self.assertRaisesMessage(ValueError, "auto, wsl, or docker"):
+                saves.parser_runtime()
+
+    def test_container_decoder_uses_shared_container_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            work_dir = Path(directory)
+            (work_dir / "Players").mkdir()
+            (work_dir / "Players" / "player.sav").touch()
+            completed = subprocess.CompletedProcess([], 0, "", "")
+            with (
+                patch.object(saves, "WORK", work_dir),
+                patch.dict("os.environ", {
+                    "PALWORLD_PARSER_CONTAINER": "parser-test",
+                    "PALWORLD_PARSER_CONTAINER_WORK_DIR": "/shared/decode",
+                }),
+                patch.object(saves.subprocess, "run", return_value=completed) as run,
+            ):
+                saves.run_container_decoder(include_dps=False)
+            command = run.call_args.args[0]
+            self.assertEqual(command[:4], ["docker", "exec", "parser-test", "sh"])
+            self.assertIn("/shared/decode/Level.sav", command[-1])
+            self.assertIn("/shared/decode/Players/player.sav", command[-1])

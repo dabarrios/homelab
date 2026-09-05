@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import shutil
 import subprocess
+import sys
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +20,7 @@ from .data import (
     LIVE_SAVE_DIR,
     LIVE_STATE,
     LIVE_STATE_FILE,
+    PARSER_ASSETS,
     REPORTS_ROOT,
     ROOT,
     STORE,
@@ -148,56 +151,21 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
     if ANALYZER.exists():
         shutil.copy2(ANALYZER, WORK / "analyze_pal_breeding.py")
     (WORK / "dps.json").write_text(json.dumps(empty_dps_json()), encoding="utf-8")
-
     setup_error = decoder_setup_error()
     if setup_error:
-        return {
-            "ok": False,
-            "error": "Decoder setup incomplete",
-            "errorDetail": setup_error,
-        }
-
-    w_work = wsl_path(WORK)
-    w_tools = wsl_path(TOOLS)
-    commands = [
-        f"cd {w_tools}",
-        ". .wsl-venv/bin/activate",
-        f"export PALWORLD_PARSER_ASSETS_DIR={w_tools}/palworld-server-tool/web/src/assets",
-        f"python3 palworld-server-tool/sav_cli/sav_cli.py -f {w_work}/Level.sav -o {w_work}/structure.json",
-        f"palsav convert {w_work}/Level.sav --to-json -o {w_work}/Level.full.json --force",
-    ]
-    players_dir = WORK / "Players"
-    if players_dir.exists():
-        for sav in sorted(players_dir.glob("*.sav")):
-            if sav.name.lower().endswith("_dps.sav"):
-                continue
-            commands.append(f'palsav convert "{wsl_path(sav)}" --to-json -o "{wsl_path(sav.with_suffix(".json"))}" --force')
-        dps_savs = sorted(players_dir.glob("*_dps.sav")) if include_dps else []
-        if dps_savs:
-            commands.append(f'palsav convert "{wsl_path(dps_savs[0])}" --to-json -o {w_work}/dps.decoded.json --force && mv {w_work}/dps.decoded.json {w_work}/dps.json || echo "WARN: DPS decode failed for {dps_savs[0].name}; continuing with empty DPS"')
-    commands.extend([
-        f"cd {w_work}",
-        "python3 analyze_pal_breeding.py",
-    ])
-    command = " && ".join(commands)
-    proc = subprocess.run(
-        ["wsl", "bash", "-lc", command],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        timeout=300,
-    )
+        return {"ok": False, "error": "Decoder setup incomplete", "errorDetail": setup_error}
+    runtime = parser_runtime()
+    proc = run_wsl_decoder(include_dps) if runtime == "wsl" else run_container_decoder(include_dps)
+    if proc.returncode == 0:
+        analyzer = subprocess.run(
+            [sys.executable, str(WORK / "analyze_pal_breeding.py")], cwd=WORK,
+            env={**os.environ, "PALWORLD_PARSER_ASSETS_DIR": str(PARSER_ASSETS)},
+            text=True, capture_output=True, timeout=300,
+        )
+        proc = subprocess.CompletedProcess(proc.args, analyzer.returncode, proc.stdout + analyzer.stdout, proc.stderr + analyzer.stderr)
     if proc.returncode != 0:
         detail = decode_failure_detail(proc.stdout, proc.stderr)
-        return {
-            "ok": False,
-            "error": "Decode failed",
-            "errorDetail": detail,
-            "stdout": proc.stdout[-4000:],
-            "stderr": proc.stderr[-4000:],
-            "returnCode": proc.returncode,
-        }
-
+        return {"ok": False, "error": "Decode failed", "errorDetail": detail, "stdout": proc.stdout[-4000:], "stderr": proc.stderr[-4000:], "returnCode": proc.returncode}
     copied = []
     for src_name, dest in [
         ("pal_roster.csv", DATA_ROOT / "pal_roster.csv"),
@@ -208,22 +176,90 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
         if src.exists():
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dest)
-            copied.append(str(dest.relative_to(ROOT)))
-
+            copied.append(path_for_result(dest))
     STORE.reload()
     invalidate_refresh_dependents()
-    return {
-        "ok": True,
-        "uploaded": uploaded_label,
-        "input": input_summary or {},
-        "copied": copied,
-        "rosterCount": len(STORE.roster),
-        "owners": STORE.owners,
-        "stdout": proc.stdout[-2000:],
-    }
+    return {"ok": True, "uploaded": uploaded_label, "input": input_summary or {}, "copied": copied, "rosterCount": len(STORE.roster), "owners": STORE.owners, "stdout": proc.stdout[-2000:]}
+
+
+def path_for_result(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def parser_runtime() -> str:
+    runtime = os.environ.get("PALWORLD_PARSER_RUNTIME", "auto").strip().lower()
+    if runtime == "auto":
+        return "wsl" if os.name == "nt" else "docker"
+    if runtime not in {"wsl", "docker"}:
+        raise ValueError("PALWORLD_PARSER_RUNTIME must be auto, wsl, or docker")
+    return runtime
+
+
+def run_wsl_decoder(include_dps: bool) -> subprocess.CompletedProcess:
+    w_work = wsl_path(WORK)
+    w_tools = wsl_path(TOOLS)
+    commands = [
+        f"cd {shlex.quote(w_tools)}", ". .wsl-venv/bin/activate",
+        f"export PALWORLD_PARSER_ASSETS_DIR={shlex.quote(w_tools + '/palworld-server-tool/web/src/assets')}",
+        f"python3 palworld-server-tool/sav_cli/sav_cli.py -f {shlex.quote(w_work + '/Level.sav')} -o {shlex.quote(w_work + '/structure.json')}",
+        f"palsav convert {shlex.quote(w_work + '/Level.sav')} --to-json -o {shlex.quote(w_work + '/Level.full.json')} --force",
+    ]
+    players_dir = WORK / "Players"
+    if players_dir.exists():
+        for sav in sorted(players_dir.glob("*.sav")):
+            if sav.name.lower().endswith("_dps.sav"):
+                continue
+            commands.append(f"palsav convert {shlex.quote(wsl_path(sav))} --to-json -o {shlex.quote(wsl_path(sav.with_suffix('.json')))} --force")
+        dps_savs = sorted(players_dir.glob("*_dps.sav")) if include_dps else []
+        if dps_savs:
+            commands.append(f"palsav convert {shlex.quote(wsl_path(dps_savs[0]))} --to-json -o {shlex.quote(w_work + '/dps.json')} --force || echo 'WARN: DPS decode failed; continuing with empty DPS'")
+    return subprocess.run(["wsl", "bash", "-lc", " && ".join(commands)], cwd=ROOT, text=True, capture_output=True, timeout=300)
+
+
+def run_container_decoder(include_dps: bool) -> subprocess.CompletedProcess:
+    container = os.environ.get("PALWORLD_PARSER_CONTAINER", "homelab-palworld-parser")
+    work = os.environ.get("PALWORLD_PARSER_CONTAINER_WORK_DIR", "/work/decode-work").rstrip("/")
+    commands = [
+        f"/app/sav_cli -f {shlex.quote(work + '/Level.sav')} -o {shlex.quote(work + '/structure.json')}",
+        f"/opt/sav-cli-venv/bin/palsav convert {shlex.quote(work + '/Level.sav')} --to-json -o {shlex.quote(work + '/Level.full.json')} --force",
+    ]
+    players_dir = WORK / "Players"
+    if players_dir.exists():
+        for sav in sorted(players_dir.glob("*.sav")):
+            if sav.name.lower().endswith("_dps.sav"):
+                continue
+            source = f"{work}/Players/{sav.name}"
+            output = f"{work}/Players/{sav.with_suffix('.json').name}"
+            commands.append(f"/opt/sav-cli-venv/bin/palsav convert {shlex.quote(source)} --to-json -o {shlex.quote(output)} --force")
+        dps_savs = sorted(players_dir.glob("*_dps.sav")) if include_dps else []
+        if dps_savs:
+            source = f"{work}/Players/{dps_savs[0].name}"
+            commands.append(f"/opt/sav-cli-venv/bin/palsav convert {shlex.quote(source)} --to-json -o {shlex.quote(work + '/dps.json')} --force || echo 'WARN: DPS decode failed; continuing with empty DPS'")
+    return subprocess.run(["docker", "exec", container, "sh", "-lc", " && ".join(commands)], cwd=ROOT, text=True, capture_output=True, timeout=300)
 
 
 def decoder_setup_error() -> str | None:
+    try:
+        runtime = parser_runtime()
+    except ValueError as exc:
+        return str(exc)
+    if runtime == "docker":
+        if shutil.which("docker") is None:
+            return "docker CLI is unavailable for the native parser container"
+        container = os.environ.get("PALWORLD_PARSER_CONTAINER", "homelab-palworld-parser")
+        try:
+            proc = subprocess.run(["docker", "inspect", "-f", "{{.State.Running}}", container], cwd=ROOT, text=True, capture_output=True, timeout=15)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            return f"unable to inspect native parser container {container} ({exc})"
+        if proc.returncode != 0 or proc.stdout.strip() != "true":
+            return f"native parser container {container} is not running"
+        for asset in [PARSER_ASSETS / "pal.json", PARSER_ASSETS / "skill.json"]:
+            if not asset.is_file():
+                return f"missing parser asset {asset}"
+        return None
     required = [
         TOOLS / ".wsl-venv" / "bin" / "activate",
         TOOLS / "palworld-server-tool" / "sav_cli" / "sav_cli.py",
@@ -239,21 +275,14 @@ def decoder_setup_error() -> str | None:
             missing.append(path)
     if not missing:
         try:
-            proc = subprocess.run(
-                ["wsl", "bash", "-lc", f"cd {wsl_path(TOOLS)} && test -x .wsl-venv/bin/python3"],
-                cwd=ROOT,
-                text=True,
-                capture_output=True,
-                timeout=15,
-            )
+            proc = subprocess.run(["wsl", "bash", "-lc", f"cd {wsl_path(TOOLS)} && test -x .wsl-venv/bin/python3"], cwd=ROOT, text=True, capture_output=True, timeout=15)
         except (OSError, subprocess.TimeoutExpired) as exc:
-            return f"unable to verify WSL parser Python; rebuild parser tools with the WSL venv setup command in README.md ({exc})"
+            return f"unable to verify WSL parser Python; rebuild parser tools with the WSL venv setup command ({exc})"
         if proc.returncode == 0:
             return None
         detail = decode_failure_detail(proc.stdout, proc.stderr)
-        return f"missing {TOOLS / '.wsl-venv' / 'bin' / 'python3'}; rebuild parser tools with the WSL venv setup command in README.md ({detail})"
-    first = missing[0]
-    return f"missing {first}; rebuild parser tools with the WSL venv setup command in README.md"
+        return f"missing {TOOLS / '.wsl-venv' / 'bin' / 'python3'}; rebuild parser tools ({detail})"
+    return f"missing {missing[0]}; rebuild parser tools"
 
 
 def decode_failure_detail(stdout: str, stderr: str) -> str:

@@ -23,3 +23,9 @@ Leave `DJANGO_HSTS_SECONDS=0` for the first verified HTTPS deployment. Increase 
 ## Docker access
 
 The Docker socket grants powerful host access. The application only exposes staff-authenticated, allowlisted start and stop actions, but the dashboard must remain restricted to the private network or VPN.
+
+## Palworld live-save sync
+
+Set `PALWORLD_LIVE_SAVE_HOST_DIR` in `.env` to the host directory containing `Level.sav` and `Players/`. Compose mounts that directory read-only at `/palworld-save`. The dashboard never decodes files in place; it copies them to `./data/pals/decode-work`.
+
+Docker deployments use the pinned native parser sidecar automatically. Direct Windows development keeps the existing WSL workflow and may continue using `PALWORLD_LIVE_SAVE_DIR` and `PALWORLD_PARSER_TOOLS_DIR` with Windows drive-letter paths. Set `PALWORLD_PARSER_RUNTIME=wsl` to force it.
