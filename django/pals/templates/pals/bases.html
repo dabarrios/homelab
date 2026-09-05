@@ -1,0 +1,31 @@
+{% extends "pals/tool_base.html" %}
+{% block tool_form %}
+<label>
+    Owner
+    <select class="js-owner" name="owner"></select>
+</label>
+<label>
+    Base
+    <select class="js-base" name="baseId"></select>
+</label>
+<label>
+    Base Name
+    <span class="base-name-row">
+        <input id="baseLabel" name="baseLabel" autocomplete="off" placeholder="Name this base">
+        <button type="button" id="saveBaseLabel">Save</button>
+    </span>
+    <span class="field-hint" id="baseLabelHint">Save a local display name for the selected base.</span>
+</label>
+<label>
+    Team Mode
+    <select name="plannerMode">
+        <option value="ideal">Ideal targets based on base</option>
+        <option value="right_now">Right now - owned only</option>
+    </select>
+</label>
+<label>
+    Team Size
+    <input name="maxWorkers" type="number" min="1" max="15" value="15">
+    <span class="field-help">Maximum Pals to place on this base team.</span>
+</label>
+{% endblock %}

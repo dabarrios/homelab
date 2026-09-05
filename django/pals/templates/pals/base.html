@@ -1,0 +1,51 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101417">
+    <title>{% block title %}PALS{% endblock %}</title>
+    <script>
+        document.documentElement.dataset.theme = localStorage.getItem("pals.theme") || "dark";
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static "pals/css/pals.css" %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="pals-shell">
+    <header class="topbar">
+        <a class="brand" href="{% url "pals:home" %}" aria-label="PALS home">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+                    <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+                    <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+                    <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+                </svg>
+            </span>
+            <span><strong>PALS</strong><small>Palworld Analysis and Logistics Suite</small></span>
+        </a>
+        <nav class="topnav" aria-label="PALS navigation">
+            <a class="{% if active == "breeding" %}is-active{% endif %}" href="{% url "pals:breeding" %}">Breeding</a>
+            <a class="{% if active == "ivs" %}is-active{% endif %}" href="{% url "pals:ivs" %}">IVs</a>
+            <a class="{% if active == "work" %}is-active{% endif %}" href="{% url "pals:work" %}">Work</a>
+            <a class="{% if active == "ranch" %}is-active{% endif %}" href="{% url "pals:ranch" %}">Ranch</a>
+            <a class="{% if active == "bases" %}is-active{% endif %}" href="{% url "pals:bases" %}">Bases</a>
+        </nav>
+        <div class="top-actions">
+            <button id="themeToggle" class="theme-icon-button" type="button" aria-label="Toggle theme">☾</button>
+            <a class="homelab-link" href="{% url "dashboard" %}">GSC</a>
+        </div>
+    </header>
+    <main class="page {% block page_class %}{% endblock %}">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+<script src="{% static "pals/js/pals.js" %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

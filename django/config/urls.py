@@ -5,7 +5,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("dashboard/", include("gsc.urls")),
+    path("gsc/", include("gsc.urls")),
+    path("pals/", include("pals.urls")),
 ]
 
 if settings.DEBUG_TOOLBAR_AVAILABLE:

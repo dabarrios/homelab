@@ -1,0 +1,47 @@
+{% extends "pals/tool_base.html" %}
+{% block tool_form %}
+<label>
+    Owner
+    <select class="js-owner" name="owner"></select>
+</label>
+<label>
+    Target Species
+    <span class="suggest-field" data-suggest="species">
+        <input name="target" data-suggest-input autocomplete="off" required>
+        <span class="suggest-menu" data-suggest-menu></span>
+    </span>
+</label>
+<label>
+    Final Passives
+    <span class="passive-picker" data-picker="passives">
+        <span class="passive-input-row">
+            <input data-passive-input autocomplete="off" placeholder="Choose a passive">
+            <button type="button" data-passive-add>Add</button>
+            <button type="button" data-passive-clear>Clear</button>
+        </span>
+        <span class="passive-chips" data-passive-chips></span>
+        <input type="hidden" name="passives">
+        <span class="field-hint" data-passive-hint>Every selected passive is bred naturally unless added below.</span>
+    </span>
+</label>
+<label class="check-row">
+    <input name="includeImplants" type="checkbox" value="1" checked>
+    Use implant inventory for passives you can add later
+</label>
+<label class="check-row">
+    <input name="requireAlpha" type="checkbox" value="1" checked>
+    Require Alpha
+</label>
+<div class="inventory-summary">
+    <button type="button" data-open-implant-inventory>Manage Implant Inventory</button>
+    <button type="button" data-open-passive-colors>Manage Passive Colors</button>
+</div>
+<label>
+    Gender
+    <select name="genderPreference">
+        <option value="any">No preference</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select>
+</label>
+{% endblock %}

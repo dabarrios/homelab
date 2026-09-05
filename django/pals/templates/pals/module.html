@@ -1,0 +1,15 @@
+{% extends "pals/base.html" %}
+{% block title %}{{ title }} · PALS{% endblock %}
+{% block content %}
+<section class="tool-layout">
+    <section class="tool-panel">
+        <p class="eyebrow">PALS</p>
+        <h1>{{ title }}</h1>
+        <p class="lead">{{ summary }}</p>
+        <div class="placeholder-panel">
+            <strong>{{ status.state|title }}</strong>
+            <p>{{ status.message }}</p>
+        </div>
+    </section>
+</section>
+{% endblock %}

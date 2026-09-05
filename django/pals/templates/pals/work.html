@@ -1,0 +1,15 @@
+{% extends "pals/tool_base.html" %}
+{% block tool_form %}
+<label>
+    Owner
+    <select class="js-owner" name="owner"></select>
+</label>
+<label>
+    Work Skill
+    <select class="js-work-type" name="work" required></select>
+</label>
+<label class="check-row">
+    <input name="includeSelfBreeders" type="checkbox" value="1" checked>
+    Include self-breed-only Pals in recommendations
+</label>
+{% endblock %}
