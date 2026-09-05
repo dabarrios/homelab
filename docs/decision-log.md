@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-09-05 - Simplify Breeding Form and Distinguish Implant Badges
+
+Decision: keep the existing compact form style, move Gender below Target Species, and place Passive Profile immediately after Desired Passives. Show selected passive chips once, above their input; custom profile selection/restoration populates that list. Replace the duplicated profile passive summary with `Profile loaded.` and omit counts. Keep built-in automatic selection described in one short sentence. Group profile Add/Edit buttons together.
+
+Give the saved-setup chooser its own full-width row and place Load/Delete below it. Remove idle helper text while retaining feedback messages. Move the implant inventory/passive color management card between saved-setup controls and Clear/Optimize. Remove the redundant per-picker Clear button from the breeding form; individual chip removal and the main Clear action remain. Disable and visibly dim Add at four selected passives, re-enabling after removal, without adding a 4/4 counter.
+
+Use the shared Implant badge class everywhere and override dark-theme generic badge colors with lavender `#C4B5FD` on purple `#35264D`; preserve passive rarity colors and Junk styling. Follow the latest request to add no Lucide icons, including the previously proposed DNA addition. Condense the missing-donor explanation to one sentence with no species list. Other result layout stays unchanged.
+
+Verification: all 19 frontend tests pass, including custom-profile population, the four-passive disabled state and re-enabling after removal, and concise blocker rendering. JavaScript syntax, Django system checks, and diff checks pass. Browser visual verification was not performed; no server was started.
+
 ## 2026-09-05 - Explain Blocked Breeding Goals and Show Partial Routes
 
 Follow-up investigation corrects the assumption that Enchanted Sword's complete route was merely being pruned. Traversing every ancestor in the loaded breeding table yields a closed set of eight species: Enchanted Sword, Blue/Green/Red/Purple/Illuminant Slime, and Cave/Illuminant Bat. David owns ten Pals in that set; none has Idiosyncratic. The owned male Illuminant Slime at Box 1, slot 17 has Reload Master. Idiosyncratic donors elsewhere in the roster cannot supply it through this graph. This conclusion is relative to the loaded breeding table, not independent verification of game data.

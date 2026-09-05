@@ -2640,6 +2640,39 @@
     gap: 8px;
 }
 
+.pals-tool[data-module="breeding"] .profile-buttons {
+    justify-content: flex-start;
+}
+
+.pals-tool[data-module="breeding"] [data-picker="passives"] .passive-input-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.pals-tool[data-module="breeding"] [data-picker="passives"] .passive-chips {
+    margin: 0 0 8px;
+}
+
+.pals-tool[data-module="breeding"] [data-picker="passives"] .passive-chips:empty {
+    display: none;
+}
+
+.pals-tool[data-module="breeding"] .saved-plan-load-row {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.pals-tool[data-module="breeding"] .saved-plan-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pals-tool[data-module="breeding"] .field-hint:empty {
+    display: none;
+}
+
+.passive-input-row button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
 .modal-panel input,
 .modal-panel select {
     width: 100%;
@@ -3566,6 +3599,11 @@
     background: #351a20;
     border-color: #a84858;
     color: #ffc5ce;
+}
+
+:root[data-theme="dark"] .passive-bar em.implant-badge {
+    background: #35264d;
+    color: #c4b5fd;
 }
 
 :root[data-theme="dark"] .passive-bar.neutral,

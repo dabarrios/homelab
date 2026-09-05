@@ -58,7 +58,8 @@ test('blocked goal explains missing donor and shows a factual partial breeding t
     groups: [{slug: 'existing_target', results: [sword]}],
   });
   assert.match(html, /Missing breeding donor/);
-  assert.match(html, /Obtain Idiosyncratic/);
+  assert.match(html, /Get a compatible Idiosyncratic donor, then sync and rerun\./);
+  assert.doesNotMatch(html, /Illuminant Slime|Based on the loaded breeding table/);
   assert.match(html, /Optional progress: breed for Reload Master/);
   assert.match(html, /This prepares only part of your goal/);
   assert.doesNotMatch(html, /Best Existing Target|Recommended Route|implant-plan/);
@@ -69,6 +70,38 @@ test('search exhaustion does not claim a missing inheritance source', () => {
   const html = renderer().renderBreeding({achievable: false, noRoute: {missingPassives: [], partialResults: []}});
   assert.match(html, /This does not prove that no route exists/);
   assert.doesNotMatch(html, /Missing breeding donor|Obtain/);
+});
+
+test('custom profile fills one passive list and Add re-enables after removal', () => {
+  const selections = {passives: []};
+  const elements = {
+    '[data-passive-chips]': {innerHTML: ''},
+    'input[name="passives"]': {value: ''},
+    '[data-passive-clear]': {hidden: false},
+    '[data-passive-add]': {disabled: false},
+  };
+  const picker = {dataset: {picker: 'passives'}, querySelector: selector => elements[selector]};
+  const hint = {textContent: ''};
+  const context = renderer({
+    passiveSelections: selections,
+    selectedProfileValue: () => 'custom:buffer',
+    customProfileByValue: () => ({passives: swordPlan.finalPassives}),
+    builtInProfileByValue: () => null,
+    $: () => hint,
+    $$: () => [picker],
+    passiveTone: () => 'gold',
+  });
+  for (const name of ['renderPassivePicker', 'updateProfileHint']) {
+    const start = source.indexOf(`function ${name}(`);
+    vm.runInContext(source.slice(start, source.indexOf('\n}', start) + 2), context);
+  }
+  context.updateProfileHint();
+  assert.equal(elements['input[name="passives"]'].value, swordPlan.finalPassives.join(','));
+  assert.equal(hint.textContent, 'Profile loaded.');
+  assert.equal(elements['[data-passive-add]'].disabled, true);
+  selections.passives.pop();
+  context.renderPassivePicker(picker);
+  assert.equal(elements['[data-passive-add]'].disabled, false);
 });
 
 test('incomplete owned fallback shows actual passives and identifies the missing route', () => {

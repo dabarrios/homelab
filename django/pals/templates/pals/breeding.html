@@ -12,41 +12,24 @@
     </span>
 </label>
 <label>
-    Desired Passives
-    <span class="passive-picker" data-picker="passives">
-        <span class="passive-input-row">
-            <input data-passive-input autocomplete="off" placeholder="Choose a passive">
-            <button type="button" data-passive-add>Add</button>
-            <button type="button" data-passive-clear>Clear</button>
-        </span>
-        <span class="passive-chips" data-passive-chips></span>
-        <input type="hidden" name="passives">
-        <span class="field-hint" data-passive-hint>Pick from known passives in your loaded roster.</span>
-    </span>
-</label>
-<label class="check-row">
-    <input name="includeImplants" type="checkbox" value="1" checked>
-    Use implant inventory for passives you can add later
-</label>
-<label class="check-row">
-    <input name="includeInsomnia" type="checkbox" value="1">
-    Include Insomnia
-</label>
-<label class="check-row">
-    <input name="breedAnyway" type="checkbox" value="1">
-    Breed anyway
-</label>
-<div class="inventory-summary">
-    <button type="button" data-open-implant-inventory>Manage Implant Inventory</button>
-    <button type="button" data-open-passive-colors>Manage Passive Colors</button>
-</div>
-<label>
     Gender
     <select name="genderPreference">
         <option value="any">No preference</option>
         <option value="Male">Male</option>
         <option value="Female">Female</option>
     </select>
+</label>
+<label>
+    Desired Passives
+    <span class="passive-picker" data-picker="passives">
+        <span class="passive-chips" data-passive-chips></span>
+        <span class="passive-input-row">
+            <input data-passive-input autocomplete="off" placeholder="Choose a passive">
+            <button type="button" data-passive-add>Add</button>
+        </span>
+        <input type="hidden" name="passives">
+        <span class="field-hint" data-passive-hint></span>
+    </span>
 </label>
 <label>
     Passive Profile
@@ -57,7 +40,19 @@
             <button type="button" id="editProfile">Edit</button>
         </span>
     </span>
-    <span class="field-hint" id="profileHint">Manual passives lets you choose each passive yourself.</span>
+    <span class="field-hint" id="profileHint"></span>
+</label>
+<label class="check-row">
+    <input name="includeImplants" type="checkbox" value="1" checked>
+    Use implant inventory
+</label>
+<label class="check-row">
+    <input name="includeInsomnia" type="checkbox" value="1">
+    Include Insomnia
+</label>
+<label class="check-row">
+    <input name="breedAnyway" type="checkbox" value="1">
+    Breed anyway
 </label>
 <label>
     Saved Setup
@@ -69,10 +64,16 @@
         </span>
         <span class="saved-plan-row saved-plan-load-row">
             <select id="savedBreedingPlan"></select>
+        </span>
+        <span class="saved-plan-row saved-plan-actions">
             <button type="button" id="loadBreedingPlan">Load</button>
             <button type="button" id="deleteBreedingPlan">Delete</button>
         </span>
     </span>
-    <span class="field-hint" id="breedingPlanStatus">Save the current setup and exact displayed tree.</span>
+    <span class="field-hint" id="breedingPlanStatus"></span>
 </label>
+<div class="inventory-summary">
+    <button type="button" data-open-implant-inventory>Manage Implant Inventory</button>
+    <button type="button" data-open-passive-colors>Manage Passive Colors</button>
+</div>
 {% endblock %}

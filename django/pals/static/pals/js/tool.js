@@ -1241,32 +1241,10 @@ function updateProfileHint() {
   const custom = customProfileByValue(value);
   const builtIn = builtInProfileByValue(value);
   if (custom) {
-    hint.innerHTML = `${profilePassiveSummary(custom.passives, 'Saved passives')}`;
-  } else if (builtIn?.locked) {
-    const passives = BUILT_IN_PROFILE_PASSIVES[builtIn.value] || [];
-    hint.innerHTML = `
-      ${profilePassiveSummary(passives.map(([passive]) => passive), 'Prioritizes', true)}
-      <span class="profile-note">Built-in profile: the app chooses the fastest reachable combination for this target. You can rename this profile, but the selection rules stay managed by the app.</span>`;
-  } else {
-    hint.textContent = 'Manual passives lets you choose each passive yourself.';
+    passiveSelections.passives = [...custom.passives];
+    $$('[data-picker="passives"]').forEach(renderPassivePicker);
   }
-}
-
-function profilePassiveSummary(passives, label, showScore = false) {
-  const items = (passives || []).slice(0, 4);
-  if (!items.length) return `<span>${escapeHtml(label)}: none selected yet.</span>`;
-  const total = items.reduce((sum, passive) => {
-    const score = (BUILT_IN_PROFILE_PASSIVES.work_speed || []).find(([name]) => name === passive)?.[1] || 0;
-    return sum + score;
-  }, 0);
-  return `
-    <span class="profile-passive-summary">
-      <span>${escapeHtml(label)}</span>
-      <span class="passive-list compact">
-        ${items.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
-      </span>
-      ${showScore && total ? `<span class="profile-score">absolute +${escapeHtml(total)}% work speed</span>` : ''}
-    </span>`;
+  hint.textContent = custom ? 'Profile loaded.' : builtIn?.locked ? 'Selects passives automatically when optimizing.' : '';
 }
 
 function applySelectedProfile() {
@@ -1474,6 +1452,8 @@ function renderPassivePicker(picker) {
   }).join('');
   const clear = picker.querySelector('[data-passive-clear]');
   if (clear) clear.hidden = selected.length === 0;
+  const add = picker.querySelector('[data-passive-add]');
+  if (add) add.disabled = selected.length >= 4;
 }
 
 function positionPassiveTooltip(anchor) {
@@ -1954,14 +1934,14 @@ function renderReadyFinishCards(candidates, data) {
         <div class="ready-missing">
           <span>Add later</span>
           <div class="passive-list ready-passive-list">
-            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em>Implant</em></span>`).join('')}
+            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em class="implant-badge">Implant</em></span>`).join('')}
           </div>
         </div>
         <div class="ready-passives ready-option-passives">
           <span>Final passives</span>
           <div class="passive-list ready-passive-list">
             ${present.map(passive => `<span class="passive-bar ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span></span>`).join('')}
-            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em>Implant</em></span>`).join('')}
+            ${missingImplants.map(passive => `<span class="passive-bar implant-missing ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span><em class="implant-badge">Implant</em></span>`).join('')}
           </div>
           ${replaceable.length ? `<p class="ready-replaceable">Replaceable: ${escapeHtml(replaceable.join(', '))}</p>` : ''}
         </div>
@@ -1993,9 +1973,7 @@ function renderBlockedBreeding(data) {
     <div class="group-heading">
       <h3>${missing.length ? 'Missing breeding donor' : 'No complete route found'}</h3>
       ${missing.length ? `
-        <p>No owned Pal that can pass traits into ${escapeHtml(data.target)} has ${escapeHtml(missing.join(', '))}.</p>
-        <p>Obtain ${escapeHtml(missing.join(', '))} on a compatible donor species: ${escapeHtml((diagnosis.sourceSpecies || []).join(', '))}. Then sync and rerun to plan the remaining breeds.</p>
-        <p>Based on the loaded breeding table, donors outside these species cannot pass those traits into ${escapeHtml(data.target)}.</p>
+        <p>Get a compatible ${escapeHtml(missing.join(', '))} donor, then sync and rerun.</p>
       ` : '<p>The current search found no complete breeding plan with your owned Pals and selected settings. This does not prove that no route exists. Check available parent genders, or try fewer desired passives.</p>'}
     </div>
     ${partial ? `<article class="route-card">
@@ -2079,7 +2057,7 @@ function renderProfileResultNotice(data) {
 function profileResultPassiveList(passives, implantPassives = new Set()) {
   return `
     <span class="passive-list compact">
-      ${(passives || []).map(passive => `<span class="passive-bar ${implantPassives.has(passive) ? 'implant-missing' : ''} ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implantPassives.has(passive) ? '<em>Implant</em>' : ''}</span>`).join('')}
+      ${(passives || []).map(passive => `<span class="passive-bar ${implantPassives.has(passive) ? 'implant-missing' : ''} ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}"><span>${escapeHtml(passive)}</span>${implantPassives.has(passive) ? '<em class="implant-badge">Implant</em>' : ''}</span>`).join('')}
     </span>`;
 }
 
