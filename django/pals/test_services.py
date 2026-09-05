@@ -98,6 +98,27 @@ class WorkerScoringTests(SimpleTestCase):
 
 
 class BreedingBoundaryTests(SimpleTestCase):
+    def test_missing_sources_checks_all_ancestors_and_excludes_unrelated_donors(self):
+        from dataclasses import replace
+        from pals.services import breeding_search as search
+        pairs = {"target": [("target", "bridge")], "bridge": [("seed", "bridge")], "seed": [("seed", "seed")]}
+        store = SimpleNamespace(
+            pals={key: SimpleNamespace(name=key) for key in ["target", "bridge", "seed", "outside"]},
+            parent_pairs_for_child=lambda key: pairs.get(key, []),
+        )
+        owned = [
+            self.state("Male", ["Burly Body"]),
+            replace(self.state("Male", ["Reload Master"]), species_key="seed"),
+            replace(self.state("Female", ["Idiosyncratic"]), species_key="outside"),
+        ]
+        target = frozenset(["Idiosyncratic", "Reload Master"])
+        with patch.object(search, "STORE", store):
+            result = search.missing_passive_sources(owned, "target", target)
+            self.assertEqual(result["missingPassives"], ["Idiosyncratic"])
+            self.assertEqual(result["sourceSpecies"], ["bridge", "seed", "target"])
+            owned.append(replace(owned[-1], species_key="seed"))
+            self.assertEqual(search.missing_passive_sources(owned, "target", target)["missingPassives"], [])
+
     def test_final_routes_cache_donors_once_per_species(self):
         from pals.services import breeding_search as search
         parents = [self.state("Male", ["Artisan"]), self.state("Female", ["Serious"])]
@@ -220,7 +241,24 @@ class BreedAnywayTests(SimpleTestCase):
     def test_same_gender_pals_are_not_a_breeding_pair(self):
         from dataclasses import replace
         self.parents[1] = replace(self.parents[1], gender="Male")
-        self.assertFalse(self.plan(breedAnyway=True)["achievable"])
+        result = self.plan(breedAnyway=True)
+        self.assertFalse(result["achievable"])
+        self.assertEqual(result["noRoute"]["reason"], "search_exhausted")
+        self.assertEqual(result["noRoute"]["missingPassives"], [])
+
+    def test_missing_donor_returns_partial_breeding_plan_without_claiming_complete_goal(self):
+        from dataclasses import replace
+        self.parents[0] = replace(self.parents[0], passives=frozenset(self.passives[:1]))
+        result = self.plan()
+        self.assertFalse(result["achievable"])
+        self.assertEqual(result["results"], [])
+        diagnosis = result["noRoute"]
+        self.assertEqual(diagnosis["reason"], "missing_sources")
+        self.assertEqual(diagnosis["missingPassives"], self.passives[1:])
+        self.assertEqual(diagnosis["partialPassives"], self.passives[:1])
+        partial = diagnosis["partialResults"][0]
+        self.assertEqual(len(partial["parents"]), 2)
+        self.assertEqual(partial["desired"], self.passives[:1])
 
     def test_continue_progress_and_gender_preference_still_require_parents(self):
         result = self.plan(breedAnyway=True, routePreference="continue_progress", genderPreference="Female")

@@ -1,5 +1,19 @@
 # Decision Log
 
+## 2026-09-05 - Explain Blocked Breeding Goals and Show Partial Routes
+
+Follow-up investigation corrects the assumption that Enchanted Sword's complete route was merely being pruned. Traversing every ancestor in the loaded breeding table yields a closed set of eight species: Enchanted Sword, Blue/Green/Red/Purple/Illuminant Slime, and Cave/Illuminant Bat. David owns ten Pals in that set; none has Idiosyncratic. The owned male Illuminant Slime at Box 1, slot 17 has Reload Master. Idiosyncratic donors elsewhere in the roster cannot supply it through this graph. This conclusion is relative to the loaded breeding table, not independent verification of game data.
+
+Decision: when no complete recommendation exists, inspect the full species ancestry graph for missing natural-passive sources. Return a structured `noRoute` diagnosis distinguishing proven absent inheritance sources from a bounded search that found no route. Source presence alone does not establish reachability with current genders and partners. Keep implants excluded from the natural-passive requirement.
+
+The Breeding page now explains which donor traits and compatible species are needed instead of displaying an unrelated owned target as the result. When existing searched routes can achieve a nonempty subset, show one optional partial breeding tree, rendered with only those achievable natural passives. Do not present the full goal or planned implants on the partial offspring. Remove the Top route label on failed goals and describe implant settings as a goal rather than an existing route.
+
+Read-only local reproduction returns missing Idiosyncratic plus a two-step Reload Master route: male Illuminant Slime (Box 1, slot 17) + female Blue Slime (Box 1, slot 15), keeping a female Illuminant Slime with Reload Master, then breed her with the male Sword (Box 1, slot 20). The full goal remains blocked until a compatible Idiosyncratic donor is obtained.
+
+Counterfactual verification: adding Idiosyncratic to an in-memory copy of that male Illuminant Slime makes the same request return three complete routes, with two steps in the top route and no blocker. This did not modify roster files or saves.
+
+Verification: 47 Django tests and 18 frontend tests pass, including transitive/cyclic ancestry, unrelated donors, partial-plan serialization/rendering, and same-gender failure without falsely claiming absent passive sources. JavaScript syntax and diff checks pass. No original saves were modified and no server was started; browser visual verification was not performed.
+
 ## 2026-09-05 - Preserve Actual Passives on Owned Breeding Results
 
 Verified report: David's local roster contains a male Enchanted Sword at Box 1, slot 20 with only Burly Body and IVs 92/29/38. Replaying the requested Idiosyncratic/Reload Master goal with Stronghold Strategist/Vanguard planned as implants returns `achievable=false`, no complete routes, and one `existing_target` fallback. Its serialized passives correctly contain only Burly Body, with both natural target passives missing.

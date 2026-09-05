@@ -14,6 +14,27 @@ from .breeding_state import (
 from .data import STORE
 
 
+def missing_passive_sources(owned: list[State], target_key: str, target: frozenset[str]) -> dict:
+    """Prove missing inheritance sources using the full species ancestry graph.
+
+    Presence is only a necessary condition: gender, partner ownership, and search
+    limits can still prevent a route. Absence proves no owned inheritance route.
+    """
+    ancestors = {target_key}
+    pending = [target_key]
+    while pending:
+        for pair in STORE.parent_pairs_for_child(pending.pop()):
+            for key in pair:
+                if key not in ancestors:
+                    ancestors.add(key)
+                    pending.append(key)
+    available = frozenset(p for s in owned if s.species_key in ancestors for p in s.passives)
+    return {
+        "missingPassives": sorted(target - available),
+        "sourceSpecies": sorted(STORE.pals[key].name for key in ancestors),
+    }
+
+
 def search_states(
     owned: list[State],
     target: frozenset[str],

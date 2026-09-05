@@ -13,7 +13,7 @@ function renderer(extra = {}) {
     renderBreedTree: route => `<div>Pair: ${route.parents.map(p => p.species).join(' + ')}</div>`,
     ...extra,
   });
-  for (const name of ['escapeHtml', 'renderBreeding', 'initFreshCopyToggle']) {
+  for (const name of ['escapeHtml', 'renderBlockedBreeding', 'renderBreeding', 'initFreshCopyToggle']) {
     const start = source.indexOf(`function ${name}(`);
     assert.ok(start >= 0, name);
     vm.runInContext(source.slice(start, source.indexOf('\n}', start) + 2), context);
@@ -50,6 +50,26 @@ const swordPlan = {
   finalPassives: ['Idiosyncratic', 'Reload Master', 'Stronghold Strategist', 'Vanguard'],
   implantPassives: ['Stronghold Strategist', 'Vanguard'],
 };
+
+test('blocked goal explains missing donor and shows a factual partial breeding tree', () => {
+  const html = cardRenderer().renderBreeding({...swordPlan, target: 'Enchanted Sword', achievable: false,
+    noRoute: {missingPassives: ['Idiosyncratic'], sourceSpecies: ['Enchanted Sword', 'Illuminant Slime'],
+      partialPassives: ['Reload Master'], partialResults: [{...sword, desired: ['Reload Master'], parents: [sword, sword]}]},
+    groups: [{slug: 'existing_target', results: [sword]}],
+  });
+  assert.match(html, /Missing breeding donor/);
+  assert.match(html, /Obtain Idiosyncratic/);
+  assert.match(html, /Optional progress: breed for Reload Master/);
+  assert.match(html, /This prepares only part of your goal/);
+  assert.doesNotMatch(html, /Best Existing Target|Recommended Route|implant-plan/);
+  assert.equal((html.match(/data-passive-tooltip="Idiosyncratic"/g) || []).length, 0);
+});
+
+test('search exhaustion does not claim a missing inheritance source', () => {
+  const html = renderer().renderBreeding({achievable: false, noRoute: {missingPassives: [], partialResults: []}});
+  assert.match(html, /This does not prove that no route exists/);
+  assert.doesNotMatch(html, /Missing breeding donor|Obtain/);
+});
 
 test('incomplete owned fallback shows actual passives and identifies the missing route', () => {
   const html = cardRenderer().renderBreeding({...swordPlan, achievable: false, groups: [

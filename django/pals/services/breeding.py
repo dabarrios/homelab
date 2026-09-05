@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from .breeding_profiles import best_work_speed_profile, profile_passives_payload
 from .breeding_progress import progress_species
-from .breeding_search import final_parent_routes, search_states
+from .breeding_search import final_parent_routes, missing_passive_sources, search_states
 from .breeding_serialization import build_group, unique_serialized
 from .breeding_state import (
     gender_filtered,
@@ -150,6 +150,20 @@ def build_plan(payload: dict) -> dict:
         recommended = unique_serialized(recommended_states, target, allowed, 3, iv_preference=iv_preference, intended_gender=gender_preference, replacement_pool=owned)
         recommended_description = "Best practical option from the searches below."
     achievable = bool(recommended)
+    no_route = None
+    if not achievable:
+        no_route = missing_passive_sources(owned, target_key, target)
+        no_route["reason"] = "missing_sources" if no_route["missingPassives"] else "search_exhausted"
+        partial_target = target - frozenset(no_route["missingPassives"])
+        partial_states = [
+            s for s in all_route_states
+            if s.species_key == target_key and s.parents and partial_target <= s.passives
+        ] if partial_target and no_route["missingPassives"] else []
+        no_route["partialPassives"] = sorted(partial_target) if partial_states else []
+        no_route["partialResults"] = unique_serialized(
+            partial_states, partial_target, allowed, 1,
+            intended_gender=gender_preference, replacement_pool=owned,
+        )
     profile_ideal = work_speed_profile["ideal"] if work_speed_profile else []
     profile_selected = work_speed_profile["selected"] if work_speed_profile else []
     profile_score = work_speed_profile["score"] if work_speed_profile else 0
@@ -203,6 +217,7 @@ def build_plan(payload: dict) -> dict:
         "breedingProfile": breeding_profile,
         "breedAnyway": breed_anyway,
         "achievable": achievable,
+        "noRoute": no_route,
         "profileIdealPassives": profile_ideal,
         "profileSelectedPassives": profile_selected,
         "profileWorkSpeedBonus": profile_score,

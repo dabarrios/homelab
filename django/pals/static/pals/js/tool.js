@@ -1983,7 +1983,33 @@ function renderReadyFinishCards(candidates, data) {
     </article>`;
 }
 
+function renderBlockedBreeding(data) {
+  const diagnosis = data.noRoute;
+  const missing = diagnosis.missingPassives || [];
+  const partial = diagnosis.partialResults?.[0];
+  const partialPlan = {finalPassives: diagnosis.partialPassives || [], implantPassives: []};
+  return `<section class="result-group">
+    ${renderProfileResultNotice(data)}
+    <div class="group-heading">
+      <h3>${missing.length ? 'Missing breeding donor' : 'No complete route found'}</h3>
+      ${missing.length ? `
+        <p>No owned Pal that can pass traits into ${escapeHtml(data.target)} has ${escapeHtml(missing.join(', '))}.</p>
+        <p>Obtain ${escapeHtml(missing.join(', '))} on a compatible donor species: ${escapeHtml((diagnosis.sourceSpecies || []).join(', '))}. Then sync and rerun to plan the remaining breeds.</p>
+        <p>Based on the loaded breeding table, donors outside these species cannot pass those traits into ${escapeHtml(data.target)}.</p>
+      ` : '<p>The current search found no complete breeding plan with your owned Pals and selected settings. This does not prove that no route exists. Check available parent genders, or try fewer desired passives.</p>'}
+    </div>
+    ${partial ? `<article class="route-card">
+      <div class="route-header"><div>
+        <h3>Optional progress: breed for ${escapeHtml(diagnosis.partialPassives.join(', '))}</h3>
+        <p>This prepares only part of your goal. You still need ${escapeHtml(missing.join(', '))} from a compatible donor.</p>
+      </div></div>
+      <div class="breed-tree">${renderBreedTree(partial, true, partialPlan)}</div>
+    </article>` : ''}
+  </section>`;
+}
+
 function renderBreeding(data) {
+  if (data.achievable === false && data.noRoute) return renderBlockedBreeding(data);
   const groups = (data.groups || []).map(group => data.breedAnyway
     ? {...group, results: (group.results || []).filter(route => route.parents?.length === 2)}
     : group);
@@ -2039,7 +2065,7 @@ function renderProfileResultNotice(data) {
           <strong>Passive profile result</strong>
         </div>
         ${data.profileDisclaimer ? `<p>${escapeHtml(data.profileDisclaimer)}</p>` : ''}
-        ${hasImplantPlan ? '<p>Implant inventory is included in this route; some final passives are planned for after breeding.</p>' : ''}
+        ${hasImplantPlan ? `<p>${data.achievable === false ? 'Your goal includes implants to add after breeding.' : 'Implant inventory is included in this route; some final passives are planned for after breeding.'}</p>` : ''}
       </div>
       <div class="profile-result-grid">
         ${ideal.length ? `<section><b>Absolute target</b>${profileResultPassiveList(ideal)}</section>` : ''}
@@ -2378,7 +2404,7 @@ function renderResult(data) {
   $('#results').classList.remove('results-empty');
   $('#results').innerHTML = (renderers[moduleKey] || renderJson)(data);
   const count = data.total || data.totalItems || data.rosterCount || (data.groups || []).length || '';
-  setText('#resultCount', data.alphaOnly ? '' : moduleKey === 'breeding' ? 'Top route' : count ? `${count} result${count === 1 ? '' : 's'}` : '');
+  setText('#resultCount', data.alphaOnly ? '' : moduleKey === 'breeding' ? (data.achievable === false ? '' : 'Top route') : count ? `${count} result${count === 1 ? '' : 's'}` : '');
 }
 
 async function ranchDropsData() {
