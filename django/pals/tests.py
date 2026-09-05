@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
-from pals.services import data, optimizer, ranch, work
+from pals.services import data, ivs, optimizer, ranch, work
 
 
 class PalsRouteTest(TestCase):
@@ -141,8 +141,8 @@ class WorkSpeedProfileTest(SimpleTestCase):
             slot=1,
         )
 
-    @patch("pals.services.optimizer.final_parent_routes", return_value=[])
-    @patch("pals.services.optimizer.species_types_for_key", return_value=["Neutral"])
+    @patch("pals.services.breeding_profiles.final_parent_routes", return_value=[])
+    @patch("pals.services.breeding_profiles.species_types_for_key", return_value=["Neutral"])
     def test_include_insomnia_uses_implant_slot_and_drops_lowest_speed(self, *_):
         result = optimizer.best_work_speed_profile(
             [
@@ -165,8 +165,8 @@ class WorkSpeedProfileTest(SimpleTestCase):
         )
         self.assertNotIn("Work Slave", result["selected"])
 
-    @patch("pals.services.optimizer.final_parent_routes", return_value=[])
-    @patch("pals.services.optimizer.species_types_for_key", return_value=["Neutral"])
+    @patch("pals.services.breeding_profiles.final_parent_routes", return_value=[])
+    @patch("pals.services.breeding_profiles.species_types_for_key", return_value=["Neutral"])
     def test_insomnia_is_not_added_without_checkbox(self, *_):
         result = optimizer.best_work_speed_profile(
             [
@@ -218,8 +218,8 @@ class IvAlphaOnlyTest(SimpleTestCase):
             pals={"jet": optimizer.BreedPal("jet", "Jetragon", 1, 1, True, False)},
         )
 
-        with patch.object(optimizer, "STORE", store), patch(
-            "pals.services.optimizer.owned_states_for_owner",
+        with patch.object(ivs, "STORE", store), patch(
+            "pals.services.ivs.owned_states_for_owner",
             return_value=[self.state(passives)],
         ):
             result = optimizer.build_iv_plan({

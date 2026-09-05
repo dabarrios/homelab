@@ -16,7 +16,6 @@ from .services import bases as bases_service
 from .services import breeding as breeding_service
 from .services import data as data_service
 from .services import ivs as ivs_service
-from .services import optimizer
 from .services import ranch as ranch_service
 from .services import saves as saves_service
 from .services import work as work_service
@@ -96,22 +95,22 @@ def bases(request):
 @require_GET
 def options(request):
     return JsonResponse({
-        "species": optimizer.STORE.species_names,
-        "passives": optimizer.STORE.passives,
-        "passivesByOwner": optimizer.STORE.passives_by_owner,
-        "passiveMeta": optimizer.STORE.passive_meta,
-        "speciesMeta": optimizer.species_meta(),
-        "owners": optimizer.STORE.owners,
+        "species": data_service.STORE.species_names,
+        "passives": data_service.STORE.passives,
+        "passivesByOwner": data_service.STORE.passives_by_owner,
+        "passiveMeta": data_service.STORE.passive_meta,
+        "speciesMeta": work_service.species_meta(),
+        "owners": data_service.STORE.owners,
         "workTypes": [
             {"key": key, "label": label}
-            for key, label in sorted(optimizer.WORK_LABELS.items(), key=lambda item: item[1])
+            for key, label in sorted(data_service.WORK_LABELS.items(), key=lambda item: item[1])
         ],
-        "baseSites": optimizer.base_work_sites_payload(),
-        "implantInventory": optimizer.load_implant_inventory(),
-        "passiveColorOverrides": optimizer.load_passive_color_overrides(),
-        "rosterCount": len(optimizer.STORE.roster),
-        "dataVersion": optimizer.STORE.breeding_data.get("dataVersion"),
-        "generatedAt": optimizer.STORE.breeding_data.get("generatedAt"),
+        "baseSites": bases_service.base_work_sites_payload(),
+        "implantInventory": ivs_service.load_implant_inventory(),
+        "passiveColorOverrides": data_service.load_passive_color_overrides(),
+        "rosterCount": len(data_service.STORE.roster),
+        "dataVersion": data_service.STORE.breeding_data.get("dataVersion"),
+        "generatedAt": data_service.STORE.breeding_data.get("generatedAt"),
     })
 
 
@@ -137,13 +136,13 @@ def ranch_drops(request):
 @login_required
 @require_GET
 def base_work_sites(request):
-    return JsonResponse(optimizer.base_work_sites_payload())
+    return JsonResponse(bases_service.base_work_sites_payload())
 
 
 @login_required
 @require_GET
 def owned_target_pals(request):
-    return JsonResponse(optimizer.owned_target_pals_payload(
+    return JsonResponse(ivs_service.owned_target_pals_payload(
         request.GET.get("owner", "David"),
         request.GET.get("target", ""),
     ))
@@ -152,22 +151,21 @@ def owned_target_pals(request):
 @login_required
 @require_GET
 def reload_data(request):
-    optimizer.STORE.reload()
-    optimizer.BASE_WORK_CACHE["payload"] = None
-    optimizer.BASE_WORK_CACHE["mtime"] = None
-    return JsonResponse({"ok": True, "rosterCount": len(optimizer.STORE.roster)})
+    data_service.STORE.reload()
+    bases_service.clear_base_work_cache()
+    return JsonResponse({"ok": True, "rosterCount": len(data_service.STORE.roster)})
 
 
 @login_required
 @require_GET
 def live_save_status(request):
-    return JsonResponse(optimizer.live_save_status())
+    return JsonResponse(saves_service.live_save_status())
 
 
 @login_required
 @require_GET
 def pal_asset(request, name: str):
-    file_path = optimizer.pal_image_path(name)
+    file_path = work_service.pal_image_path(name)
     if not file_path:
         raise Http404
     content_type = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
@@ -180,18 +178,18 @@ def pal_asset(request, name: str):
 def upload_save(request):
     if not request.body:
         return json_error("No file data received")
-    optimizer.UPLOADS.mkdir(parents=True, exist_ok=True)
+    data_service.UPLOADS.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     content_type = request.META.get("CONTENT_TYPE", "")
     try:
-        files = optimizer.multipart_files(request.META.get("CONTENT_TYPE", ""), request.body) if content_type.startswith("multipart/form-data") else []
+        files = saves_service.multipart_files(request.META.get("CONTENT_TYPE", ""), request.body) if content_type.startswith("multipart/form-data") else []
         if not files:
             files = [(request.META.get("HTTP_X_FILENAME", "Level.sav"), request.body)]
-        upload_dir = optimizer.save_uploaded_files(files, stamp)
+        upload_dir = saves_service.save_uploaded_files(files, stamp)
         uploaded_files = [p for p in upload_dir.rglob("*") if p.is_file()]
         if len(uploaded_files) == 1 and uploaded_files[0].suffix.lower() == ".zip":
-            upload_dir = optimizer.expand_zip_upload(uploaded_files[0], stamp)
-        return JsonResponse(optimizer.run_decode_from_save_dir(upload_dir, str(upload_dir.relative_to(optimizer.ROOT))))
+            upload_dir = saves_service.expand_zip_upload(uploaded_files[0], stamp)
+        return JsonResponse(saves_service.run_decode_from_save_dir(upload_dir, str(upload_dir.relative_to(data_service.ROOT))))
     except zipfile.BadZipFile:
         return json_error("Uploaded .zip is not a valid zip file")
     except Exception as exc:
@@ -204,11 +202,11 @@ def upload_save(request):
 def upload_level(request):
     if not request.body:
         return json_error("No file data received")
-    optimizer.UPLOADS.mkdir(parents=True, exist_ok=True)
+    data_service.UPLOADS.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    upload_path = optimizer.UPLOADS / f"Level-{stamp}.sav"
+    upload_path = data_service.UPLOADS / f"Level-{stamp}.sav"
     upload_path.write_bytes(request.body)
-    return JsonResponse(optimizer.run_decode_from_level(upload_path))
+    return JsonResponse(saves_service.run_decode_from_level(upload_path))
 
 
 @login_required
@@ -216,7 +214,7 @@ def upload_level(request):
 @require_POST
 def live_save_refresh(request):
     try:
-        result = optimizer.refresh_live_save(force=bool(json_payload(request).get("force")))
+        result = saves_service.refresh_live_save(force=bool(json_payload(request).get("force")))
         return JsonResponse(result, status=409 if result.get("refreshing") and not result.get("ok") else 200)
     except Exception as exc:
         return json_error(str(exc), status=500)
@@ -226,14 +224,14 @@ def live_save_refresh(request):
 @csrf_exempt
 @require_POST
 def optimize(request):
-    return JsonResponse(optimizer.build_plan(json_payload(request)))
+    return JsonResponse(breeding_service.build_plan(json_payload(request)))
 
 
 @login_required
 @csrf_exempt
 @require_POST
 def profile_passives(request):
-    result = optimizer.profile_passives_payload(json_payload(request))
+    result = breeding_service.profile_passives_payload(json_payload(request))
     return JsonResponse(result, status=400 if not result.get("ok") else 200)
 
 
@@ -241,7 +239,7 @@ def profile_passives(request):
 @csrf_exempt
 @require_POST
 def improve_ivs(request):
-    return JsonResponse(optimizer.build_iv_plan(json_payload(request)))
+    return JsonResponse(ivs_service.build_iv_plan(json_payload(request)))
 
 
 @login_required
@@ -249,7 +247,7 @@ def improve_ivs(request):
 @require_POST
 def base_labels(request):
     payload = json_payload(request)
-    labels = optimizer.load_base_labels()
+    labels = bases_service.load_base_labels()
     base_id = str(payload.get("baseId") or "")
     label = str(payload.get("label") or "").strip()
     if not base_id:
@@ -258,8 +256,8 @@ def base_labels(request):
         labels[base_id] = label[:80]
     else:
         labels.pop(base_id, None)
-    optimizer.save_base_labels(labels)
-    optimizer.BASE_WORK_CACHE["payload"] = None
+    bases_service.save_base_labels(labels)
+    bases_service.clear_base_work_cache()
     return JsonResponse({"ok": True, "labels": labels})
 
 
@@ -268,7 +266,7 @@ def base_labels(request):
 @require_POST
 def implant_inventory(request):
     payload = json_payload(request)
-    inventory = optimizer.load_implant_inventory()
+    inventory = ivs_service.load_implant_inventory()
     passive = str(payload.get("passive") or "").strip()
     if not passive:
         return json_error("Missing passive")
@@ -276,9 +274,9 @@ def implant_inventory(request):
         inventory.pop(passive, None)
     else:
         infinite = bool(payload.get("infinite"))
-        count = max(0, optimizer.as_int(payload.get("count")))
+        count = max(0, data_service.as_int(payload.get("count")))
         inventory[passive] = {"infinite": infinite, "count": None if infinite else count}
-    optimizer.save_implant_inventory(inventory)
+    ivs_service.save_implant_inventory(inventory)
     return JsonResponse({"ok": True, "inventory": inventory})
 
 
@@ -287,25 +285,25 @@ def implant_inventory(request):
 @require_POST
 def passive_colors(request):
     payload = json_payload(request)
-    overrides = optimizer.load_passive_color_overrides()
+    overrides = data_service.load_passive_color_overrides()
     passive = str(payload.get("passive") or "").strip()
     if not passive:
         return json_error("Missing passive")
-    canonical = next((item for item in optimizer.STORE.passives if item.lower() == passive.lower()), passive)
+    canonical = next((item for item in data_service.STORE.passives if item.lower() == passive.lower()), passive)
     if payload.get("delete"):
         overrides.pop(canonical, None)
     else:
         tone = str(payload.get("tone") or "").strip()
-        if tone not in optimizer.PASSIVE_TONES:
+        if tone not in data_service.PASSIVE_TONES:
             return json_error("Choose a valid passive color")
         overrides[canonical] = tone
-    optimizer.save_passive_color_overrides(overrides)
-    optimizer.STORE.passive_meta = optimizer.build_passive_meta(optimizer.STORE.passives)
-    return JsonResponse({"ok": True, "overrides": overrides, "passiveMeta": optimizer.STORE.passive_meta})
+    data_service.save_passive_color_overrides(overrides)
+    data_service.STORE.passive_meta = data_service.build_passive_meta(data_service.STORE.passives)
+    return JsonResponse({"ok": True, "overrides": overrides, "passiveMeta": data_service.STORE.passive_meta})
 
 
 @login_required
 @csrf_exempt
 @require_POST
 def base_planner(request):
-    return JsonResponse(optimizer.build_base_planner(json_payload(request)))
+    return JsonResponse(bases_service.build_base_planner(json_payload(request)))

@@ -1,8 +1,9 @@
-"""Species metadata and work suitability recommendations."""
+"""Species metadata, work suitability, and shared owned-worker scoring."""
 
 from __future__ import annotations
 
 import json
+
 from pathlib import Path
 
 from .data import (
@@ -18,6 +19,7 @@ from .data import (
     as_int,
     match_key,
     normalize_species,
+    split_passives,
 )
 
 
@@ -371,5 +373,203 @@ def work_card_for_pal(pal: dict, owner_counts: dict[str, int], selected_work: st
     }
 
 
+WORK_SPEED_PASSIVE_SCORE = {
+    "Demon’s Hand": 90,
+    "Remarkable Craftsmanship": 75,
+    "Artisan": 50,
+    "Work Slave": 30,
+    "Lucky": 20,
+    "Serious": 20,
+    "Conceited": 10,
+}
+
+
+WORK_UPTIME_PASSIVE_SCORE = {
+    "Insomnia": 30,
+    "Vampiric": 25,
+}
+
+
+BASE_OPERATION_PASSIVE_SCORE = {
+    "Mastery of Fasting": 20,
+    "Diet Lover": 15,
+    "Workaholic": 15,
+    "Dainty Eater": 10,
+    "Positive Thinker": 10,
+    "Heart of the Immovable King": 8,
+}
+
+
+BASE_OPERATION_PASSIVE_PENALTY = {
+    "Musclehead": 50,
+    "Slacker": 30,
+    "Clumsy": 10,
+    "Hooligan": 10,
+    "Bottomless Stomach": 15,
+    "Destructive": 15,
+    "Glutton": 10,
+    "Unstable": 10,
+}
+
+
+WORK_RANK_PASSIVE_PATTERNS = {
+    "kindling": "EmitFlame",
+    "watering": "Watering",
+    "planting": "Seeding",
+    "electric": "GenerateElectricity",
+    "handiwork": "Handcraft",
+    "gathering": "Collection",
+    "mining": "Mining",
+    "farming": "MonsterFarm",
+    "lumbering": "Deforest",
+    "medicine": "ProductMedicine",
+    "cooling": "Cool",
+    "transporting": "Transport",
+}
+
+
+def pal_data_for_species(name: str) -> dict | None:
+    key = STORE.name_to_key.get(normalize_species(name).lower())
+    return next((pal for pal in STORE.breeding_data.get("pals", []) if pal.get("key") == key), None)
+
+
+def passive_work_score_parts(passives: frozenset[str], types: list[str]) -> dict[str, int]:
+    type_set = {str(t).lower() for t in types or []}
+    is_dark = "dark" in type_set
+    direct_speed = sum(WORK_SPEED_PASSIVE_SCORE.get(passive, 0) for passive in passives)
+    uptime = 0 if is_dark else sum(WORK_UPTIME_PASSIVE_SCORE.get(passive, 0) for passive in passives)
+    operations = sum(BASE_OPERATION_PASSIVE_SCORE.get(passive, 0) for passive in passives)
+    harmful = sum(BASE_OPERATION_PASSIVE_PENALTY.get(passive, 0) for passive in passives)
+    return {
+        "directSpeed": direct_speed,
+        "uptime": uptime,
+        "operations": operations,
+        "harmful": harmful,
+        "total": direct_speed + uptime + operations - harmful,
+    }
+
+
+def passive_work_speed_score(passives: frozenset[str], types: list[str] | None = None) -> int:
+    return passive_work_score_parts(passives, types or []).get("total", 0)
+
+
+def passive_work_rank_bonus(row: dict[str, str], skill: str) -> int:
+    pattern = WORK_RANK_PASSIVE_PATTERNS.get(skill, "")
+    if not pattern:
+        return 0
+    passive_ids = row.get("passive_ids", "") or ""
+    return 1 if f"WorkSuitabilityAddRank_{pattern}_1" in passive_ids else 0
+
+
+def actual_owned_work_levels(row: dict[str, str], pal: dict) -> dict[str, int]:
+    name = pal.get("name", "")
+    base = work_for_pal(pal)
+    full = fully_condensed_work_levels(base, name)
+    stars = as_int(row.get("condensation_stars"))
+    levels = {}
+    for key in WORK_LABELS:
+        base_level = as_int(base.get(key))
+        if base_level <= 0:
+            continue
+        level = as_int(full.get(key), base_level) if stars >= 4 else base_level
+        level += passive_work_rank_bonus(row, key)
+        levels[key] = min(10, level)
+    return levels
+
+
+def work_entries_from_levels(levels: dict[str, int], maximum_levels: dict[str, int] | None = None) -> list[dict]:
+    maximum_levels = maximum_levels or {}
+    entries = []
+    for key, label in sorted(WORK_LABELS.items(), key=lambda item: item[1]):
+        level = as_int(levels.get(key))
+        if level <= 0:
+            continue
+        entries.append({
+            "key": key,
+            "label": label,
+            "level": level,
+            "currentOnly": True,
+            "fullyCondensedLevel": None,
+            "projectedFullyCondensedLevel": None,
+            "plannerCurrentLevel": level,
+            "plannerMaximumLevel": max(level, as_int(maximum_levels.get(key), level)),
+        })
+    return entries
+
+
+def maximum_owned_work_levels(row: dict[str, str], pal: dict) -> dict[str, int]:
+    base = work_for_pal(pal)
+    full = fully_condensed_work_levels(base, pal.get("name", ""))
+    levels = {}
+    for key in WORK_LABELS:
+        base_level = as_int(base.get(key))
+        if base_level <= 0:
+            continue
+        level = as_int(full.get(key), base_level) + passive_work_rank_bonus(row, key)
+        levels[key] = min(10, level)
+    return levels
+
+
+def best_owned_work_levels(owner: str) -> dict[str, dict[str, int]]:
+    best: dict[str, dict[str, int]] = {}
+    for row in STORE.roster:
+        if owner and row.get("owner") != owner:
+            continue
+        species = normalize_species(row.get("species", ""))
+        pal = pal_data_for_species(species)
+        if not pal:
+            continue
+        species_levels = best.setdefault(pal.get("name", species), {})
+        for key, level in actual_owned_work_levels(row, pal).items():
+            species_levels[key] = max(species_levels.get(key, 0), level)
+    return best
+
+
+def work_card_for_owned_row(row: dict[str, str], *, display_location: str | None = None) -> dict | None:
+    """Build a worker card; base-aware callers supply a resolved location label."""
+    species = normalize_species(row.get("species", ""))
+    pal = pal_data_for_species(species)
+    if not pal:
+        return None
+    levels = actual_owned_work_levels(row, pal)
+    if not levels:
+        return None
+    passives = split_passives(row.get("passives"))
+    work_source = work_source_for(pal.get("name", ""))
+    entries = work_entries_from_levels(levels, maximum_owned_work_levels(row, pal))
+    location = display_location if display_location is not None else (row.get("location", "") or "")
+    score_parts = passive_work_score_parts(passives, pal.get("types", []))
+    return {
+        "key": pal.get("key", ""),
+        "name": pal.get("name", species),
+        "types": pal.get("types", []),
+        "icon": icon_url_for_key(pal.get("key", "")),
+        "size": pal_size_for(pal.get("name", species)),
+        "sizeGroup": SIZE_GROUPS.get(pal_size_for(pal.get("name", species)), "Unknown Size"),
+        "sizeKnown": pal_size_for(pal.get("name", species)) != "Unknown",
+        "selectedWork": "",
+        "selectedWorkLabel": "",
+        "selectedLevel": max(levels.values(), default=0),
+        "work": entries,
+        "workLevels": {entry["key"]: entry for entry in entries},
+        "workCount": len(entries),
+        "workCondensationSource": "verified" if work_source else "projected",
+        "workCondensationSourceDetail": (work_source or {}).get("source", ""),
+        "workCondensationSourceUrl": (work_source or {}).get("url", ""),
+        "ownedCount": 1,
+        "breedable": bool(pal.get("breedable", True)),
+        "uniqueOnly": bool(pal.get("uniqueOnly", False)),
+        "plannerPassives": sorted(passives),
+        "plannerPassiveSpeedScore": score_parts["total"],
+        "plannerPassiveScoreParts": score_parts,
+        "plannerLocation": location,
+        "plannerCondensationStars": as_int(row.get("condensation_stars")),
+        "plannerLevel": as_int(row.get("level")),
+        "plannerGender": row.get("gender", ""),
+        "plannerInstanceId": row.get("instance_id", ""),
+        "rightNow": True,
+    }
+
+
 def module_status() -> dict[str, str]:
-    return {"state": "ready", "message": "Work suitability data and recommendations are available."}
+    return {"state": "ready", "message": "Work suitability and owned worker scoring are available."}
