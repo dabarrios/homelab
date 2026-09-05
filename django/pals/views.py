@@ -118,7 +118,7 @@ def options(request):
 @login_required
 @require_GET
 def work_suitability(request):
-    return JsonResponse(optimizer.work_suitability_payload(
+    return JsonResponse(work_service.work_suitability_payload(
         owner=request.GET.get("owner", ""),
         selected_work=request.GET.get("work", ""),
         include_self_breeders=request.GET.get("includeSelfBreeders", "1") not in {"0", "false", "False"},

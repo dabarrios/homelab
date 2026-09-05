@@ -455,3 +455,10 @@ class DataStore:
 
 
 STORE = DataStore()
+
+
+def module_status() -> dict[str, str]:
+    return {
+        "state": "ready",
+        "message": f"Loaded {len(STORE.roster)} Pals across {len(STORE.owners)} owners.",
+    }

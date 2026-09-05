@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import os
 import json
 import math
 import re
-import shutil
-import subprocess
 import threading
 import zipfile
 from datetime import datetime
@@ -13,7 +10,7 @@ from dataclasses import dataclass, replace
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from itertools import combinations, product
 from pathlib import Path
-from urllib.parse import parse_qs, unquote, urlparse
+from urllib.parse import parse_qs, urlparse
 
 from .data import (
     ANALYZER,
@@ -21,6 +18,7 @@ from .data import (
     BASE_LABELS_FILE,
     BLUE_PASSIVES,
     BREEDING,
+    BreedPal,
     DATA_ROOT,
     DataStore,
     GOLD_PASSIVES,
@@ -71,7 +69,53 @@ from .data import (
     split_passives,
 )
 from .bases import load_base_labels, save_base_labels
+from .work import (
+    pal_image_path,
+    icon_url_for_key,
+    species_meta,
+    species_types_for_key,
+    WORK_ORDER_INDEX,
+    ordered_work_keys,
+    condensation_rank_targets,
+    load_work_overrides,
+    WORK_SUITABILITY_OVERRIDES,
+    work_override_for,
+    palpedia_entry_for,
+    work_for_pal,
+    work_source_for,
+    projected_fully_condensed_work_levels,
+    fully_condensed_work_levels,
+    pal_size_for,
+    owned_species_counts,
+    work_entries,
+    card_final_level,
+    requires_owned_seed_for_breeding,
+    work_recommendations,
+    work_suitability_payload,
+)
 from .ivs import available_implant_passives, load_implant_inventory, save_implant_inventory
+from .saves import (
+    copy_full_save_to_workspace,
+    decode_failure_detail,
+    decoder_setup_error,
+    empty_dps_json,
+    expand_zip_upload,
+    live_save_files,
+    live_save_fingerprint,
+    live_save_status,
+    multipart_files,
+    persist_live_state,
+    refresh_live_save,
+    register_refresh_hook,
+    reset_directory,
+    run_decode_from_level,
+    run_decode_from_save_dir,
+    run_decode_workspace,
+    safe_upload_relative_path,
+    save_uploaded_files,
+    shortest_file_match,
+    wsl_path,
+)
 
 
 @dataclass(frozen=True)
@@ -118,320 +162,6 @@ class State:
         return self.defense_iv / max(1, self.iv_sources)
 
 
-def pal_image_path(name: str) -> Path | None:
-    safe_name = Path(name).name
-    for root in (LOCAL_PAL_IMAGES, PAL_IMAGES):
-        try:
-            file_path = (root / safe_name).resolve()
-            root_path = root.resolve()
-        except OSError:
-            continue
-        if str(file_path).startswith(str(root_path)) and file_path.exists():
-            return file_path
-    return None
-
-
-def icon_url_for_key(key: str) -> str | None:
-    for suffix in (".png", ".webp"):
-        name = f"{key}{suffix}"
-        if pal_image_path(name):
-            return f"/assets/pals/{name}"
-    return None
-
-
-def species_meta() -> dict[str, dict]:
-    return {
-        pal.get("name", ""): {
-            "key": pal.get("key", ""),
-            "types": pal.get("types", []),
-            "icon": icon_url_for_key(pal.get("key", "")),
-        }
-        for pal in STORE.breeding_data.get("pals", [])
-        if pal.get("name")
-    }
-
-
-def species_types_for_key(key: str) -> list[str]:
-    for pal in STORE.breeding_data.get("pals", []):
-        if pal.get("key") == key:
-            return pal.get("types", [])
-    return []
-
-
-WORK_ORDER_INDEX = {key: idx for idx, key in enumerate(WORK_LABELS)}
-
-
-def ordered_work_keys(work: dict) -> list[str]:
-    return [key for key in WORK_LABELS if as_int(work.get(key)) > 0]
-
-
-def condensation_rank_targets(work: dict) -> list[str]:
-    keys = ordered_work_keys(work)
-    if not keys:
-        return []
-    ranked = sorted(keys, key=lambda key: (-as_int(work.get(key)), WORK_ORDER_INDEX[key]))
-    return [ranked[idx % len(ranked)] for idx in range(3)]
-
-
-def load_work_overrides() -> dict[str, dict]:
-    if not WORK_OVERRIDES.exists():
-        return {}
-    try:
-        data = json.loads(WORK_OVERRIDES.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return {match_key(name): value for name, value in (data.get("overrides") or {}).items()}
-
-
-WORK_SUITABILITY_OVERRIDES = load_work_overrides()
-
-
-def work_override_for(name: str) -> dict | None:
-    override = WORK_SUITABILITY_OVERRIDES.get(match_key(name))
-    if isinstance(override, dict):
-        return override
-    return None
-
-
-def palpedia_entry_for(name: str) -> dict | None:
-    entry = getattr(STORE, "palpedia_work", {}).get(match_key(name))
-    if isinstance(entry, dict):
-        return entry
-    return None
-
-
-def work_for_pal(pal: dict) -> dict:
-    entry = palpedia_entry_for(pal.get("name", ""))
-    if entry:
-        return entry.get("baseWork") or {}
-    return pal.get("work") or {}
-
-
-def work_source_for(name: str) -> dict | None:
-    entry = palpedia_entry_for(name)
-    if entry:
-        source = getattr(STORE, "palpedia_work_source", {}) or {}
-        fetched = source.get("fetchedAt", "")
-        detail = source.get("source", "Palpedia.net Work Suitability")
-        if fetched:
-            detail = f"{detail}, fetched {fetched}"
-        return {"source": detail, "url": source.get("sourceUrl", "")}
-    return work_override_for(name)
-
-
-def projected_fully_condensed_work_levels(work: dict) -> dict[str, int]:
-    levels = {key: as_int(work.get(key)) for key in ordered_work_keys(work)}
-    for key in condensation_rank_targets(work):
-        levels[key] = min(10, levels[key] + 1)
-    for key in list(levels):
-        levels[key] = min(10, levels[key] + 1)
-    return levels
-
-
-def fully_condensed_work_levels(work: dict, name: str = "") -> dict[str, int]:
-    entry = palpedia_entry_for(name)
-    if entry:
-        verified = entry.get("fullyCondensedWork") or {}
-        return {key: as_int(verified.get(key)) for key in WORK_LABELS if as_int(verified.get(key)) > 0}
-    override = work_override_for(name)
-    if not override:
-        return {}
-    verified = override.get("fullyCondensedWork") or {}
-    return {key: as_int(verified.get(key)) for key in WORK_LABELS if as_int(verified.get(key)) > 0}
-
-
-def pal_size_for(name: str) -> str:
-    entry = palpedia_entry_for(name)
-    size = str((entry or {}).get("size") or "").strip().upper()
-    if size in VALID_PAL_SIZES:
-        return size
-    return "Unknown"
-
-
-def owned_species_counts(owner: str) -> dict[str, int]:
-    counts: dict[str, int] = {}
-    for row in STORE.roster:
-        if owner and row.get("owner") != owner:
-            continue
-        species = normalize_species(row.get("species", ""))
-        if not species:
-            continue
-        counts[species] = counts.get(species, 0) + 1
-    return counts
-
-
-def work_entries(work: dict, name: str = "") -> list[dict]:
-    entries = []
-    condensed_levels = fully_condensed_work_levels(work, name)
-    projected_levels = projected_fully_condensed_work_levels(work)
-    for key, label in sorted(WORK_LABELS.items(), key=lambda item: item[1]):
-        level = as_int(work.get(key))
-        if level <= 0:
-            continue
-        entries.append({
-            "key": key,
-            "label": label,
-            "level": level,
-            "fullyCondensedLevel": condensed_levels.get(key),
-            "projectedFullyCondensedLevel": projected_levels.get(key),
-        })
-    return entries
-
-
-def card_final_level(card: dict) -> int:
-    return as_int(card.get("selectedFullyCondensedLevel") or card.get("selectedLevel"))
-
-
-def requires_owned_seed_for_breeding(species_key: str) -> bool:
-    pairs = STORE.parent_pairs_for_child(species_key)
-    return bool(pairs) and all(a == species_key and b == species_key for a, b in pairs)
-
-
-def work_recommendations(cards: list[dict], selected_work: str, include_self_breeders: bool = True) -> list[dict]:
-    if not cards:
-        return []
-    pick_pool = cards if include_self_breeders else [card for card in cards if not card.get("requiresOwnedSeed")]
-    pick_pool = pick_pool or cards
-
-    def best(sort_key):
-        return sorted(pick_pool, key=sort_key)[0]
-
-    popular_name = POPULAR_WORK_PICKS.get(selected_work)
-    popular = next((card for card in pick_pool if card.get("name") == popular_name), None) if popular_name else None
-    practical = popular or best(lambda card: (
-        -card_final_level(card),
-        0 if card.get("size") in {"S", "M"} else 1 if card.get("size") in {"XS", "L"} else 2,
-        card.get("workCount", 99),
-        0 if card.get("ownedCount") else 1,
-        card.get("name", ""),
-    ))
-    def best_for_sizes(sizes: set[str]) -> dict | None:
-        pool = [card for card in pick_pool if card.get("size") in sizes]
-        return sorted(pool, key=lambda card: (
-            -card_final_level(card),
-            -as_int(card.get("selectedLevel")),
-            card.get("workCount", 99),
-            0 if card.get("ownedCount") else 1,
-            SIZE_ORDER.get(card.get("size"), 99),
-            card.get("name", ""),
-        ))[0] if pool else None
-    dark_pool = [card for card in pick_pool if any("dark" == str(type_name).lower() for type_name in card.get("types", []))]
-
-    specs = [
-        ("recommended", "Recommended", "Common practical choice for this work skill." if popular else "Best practical mix of final level, footprint, focus, and ownership.", practical),
-        ("dark", "Best Dark", "Best dark-type option for this work skill; dark Pals do not need Insomnia for night uptime.", sorted(dark_pool, key=lambda card: (
-            -card_final_level(card),
-            -as_int(card.get("selectedLevel")),
-            0 if card.get("size") in {"S", "M"} else 1 if card.get("size") in {"XS", "L"} else 2,
-            card.get("workCount", 99),
-            0 if card.get("ownedCount") else 1,
-            card.get("name", ""),
-        ))[0] if dark_pool else None),
-        ("xl", "Best XL", "Highest selected work level among XL Pals.", best_for_sizes({"XL"})),
-        ("large", "Best L", "Highest selected work level among L Pals.", best_for_sizes({"L"})),
-        ("medium", "Best Medium", "Highest selected work level among Medium (M) Pals.", best_for_sizes({"M"})),
-        ("small", "Best Small", "Highest selected work level among Small (S) Pals.", best_for_sizes({"S"})),
-        ("xs", "Best XS", "Highest selected work level among Extra Small (XS) Pals.", best_for_sizes({"XS"})),
-    ]
-    seen = set()
-    recommendations = []
-    for role, title, reason, card in specs:
-        if not card:
-            continue
-        recommendations.append({
-            "role": role,
-            "title": title,
-            "reason": reason,
-            "card": card,
-            "duplicate": card.get("name") in seen,
-        })
-        seen.add(card.get("name"))
-    return recommendations
-
-
-def work_suitability_payload(owner: str = "", selected_work: str = "", include_self_breeders: bool = True) -> dict:
-    if selected_work not in WORK_LABELS:
-        return {
-            "error": "Choose a work skill.",
-            "groups": [],
-            "recommendations": [],
-            "selectedWork": "",
-            "selectedWorkLabel": "",
-            "total": 0,
-            "verifiedCondensationCount": 0,
-        }
-    counts = owned_species_counts(owner)
-    cards = []
-    for pal in STORE.breeding_data.get("pals", []):
-        work = work_for_pal(pal)
-        level = as_int(work.get(selected_work))
-        if level <= 0:
-            continue
-        name = pal.get("name", "")
-        size = pal_size_for(name)
-        entries = work_entries(work, name)
-        condensed_levels = fully_condensed_work_levels(work, name)
-        projected_levels = projected_fully_condensed_work_levels(work)
-        work_source = work_source_for(name)
-        requires_seed = requires_owned_seed_for_breeding(pal.get("key", ""))
-        owned_count = counts.get(name, 0)
-        cards.append({
-            "key": pal.get("key", ""),
-            "name": name,
-            "types": pal.get("types", []),
-            "icon": icon_url_for_key(pal.get("key", "")),
-            "size": size,
-            "sizeGroup": SIZE_GROUPS.get(size, "Unknown Size"),
-            "sizeKnown": size != "Unknown",
-            "selectedWork": selected_work,
-            "selectedWorkLabel": WORK_LABELS[selected_work],
-            "selectedLevel": level,
-            "selectedFullyCondensedLevel": condensed_levels.get(selected_work),
-            "selectedProjectedFullyCondensedLevel": projected_levels.get(selected_work),
-            "work": entries,
-            "workCount": len(entries),
-            "workCondensationSource": "verified" if work_source else "projected",
-            "workCondensationSourceDetail": (work_source or {}).get("source", ""),
-            "workCondensationSourceUrl": (work_source or {}).get("url", ""),
-            "ownedCount": owned_count,
-            "breedable": bool(pal.get("breedable", True)),
-            "uniqueOnly": bool(pal.get("uniqueOnly", False)),
-            "requiresOwnedSeed": requires_seed,
-            "unavailableReason": f"It looks like you need to tame or capture {name} first. Once you own one, come back and self-breed it." if requires_seed and not owned_count else "",
-        })
-    if not include_self_breeders:
-        cards = [card for card in cards if not card["requiresOwnedSeed"]]
-    cards.sort(key=lambda item: (
-        SIZE_ORDER.get(item["size"], 99),
-        -card_final_level(item),
-        -as_int(item.get("selectedLevel")),
-        item["workCount"],
-        0 if item.get("ownedCount") else 1,
-        item["name"],
-    ))
-    grouped: dict[str, list[dict]] = {}
-    for card in cards:
-        grouped.setdefault(card["sizeGroup"], []).append(card)
-    group_order = ["Extra Small", "Small", "Medium", "Large", "Extra Large", "Unknown Size"]
-    groups = [
-        {"title": title, "cards": grouped.get(title, [])}
-        for title in group_order
-        if grouped.get(title)
-    ]
-    return {
-        "workTypes": [{"key": key, "label": label} for key, label in sorted(WORK_LABELS.items(), key=lambda item: item[1])],
-        "selectedWork": selected_work,
-        "selectedWorkLabel": WORK_LABELS[selected_work],
-        "owner": owner,
-        "groups": groups,
-        "recommendations": work_recommendations(cards, selected_work, include_self_breeders=include_self_breeders),
-        "includeSelfBreeders": include_self_breeders,
-        "total": len(cards),
-        "knownSizeCount": sum(1 for card in cards if card["sizeKnown"]),
-        "verifiedCondensationCount": sum(1 for card in cards if card["workCondensationSource"] == "verified"),
-        "condensationNote": "Work Suitability uses Palpedia.net base and condenser-star data when available. Missing species fall back to bundled base work levels and are marked Needs verification.",
-        "sizeSourceNote": "Size uses Palpedia species metadata. Unknown size means the species was missing or had no recognized size in the synced Palpedia data.",
-    }
 
 
 def normalized_item_text(value: str) -> str:
@@ -520,6 +250,14 @@ def ranch_drops_payload(owner: str = "", include_self_breeders: bool = True) -> 
 
 
 BASE_WORK_CACHE = {"mtime": None, "payload": None}
+
+
+def clear_base_work_cache() -> None:
+    BASE_WORK_CACHE["payload"] = None
+    BASE_WORK_CACHE["mtime"] = None
+
+
+register_refresh_hook(clear_base_work_cache)
 
 
 def guid_text(value) -> str:
@@ -2372,407 +2110,6 @@ def serialize_state(s: State, target: frozenset[str], allowed: frozenset[str], i
     }
 
 
-
-
-def empty_dps_json() -> dict:
-    return {"properties": {"SaveParameterArray": {"value": {"values": []}}}}
-
-
-def safe_upload_relative_path(name: str) -> Path:
-    cleaned = unquote(name or "upload.bin").replace("\\", "/")
-    parts = []
-    for part in cleaned.split("/"):
-        if not part or part in {".", ".."} or ":" in part:
-            continue
-        parts.append(part)
-    return Path(*parts) if parts else Path("upload.bin")
-
-
-def reset_directory(path: Path) -> None:
-    if path.exists():
-        def clear_readonly(func, target, _exc_info):
-            try:
-                os.chmod(target, 0o700)
-            except OSError:
-                pass
-            func(target)
-        shutil.rmtree(path, onerror=clear_readonly)
-    path.mkdir(parents=True, exist_ok=True)
-
-
-def multipart_files(content_type: str, body: bytes) -> list[tuple[str, bytes]]:
-    match = re.search(r"boundary=(?:\"([^\"]+)\"|([^;]+))", content_type or "")
-    if not match:
-        raise ValueError("Missing multipart boundary")
-    boundary = (match.group(1) or match.group(2)).encode("utf-8")
-    files = []
-    for part in body.split(b"--" + boundary):
-        part = part.strip(b"\r\n")
-        if not part or part == b"--" or part.endswith(b"--") and len(part) == 2:
-            continue
-        if b"\r\n\r\n" not in part:
-            continue
-        raw_headers, data = part.split(b"\r\n\r\n", 1)
-        headers = raw_headers.decode("latin-1", errors="ignore")
-        disposition = next((line for line in headers.split("\r\n") if line.lower().startswith("content-disposition:")), "")
-        filename_match = re.search(r'filename="((?:\\"|[^"])*)"', disposition)
-        if not filename_match:
-            continue
-        filename = filename_match.group(1).replace('\\"', '"')
-        payload = data.rstrip(b"\r\n")
-        rel = safe_upload_relative_path(filename)
-        if not rel.suffix and not payload:
-            continue
-        files.append((filename, payload))
-    return files
-
-
-def save_uploaded_files(files: list[tuple[str, bytes]], stamp: str) -> Path:
-    upload_dir = UPLOADS / f"save-{stamp}"
-    reset_directory(upload_dir)
-    for filename, data in files:
-        rel = safe_upload_relative_path(filename)
-        dest = (upload_dir / rel).resolve()
-        if not str(dest).startswith(str(upload_dir.resolve())):
-            continue
-        if dest.exists() and dest.is_dir():
-            continue
-        if not rel.suffix and not data:
-            continue
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_bytes(data)
-    return upload_dir
-
-
-def expand_zip_upload(zip_path: Path, stamp: str) -> Path:
-    extract_dir = UPLOADS / f"save-{stamp}-zip"
-    reset_directory(extract_dir)
-    with zipfile.ZipFile(zip_path) as zf:
-        for info in zf.infolist():
-            if info.is_dir():
-                continue
-            rel = safe_upload_relative_path(info.filename)
-            dest = (extract_dir / rel).resolve()
-            if not str(dest).startswith(str(extract_dir.resolve())):
-                continue
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_bytes(zf.read(info))
-    return extract_dir
-
-
-def shortest_file_match(root: Path, predicate) -> Path | None:
-    matches = [p for p in root.rglob("*") if p.is_file() and predicate(p)]
-    if not matches:
-        return None
-    return min(matches, key=lambda p: (len(p.relative_to(root).parts), len(str(p))))
-
-
-def copy_full_save_to_workspace(source_dir: Path, include_dps: bool = True) -> dict:
-    reset_directory(WORK)
-    if ANALYZER.exists():
-        shutil.copy2(ANALYZER, WORK / "analyze_pal_breeding.py")
-
-    level = shortest_file_match(source_dir, lambda p: p.name.lower() == "level.sav")
-    if not level:
-        return {"ok": False, "error": "No Level.sav found in upload"}
-    shutil.copy2(level, WORK / "Level.sav")
-
-    players_dir = WORK / "Players"
-    players_dir.mkdir(parents=True, exist_ok=True)
-    copied_players = 0
-    copied_dps = 0
-    save_root = level.parent
-    source_players = save_root / "Players"
-    candidate_saves = list(source_players.glob("*.sav")) if source_players.exists() else []
-    if not candidate_saves:
-        candidate_saves = [
-            sav for sav in source_dir.rglob("*.sav")
-            if "players" in {part.lower() for part in sav.relative_to(source_dir).parts[:-1]} and "backup" not in {part.lower() for part in sav.relative_to(source_dir).parts[:-1]}
-        ]
-    for sav in sorted(candidate_saves):
-        name = sav.name.lower()
-        if name == "level.sav":
-            continue
-        if name.endswith("_dps.sav"):
-            if not include_dps:
-                continue
-            shutil.copy2(sav, players_dir / sav.name)
-            copied_dps += 1
-        else:
-            shutil.copy2(sav, players_dir / sav.name)
-            copied_players += 1
-    (WORK / "dps.json").write_text(json.dumps(empty_dps_json()), encoding="utf-8")
-    return {"ok": True, "level": str(level), "players": copied_players, "dps": copied_dps}
-
-
-def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None, include_dps: bool = True) -> dict:
-    if ANALYZER.exists():
-        shutil.copy2(ANALYZER, WORK / "analyze_pal_breeding.py")
-    (WORK / "dps.json").write_text(json.dumps(empty_dps_json()), encoding="utf-8")
-
-    setup_error = decoder_setup_error()
-    if setup_error:
-        return {
-            "ok": False,
-            "error": "Decoder setup incomplete",
-            "errorDetail": setup_error,
-        }
-
-    w_work = wsl_path(WORK)
-    w_tools = wsl_path(TOOLS)
-    commands = [
-        f"cd {w_tools}",
-        ". .wsl-venv/bin/activate",
-        f"export PALWORLD_PARSER_ASSETS_DIR={w_tools}/palworld-server-tool/web/src/assets",
-        f"python3 palworld-server-tool/sav_cli/sav_cli.py -f {w_work}/Level.sav -o {w_work}/structure.json",
-        f"palsav convert {w_work}/Level.sav --to-json -o {w_work}/Level.full.json --force",
-    ]
-    players_dir = WORK / "Players"
-    if players_dir.exists():
-        for sav in sorted(players_dir.glob("*.sav")):
-            if sav.name.lower().endswith("_dps.sav"):
-                continue
-            commands.append(f'palsav convert "{wsl_path(sav)}" --to-json -o "{wsl_path(sav.with_suffix(".json"))}" --force')
-        dps_savs = sorted(players_dir.glob("*_dps.sav")) if include_dps else []
-        if dps_savs:
-            commands.append(f'palsav convert "{wsl_path(dps_savs[0])}" --to-json -o {w_work}/dps.decoded.json --force && mv {w_work}/dps.decoded.json {w_work}/dps.json || echo "WARN: DPS decode failed for {dps_savs[0].name}; continuing with empty DPS"')
-    commands.extend([
-        f"cd {w_work}",
-        "python3 analyze_pal_breeding.py",
-    ])
-    command = " && ".join(commands)
-    proc = subprocess.run(
-        ["wsl", "bash", "-lc", command],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        timeout=300,
-    )
-    if proc.returncode != 0:
-        detail = decode_failure_detail(proc.stdout, proc.stderr)
-        return {
-            "ok": False,
-            "error": "Decode failed",
-            "errorDetail": detail,
-            "stdout": proc.stdout[-4000:],
-            "stderr": proc.stderr[-4000:],
-            "returnCode": proc.returncode,
-        }
-
-    copied = []
-    for src_name, dest in [
-        ("pal_roster.csv", DATA_ROOT / "pal_roster.csv"),
-        ("passive_inventory.csv", DATA_ROOT / "passive_inventory.csv"),
-        ("breeding_report.md", REPORTS_ROOT / "breeding_report.md"),
-    ]:
-        src = WORK / src_name
-        if src.exists():
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src, dest)
-            copied.append(str(dest.relative_to(ROOT)))
-
-    STORE.reload()
-    BASE_WORK_CACHE["payload"] = None
-    BASE_WORK_CACHE["mtime"] = None
-    return {
-        "ok": True,
-        "uploaded": uploaded_label,
-        "input": input_summary or {},
-        "copied": copied,
-        "rosterCount": len(STORE.roster),
-        "owners": STORE.owners,
-        "stdout": proc.stdout[-2000:],
-    }
-
-
-def decoder_setup_error() -> str | None:
-    required = [
-        TOOLS / ".wsl-venv" / "bin" / "activate",
-        TOOLS / "palworld-server-tool" / "sav_cli" / "sav_cli.py",
-        TOOLS / "PalSav" / "pyproject.toml",
-    ]
-    missing = []
-    for path in required:
-        try:
-            exists = path.exists()
-        except OSError:
-            exists = False
-        if not exists:
-            missing.append(path)
-    if not missing:
-        try:
-            proc = subprocess.run(
-                ["wsl", "bash", "-lc", f"cd {wsl_path(TOOLS)} && test -x .wsl-venv/bin/python3"],
-                cwd=ROOT,
-                text=True,
-                capture_output=True,
-                timeout=15,
-            )
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            return f"unable to verify WSL parser Python; rebuild parser tools with the WSL venv setup command in README.md ({exc})"
-        if proc.returncode == 0:
-            return None
-        detail = decode_failure_detail(proc.stdout, proc.stderr)
-        return f"missing {TOOLS / '.wsl-venv' / 'bin' / 'python3'}; rebuild parser tools with the WSL venv setup command in README.md ({detail})"
-    first = missing[0]
-    return f"missing {first}; rebuild parser tools with the WSL venv setup command in README.md"
-
-
-def decode_failure_detail(stdout: str, stderr: str) -> str:
-    lines = []
-    for text in (stderr, stdout):
-        for line in text.splitlines():
-            line = line.strip()
-            if line:
-                lines.append(line)
-    if not lines:
-        return "decoder exited without output"
-
-    interesting = [
-        line for line in lines
-        if (
-            "error" in line.lower()
-            or "failed" in line.lower()
-            or "traceback" in line.lower()
-            or "not found" in line.lower()
-            or "no such file" in line.lower()
-            or "command not found" in line.lower()
-        )
-    ]
-    chosen = interesting[-1] if interesting else lines[-1]
-    return chosen[-500:]
-
-
-def run_decode_from_save_dir(source_dir: Path, uploaded_label: str, include_dps: bool = True) -> dict:
-    prepared = copy_full_save_to_workspace(source_dir, include_dps=include_dps)
-    if not prepared.get("ok"):
-        return prepared
-    prepared["dpsSkipped"] = not include_dps
-    return run_decode_workspace(uploaded_label, prepared, include_dps=include_dps)
-
-def wsl_path(path: Path) -> str:
-    resolved = path.resolve()
-    drive = resolved.drive.rstrip(":").lower()
-    rest = resolved.as_posix()[3:]
-    return f"/mnt/{drive}/{rest}"
-
-
-def run_decode_from_level(upload_path: Path) -> dict:
-    if not upload_path.exists():
-        return {"ok": False, "error": f"Upload not found: {upload_path}"}
-    WORK.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(upload_path, WORK / "Level.sav")
-    return run_decode_workspace(str(upload_path.relative_to(ROOT)), {"levelOnly": True})
-
-
-def live_save_files() -> list[Path]:
-    if LIVE_SAVE_DIR is None:
-        return []
-    if not LIVE_SAVE_DIR.exists():
-        return []
-    files: list[Path] = []
-    level = LIVE_SAVE_DIR / "Level.sav"
-    if level.is_file():
-        files.append(level)
-    players = LIVE_SAVE_DIR / "Players"
-    if players.exists():
-        files.extend(sorted(p for p in players.glob("*.sav") if p.is_file()))
-    return files
-
-
-def live_save_fingerprint() -> tuple[str, int, float]:
-    entries = []
-    latest_modified = 0.0
-    for file_path in live_save_files():
-        try:
-            stat = file_path.stat()
-        except OSError:
-            continue
-        latest_modified = max(latest_modified, stat.st_mtime)
-        rel = file_path.relative_to(LIVE_SAVE_DIR).as_posix() if LIVE_SAVE_DIR is not None else file_path.name
-        entries.append(f"{rel}:{stat.st_size}:{stat.st_mtime_ns}")
-    return "|".join(sorted(entries)), len(entries), latest_modified
-
-
-def persist_live_state() -> None:
-    LIVE_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    LIVE_STATE_FILE.write_text(json.dumps(LIVE_STATE, indent=2), encoding="utf-8")
-
-
-def live_save_status() -> dict:
-    if LIVE_SAVE_DIR is None:
-        return {
-            "ok": False,
-            "configured": False,
-            "path": "",
-            "exists": False,
-            "levelExists": False,
-            "fingerprint": "",
-            "fileCount": 0,
-            "latestModified": 0.0,
-            "lastRefreshFingerprint": LIVE_STATE["last_refresh_fingerprint"],
-            "lastRefreshAt": LIVE_STATE["last_refresh_at"],
-            "refreshing": LIVE_LOCK.locked(),
-            "lastResult": LIVE_STATE["last_result"],
-        }
-    exists = LIVE_SAVE_DIR.exists()
-    level_exists = (LIVE_SAVE_DIR / "Level.sav").is_file()
-    fingerprint, file_count, latest_modified = live_save_fingerprint() if exists else ("", 0, 0.0)
-    return {
-        "ok": exists and level_exists,
-        "configured": True,
-        "path": str(LIVE_SAVE_DIR),
-        "exists": exists,
-        "levelExists": level_exists,
-        "fingerprint": fingerprint,
-        "fileCount": file_count,
-        "latestModified": latest_modified,
-        "lastRefreshFingerprint": LIVE_STATE["last_refresh_fingerprint"],
-        "lastRefreshAt": LIVE_STATE["last_refresh_at"],
-        "refreshing": LIVE_LOCK.locked(),
-        "lastResult": LIVE_STATE["last_result"],
-    }
-
-
-def refresh_live_save(force: bool = False) -> dict:
-    if LIVE_SAVE_DIR is None:
-        status = live_save_status()
-        status.update({"ok": False, "refreshing": False, "error": "PALWORLD_LIVE_SAVE_DIR is not configured."})
-        return status
-    if not LIVE_LOCK.acquire(blocking=False):
-        status = live_save_status()
-        status.update({"ok": False, "refreshing": True, "error": "Live save refresh already running"})
-        return status
-    try:
-        before = live_save_status()
-        if not before["ok"]:
-            before.update({"ok": False, "refreshing": False, "error": "Live save folder or Level.sav was not found"})
-            return before
-        if not force:
-            before.update({"ok": True, "refreshing": False, "skipped": True, "message": "Auto refresh is disabled. Use Sync Save to refresh manually."})
-            return before
-        if before["fingerprint"] == LIVE_STATE["last_refresh_fingerprint"]:
-            before.update({"ok": True, "refreshing": False, "skipped": True, "message": "Live save is already current"})
-            return before
-        result = run_decode_from_save_dir(LIVE_SAVE_DIR, "live-save", include_dps=False)
-        after = live_save_status()
-        after["refreshing"] = False
-        if result.get("ok"):
-            LIVE_STATE["last_refresh_fingerprint"] = after["fingerprint"]
-            LIVE_STATE["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
-        LIVE_STATE["last_result"] = {
-            "ok": bool(result.get("ok")),
-            "rosterCount": result.get("rosterCount"),
-            "error": result.get("error"),
-            "errorDetail": result.get("errorDetail"),
-            "at": datetime.now().isoformat(timespec="seconds"),
-        }
-        if result.get("ok"):
-            persist_live_state()
-        result["live"] = {**after, "lastRefreshFingerprint": LIVE_STATE["last_refresh_fingerprint"], "lastRefreshAt": LIVE_STATE["last_refresh_at"], "lastResult": LIVE_STATE["last_result"]}
-        return result
-    finally:
-        LIVE_LOCK.release()
 
 
 class Handler(BaseHTTPRequestHandler):

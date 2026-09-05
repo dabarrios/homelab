@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
-from pals.services import optimizer
+from pals.services import data, optimizer, work
 
 
 class PalsRouteTest(TestCase):
@@ -61,7 +61,7 @@ class PalsRouteTest(TestCase):
     def test_live_save_status_is_opt_in(self):
         self.client.force_login(self.user)
 
-        with patch("pals.services.optimizer.LIVE_SAVE_DIR", None):
+        with patch("pals.services.saves.LIVE_SAVE_DIR", None):
             response = self.client.get(reverse("pals:api_live_save_status"))
 
         self.assertEqual(response.status_code, 200)
@@ -201,7 +201,7 @@ class PassiveColorOverrideTest(SimpleTestCase):
                 encoding="utf-8",
             )
 
-            with patch.object(optimizer, "BREEDING", breeding), patch.object(optimizer, "ROSTER", roster), patch.object(optimizer, "PASSIVE_INVENTORY", passive_inventory), patch.object(optimizer, "SKILL_METADATA", skill), patch.object(optimizer, "PASSIVE_COLOR_OVERRIDES_FILE", root / "overrides.json"):
+            with patch.object(data, "BREEDING", breeding), patch.object(data, "ROSTER", roster), patch.object(data, "PASSIVE_INVENTORY", passive_inventory), patch.object(data, "SKILL_METADATA", skill), patch.object(data, "PASSIVE_COLOR_OVERRIDES_FILE", root / "overrides.json"):
                 store = optimizer.DataStore()
 
         self.assertIn("Dimensional Leap", store.passives)
@@ -223,8 +223,43 @@ class PassiveColorOverrideTest(SimpleTestCase):
             path = Path(tmp) / "passive_color_overrides.json"
             path.write_text('{"Serenity": "positive"}', encoding="utf-8")
 
-            with patch.object(optimizer, "PASSIVE_COLOR_OVERRIDES_FILE", path):
+            with patch.object(data, "PASSIVE_COLOR_OVERRIDES_FILE", path):
                 meta = optimizer.build_passive_meta(["Serenity"])
 
         self.assertEqual(meta["Serenity"]["tone"], "positive")
         self.assertEqual(meta["Serenity"]["toneSource"], "override")
+
+
+class WorkSuitabilityTest(SimpleTestCase):
+    def test_owner_and_self_breeder_filters_preserve_verified_levels(self):
+        store = SimpleNamespace(
+            roster=[
+                {"owner": "Alice", "species": "Worker"},
+                {"owner": "Bob", "species": "Worker"},
+            ],
+            breeding_data={"pals": [
+                {"key": "worker", "name": "Worker", "work": {"mining": 1}},
+                {"key": "seed", "name": "Seed", "work": {"mining": 2}},
+            ]},
+            palpedia_work={"worker": {
+                "baseWork": {"mining": 3},
+                "fullyCondensedWork": {"mining": 7},
+                "size": "M",
+            }},
+            parent_pairs_for_child=lambda key: [(key, key)] if key == "seed" else [("a", "b")],
+        )
+        with patch.object(work, "STORE", store), patch.object(work, "WORK_SUITABILITY_OVERRIDES", {}), patch.object(work, "icon_url_for_key", return_value=None):
+            payload = work.work_suitability_payload("Alice", "mining", False)
+            all_pals = work.work_suitability_payload("Alice", "mining", True)
+
+        self.assertEqual(payload["total"], 1)
+        card = payload["groups"][0]["cards"][0]
+        self.assertEqual(card["ownedCount"], 1)
+        self.assertEqual(card["selectedLevel"], 3)
+        self.assertEqual(card["selectedFullyCondensedLevel"], 7)
+        self.assertEqual(payload["verifiedCondensationCount"], 1)
+        self.assertEqual(all_pals["total"], 2)
+        seed = next(card for group in all_pals["groups"] for card in group["cards"] if card["key"] == "seed")
+        self.assertTrue(seed["requiresOwnedSeed"])
+        self.assertIsNone(seed["selectedFullyCondensedLevel"])
+        self.assertEqual(seed["selectedProjectedFullyCondensedLevel"], 6)
