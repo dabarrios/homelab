@@ -421,3 +421,31 @@ class ParserRuntimeTests(SimpleTestCase):
             self.assertEqual(command[:4], ["docker", "exec", "parser-test", "sh"])
             self.assertIn("/shared/decode/Level.sav", command[-1])
             self.assertIn("/shared/decode/Players/player.sav", command[-1])
+
+
+class CanonicalReferenceDataTests(SimpleTestCase):
+    def test_catalogs_load_without_generated_or_owned_data(self):
+        with tempfile.TemporaryDirectory() as directory:
+            missing = Path(directory)
+            with (
+                patch.object(data, "ROSTER", missing / "pal_roster.csv"),
+                patch.object(data, "PASSIVE_INVENTORY", missing / "passive_inventory.csv"),
+                patch.object(data, "PALPEDIA_WORK", missing / "palpedia_work_suitability.json"),
+                patch.object(data, "PASSIVE_COLOR_OVERRIDES_FILE", missing / "passive_colors.json"),
+            ):
+                store = data.DataStore()
+
+        self.assertEqual(len(store.pals), 299)
+        self.assertIn("Jetragon", store.species_names)
+        self.assertIn("Lamball", store.species_names)
+        self.assertIn("Demon\u2019s Hand", store.passives)
+        self.assertEqual(store.roster, [])
+        self.assertEqual(store.child_for("lazydragon", "eleccat"), "lazydragon_electric")
+
+    def test_reference_integrity_and_work_metadata(self):
+        keys = set(data.STORE.pals)
+        self.assertEqual(len(keys), len(data.STORE.pals))
+        self.assertTrue(all(parent in keys for combo in data.STORE.breeding_data["uniqueCombos"] for parent in combo["parents"]))
+        self.assertTrue(all(combo["child"] in keys for combo in data.STORE.breeding_data["uniqueCombos"]))
+        anubis = next(pal for pal in data.STORE.breeding_data["pals"] if pal["name"] == "Anubis")
+        self.assertEqual(anubis["work"]["mining"], 6)
