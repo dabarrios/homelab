@@ -184,9 +184,9 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
 
 def path_for_result(path: Path) -> str:
     try:
-        return str(path.relative_to(ROOT))
+        return path.relative_to(ROOT).as_posix()
     except ValueError:
-        return str(path)
+        return path.as_posix()
 
 
 def parser_runtime() -> str:
@@ -405,7 +405,7 @@ def live_save_status() -> dict:
 def refresh_live_save(force: bool = False) -> dict:
     if LIVE_SAVE_DIR is None:
         status = live_save_status()
-        status.update({"ok": False, "refreshing": False, "error": "PALWORLD_LIVE_SAVE_DIR is not configured."})
+        status.update({"ok": False, "refreshing": False, "error": "PALWORLD_LIVE_SAVE_WINDOWS_DIR or PALWORLD_LIVE_SAVE_LINUX_DIR is not configured for this platform."})
         return status
     if not LIVE_LOCK.acquire(blocking=False):
         status = live_save_status()
