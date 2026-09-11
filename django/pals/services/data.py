@@ -30,7 +30,7 @@ PALPEDIA_WORK = DATA_ROOT / "palpedia_work_suitability.json"
 ANALYZER = Path(__file__).with_name("analyze_pal_breeding.py")
 UPLOADS = LOCAL_ROOT / "uploads"
 WORK = Path(os.environ.get("PALWORLD_DECODE_WORK_DIR", LOCAL_ROOT / "decode-work"))
-TOOLS = Path(os.environ.get("PALWORLD_PARSER_TOOLS_DIR", Path.home() / "AppData" / "Local" / "Temp" / "palworld_parser_tools"))
+TOOLS = Path(os.environ.get("PALWORLD_PARSER_TOOLS_DIR", LOCAL_ROOT / "parser-tools"))
 PARSER_ASSETS = Path(os.environ.get("PALWORLD_PARSER_ASSETS_DIR", TOOLS / "palworld-server-tool" / "web" / "src" / "assets"))
 
 
