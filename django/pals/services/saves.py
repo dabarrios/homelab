@@ -9,17 +9,16 @@ import shutil
 import subprocess
 import sys
 import zipfile
-from datetime import datetime
 from pathlib import Path
 from urllib.parse import unquote
+
+from django.utils import timezone
 
 from .data import (
     ANALYZER,
     DATA_ROOT,
     LIVE_LOCK,
     LIVE_SAVE_DIR,
-    LIVE_STATE,
-    LIVE_STATE_FILE,
     PARSER_ASSETS,
     REPORTS_ROOT,
     ROOT,
@@ -30,6 +29,13 @@ from .data import (
 )
 
 _refresh_hooks = []
+
+
+def sync_state():
+    from ..models import LiveSyncState
+
+    state, _ = LiveSyncState.objects.get_or_create(pk=1)
+    return state
 
 
 def register_refresh_hook(callback) -> None:
@@ -184,9 +190,9 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
 
 def path_for_result(path: Path) -> str:
     try:
-        return str(path.relative_to(ROOT))
+        return path.relative_to(ROOT).as_posix()
     except ValueError:
-        return str(path)
+        return path.as_posix()
 
 
 def parser_runtime() -> str:
@@ -362,12 +368,8 @@ def live_save_fingerprint() -> tuple[str, int, float]:
     return "|".join(sorted(entries)), len(entries), latest_modified
 
 
-def persist_live_state() -> None:
-    LIVE_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    LIVE_STATE_FILE.write_text(json.dumps(LIVE_STATE, indent=2), encoding="utf-8")
-
-
 def live_save_status() -> dict:
+    state = sync_state()
     if LIVE_SAVE_DIR is None:
         return {
             "ok": False,
@@ -378,10 +380,11 @@ def live_save_status() -> dict:
             "fingerprint": "",
             "fileCount": 0,
             "latestModified": 0.0,
-            "lastRefreshFingerprint": LIVE_STATE["last_refresh_fingerprint"],
-            "lastRefreshAt": LIVE_STATE["last_refresh_at"],
-            "refreshing": LIVE_LOCK.locked(),
-            "lastResult": LIVE_STATE["last_result"],
+            "lastRefreshFingerprint": state.current_fingerprint,
+            "lastRefreshAt": state.last_refresh_at.isoformat() if state.last_refresh_at else "",
+            "refreshing": state.refreshing,
+            "requested": state.requested,
+            "lastResult": state.last_result,
         }
     exists = LIVE_SAVE_DIR.exists()
     level_exists = (LIVE_SAVE_DIR / "Level.sav").is_file()
@@ -395,17 +398,18 @@ def live_save_status() -> dict:
         "fingerprint": fingerprint,
         "fileCount": file_count,
         "latestModified": latest_modified,
-        "lastRefreshFingerprint": LIVE_STATE["last_refresh_fingerprint"],
-        "lastRefreshAt": LIVE_STATE["last_refresh_at"],
-        "refreshing": LIVE_LOCK.locked(),
-        "lastResult": LIVE_STATE["last_result"],
+        "lastRefreshFingerprint": state.current_fingerprint,
+        "lastRefreshAt": state.last_refresh_at.isoformat() if state.last_refresh_at else "",
+        "refreshing": state.refreshing,
+        "requested": state.requested,
+        "lastResult": state.last_result,
     }
 
 
 def refresh_live_save(force: bool = False) -> dict:
     if LIVE_SAVE_DIR is None:
         status = live_save_status()
-        status.update({"ok": False, "refreshing": False, "error": "PALWORLD_LIVE_SAVE_DIR is not configured."})
+        status.update({"ok": False, "refreshing": False, "error": "PALWORLD_LIVE_SAVE_WINDOWS_DIR or PALWORLD_LIVE_SAVE_LINUX_DIR is not configured for this platform."})
         return status
     if not LIVE_LOCK.acquire(blocking=False):
         status = live_save_status()
@@ -419,25 +423,35 @@ def refresh_live_save(force: bool = False) -> dict:
         if not force:
             before.update({"ok": True, "refreshing": False, "skipped": True, "message": "Auto refresh is disabled. Use Sync Save to refresh manually."})
             return before
-        if before["fingerprint"] == LIVE_STATE["last_refresh_fingerprint"]:
+        state = sync_state()
+        if before["fingerprint"] == state.current_fingerprint:
+            if state.requested:
+                state.requested = False
+                state.save(update_fields=["requested", "updated_at"])
             before.update({"ok": True, "refreshing": False, "skipped": True, "message": "Live save is already current"})
             return before
-        result = run_decode_from_save_dir(LIVE_SAVE_DIR, "live-save", include_dps=False)
+        state.refreshing = True
+        state.requested = False
+        state.save(update_fields=["refreshing", "requested", "updated_at"])
+        try:
+            result = run_decode_from_save_dir(LIVE_SAVE_DIR, "live-save", include_dps=False)
+        except Exception as exc:
+            result = {"ok": False, "error": "Live save sync failed", "errorDetail": str(exc)}
         after = live_save_status()
         after["refreshing"] = False
         if result.get("ok"):
-            LIVE_STATE["last_refresh_fingerprint"] = after["fingerprint"]
-            LIVE_STATE["last_refresh_at"] = datetime.now().isoformat(timespec="seconds")
-        LIVE_STATE["last_result"] = {
+            state.current_fingerprint = after["fingerprint"]
+            state.last_refresh_at = timezone.now()
+        state.refreshing = False
+        state.last_result = {
             "ok": bool(result.get("ok")),
             "rosterCount": result.get("rosterCount"),
             "error": result.get("error"),
             "errorDetail": result.get("errorDetail"),
-            "at": datetime.now().isoformat(timespec="seconds"),
+            "at": timezone.now().isoformat(timespec="seconds"),
         }
-        if result.get("ok"):
-            persist_live_state()
-        result["live"] = {**after, "lastRefreshFingerprint": LIVE_STATE["last_refresh_fingerprint"], "lastRefreshAt": LIVE_STATE["last_refresh_at"], "lastResult": LIVE_STATE["last_result"]}
+        state.save(update_fields=["current_fingerprint", "refreshing", "last_refresh_at", "last_result", "updated_at"])
+        result["live"] = {**after, "lastRefreshFingerprint": state.current_fingerprint, "lastRefreshAt": state.last_refresh_at.isoformat() if state.last_refresh_at else "", "lastResult": state.last_result}
         return result
     finally:
         LIVE_LOCK.release()
@@ -445,6 +459,26 @@ def refresh_live_save(force: bool = False) -> dict:
 
 def live_sync_available() -> bool:
     return LIVE_SAVE_DIR is not None
+
+
+def request_live_save_refresh() -> dict:
+    if LIVE_SAVE_DIR is None:
+        return live_save_status()
+    state = sync_state()
+    if not state.refreshing:
+        state.requested = True
+        state.save(update_fields=["requested", "updated_at"])
+    status = live_save_status()
+    status.update({"ok": True, "queued": True, "message": "Live save sync queued"})
+    return status
+
+
+def reload_store_if_needed() -> None:
+    state = sync_state()
+    if state.current_fingerprint and state.current_fingerprint != getattr(STORE, "source_fingerprint", ""):
+        STORE.reload()
+        STORE.source_fingerprint = state.current_fingerprint
+        invalidate_refresh_dependents()
 
 
 def module_status() -> dict[str, str]:

@@ -7,6 +7,7 @@ import json
 import math
 import os
 import re
+import sys
 import threading
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,9 +30,16 @@ PALPEDIA_WORK = DATA_ROOT / "palpedia_work_suitability.json"
 ANALYZER = Path(__file__).with_name("analyze_pal_breeding.py")
 UPLOADS = LOCAL_ROOT / "uploads"
 WORK = Path(os.environ.get("PALWORLD_DECODE_WORK_DIR", LOCAL_ROOT / "decode-work"))
-TOOLS = Path(os.environ.get("PALWORLD_PARSER_TOOLS_DIR", Path.home() / "AppData" / "Local" / "Temp" / "palworld_parser_tools"))
+TOOLS = Path(os.environ.get("PALWORLD_PARSER_TOOLS_DIR", LOCAL_ROOT / "parser-tools"))
 PARSER_ASSETS = Path(os.environ.get("PALWORLD_PARSER_ASSETS_DIR", TOOLS / "palworld-server-tool" / "web" / "src" / "assets"))
-LIVE_SAVE_ENV = os.environ.get("PALWORLD_LIVE_SAVE_DIR", "").strip()
+
+
+def resolve_live_save_env() -> str:
+    env_name = "PALWORLD_LIVE_SAVE_WINDOWS_DIR" if sys.platform == "win32" else "PALWORLD_LIVE_SAVE_LINUX_DIR"
+    return os.environ.get(env_name, "").strip()
+
+
+LIVE_SAVE_ENV = resolve_live_save_env()
 LIVE_SAVE_DIR = Path(LIVE_SAVE_ENV) if LIVE_SAVE_ENV else None
 LIVE_LOCK = threading.Lock()
 LIVE_STATE_FILE = DATA_ROOT / "live_save_state.json"

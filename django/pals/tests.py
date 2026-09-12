@@ -71,6 +71,22 @@ class PalsRouteTest(TestCase):
         self.assertIs(payload["configured"], False)
         self.assertEqual(payload["path"], "")
 
+    def test_live_save_env_uses_windows_dir_on_windows(self):
+        env = {
+            "PALWORLD_LIVE_SAVE_WINDOWS_DIR": r"V:\palworld\save",
+            "PALWORLD_LIVE_SAVE_LINUX_DIR": "/data/as1/palworld/save",
+        }
+        with patch.dict("os.environ", env, clear=True), patch.object(data.sys, "platform", "win32"):
+            self.assertEqual(data.resolve_live_save_env(), r"V:\palworld\save")
+
+    def test_live_save_env_uses_linux_dir_on_non_windows(self):
+        env = {
+            "PALWORLD_LIVE_SAVE_WINDOWS_DIR": r"V:\palworld\save",
+            "PALWORLD_LIVE_SAVE_LINUX_DIR": "/data/as1/palworld/save",
+        }
+        with patch.dict("os.environ", env, clear=True), patch.object(data.sys, "platform", "linux"):
+            self.assertEqual(data.resolve_live_save_env(), "/data/as1/palworld/save")
+
 
     def test_ranch_api_passes_filters_to_ranch_service(self):
         self.client.force_login(self.user)

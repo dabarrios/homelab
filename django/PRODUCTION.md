@@ -26,6 +26,6 @@ The Docker socket grants powerful host access. The application only exposes staf
 
 ## Palworld live-save sync
 
-Set `PALWORLD_LIVE_SAVE_HOST_DIR` in `.env` to the host directory containing `Level.sav` and `Players/`. Compose mounts that directory read-only at `/palworld-save`. The dashboard never decodes files in place; it copies them to `./data/pals/decode-work`.
+Set `PALWORLD_LIVE_SAVE_LINUX_DIR` in `.env` to the host directory containing `Level.sav` and `Players/`. Compose mounts that directory read-only at the same path inside the dashboard container. The dashboard never decodes files in place; it copies them to `./data/pals/decode-work`.
 
-Docker deployments use the pinned native parser sidecar automatically. Direct Windows development keeps the existing WSL workflow and may continue using `PALWORLD_LIVE_SAVE_DIR` and `PALWORLD_PARSER_TOOLS_DIR` with Windows drive-letter paths. Set `PALWORLD_PARSER_RUNTIME=wsl` to force it.
+Docker deployments use the pinned native parser sidecar automatically. Direct Windows development keeps the existing WSL workflow and uses `PALWORLD_LIVE_SAVE_WINDOWS_DIR` with a Windows drive-letter path. Set `PALWORLD_PARSER_RUNTIME=wsl` to force it.
