@@ -2586,12 +2586,23 @@ async function loadLiveStatus() {
 }
 
 async function refreshLiveSave() {
-  setLiveStatus('Syncing save...', 'active');
-  const result = await postJson('/live-save/refresh', {force: true});
-  setLiveStatus(result.ok ? `Synced ${result.rosterCount || 0} Pals` : result.error || 'Sync failed', result.ok ? 'good' : 'bad');
-  options = await api('/options');
-  ranchDropsCache = null;
-  fillOptions();
+  setLiveStatus('Sync queued...', 'active');
+  await postJson('/live-save/refresh', {force: true});
+  for (let attempt = 0; attempt < 180; attempt += 1) {
+    const status = await api('/live-save/status');
+    if (status.lastResult?.ok && status.lastRefreshFingerprint === status.fingerprint) {
+      setLiveStatus(`Synced ${status.lastResult.rosterCount || 0} Pals`, 'good');
+      options = await api('/options');
+      ranchDropsCache = null;
+      fillOptions();
+      return;
+    }
+    if (status.lastResult && !status.lastResult.ok && !status.refreshing && !status.requested) {
+      throw new Error(status.lastResult.error || 'Sync failed');
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  setLiveStatus('Sync is still running in the background.', 'active');
 }
 
 async function uploadSave(file) {

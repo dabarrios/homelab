@@ -1,0 +1,1 @@
+"""PALS management commands."""
