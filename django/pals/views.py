@@ -92,7 +92,6 @@ def bases(request):
 @login_required
 @require_GET
 def options(request):
-    saves_service.reload_store_if_needed()
     return JsonResponse({
         "species": data_service.STORE.species_names,
         "passives": data_service.STORE.passives,
@@ -219,7 +218,7 @@ def upload_level(request):
 @require_POST
 def live_save_refresh(request):
     try:
-        result = saves_service.request_live_save_refresh()
+        result = saves_service.refresh_live_save(force=bool(json_payload(request).get("force")))
         return JsonResponse(result, status=409 if result.get("refreshing") and not result.get("ok") else 200)
     except Exception as exc:
         return json_error(str(exc), status=500)
