@@ -13,6 +13,7 @@ from django.views.decorators.http import require_GET, require_POST
 from .services import bases as bases_service
 from .services import breeding as breeding_service
 from .services import data as data_service
+from .services import effigies as effigies_service
 from .services import ivs as ivs_service
 from .services import ranch as ranch_service
 from .services import saves as saves_service
@@ -25,6 +26,7 @@ MODULES = [
     {"key": "work", "title": "Work", "route": "pals:work", "summary": "Rank candidates by work suitability."},
     {"key": "ranch", "title": "Ranch", "route": "pals:ranch", "summary": "Find ranch drops and passive priorities."},
     {"key": "bases", "title": "Bases", "route": "pals:bases", "summary": "Draft base worker teams by role."},
+    {"key": "effigies", "title": "Effigies", "route": "pals:effigies", "summary": "Track remaining effigies on a live map."},
 ]
 
 
@@ -87,6 +89,16 @@ def ranch(request, item_slug: str = ""):
 @login_required
 def bases(request):
     return render(request, "pals/bases.html", app_context("bases", "Bases", bases_service.module_status()["message"], "bases", "Build Best Team"))
+
+
+@login_required
+def effigies(request):
+    return render(request, "pals/effigies.html", {
+        "modules": MODULES,
+        "active": "effigies",
+        "title": "Effigies",
+        "summary": "Find the remaining effigies with save-synced progress and live-play hiding.",
+    })
 
 
 @login_required
@@ -158,6 +170,12 @@ def reload_data(request):
 @require_GET
 def live_save_status(request):
     return JsonResponse(saves_service.live_save_status())
+
+
+@login_required
+@require_GET
+def effigy_tracker(request):
+    return JsonResponse(effigies_service.tracker_payload(request.GET.get("player", "")))
 
 
 @login_required

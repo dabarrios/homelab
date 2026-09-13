@@ -166,6 +166,7 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
     if proc.returncode != 0:
         detail = decode_failure_detail(proc.stdout, proc.stderr)
         return {"ok": False, "error": "Decode failed", "errorDetail": detail, "stdout": proc.stdout[-4000:], "stderr": proc.stderr[-4000:], "returnCode": proc.returncode}
+    persist_effigy_players()
     copied = []
     for src_name, dest in [
         ("pal_roster.csv", DATA_ROOT / "pal_roster.csv"),
@@ -180,6 +181,22 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
     STORE.reload()
     invalidate_refresh_dependents()
     return {"ok": True, "uploaded": uploaded_label, "input": input_summary or {}, "copied": copied, "rosterCount": len(STORE.roster), "owners": STORE.owners, "stdout": proc.stdout[-2000:]}
+
+
+def persist_effigy_players() -> None:
+    """Keep decoded player RecordData available to dashboard-only readers."""
+    source = WORK / "Players"
+    if not source.exists():
+        return
+    target = DATA_ROOT / "effigy_players"
+    reset_directory(target)
+    structure = WORK / "structure.json"
+    if structure.exists():
+        shutil.copy2(structure, target / "structure.json")
+    for player in source.glob("*.json"):
+        if player.name.lower().endswith("_dps.json"):
+            continue
+        shutil.copy2(player, target / player.name)
 
 
 def path_for_result(path: Path) -> str:

@@ -1,0 +1,57 @@
+{% extends "pals/base.html" %}
+{% load static %}
+{% block title %}PALS · Effigies{% endblock %}
+{% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<link rel="stylesheet" href="{% static 'pals/css/tool.css' %}">
+<link rel="stylesheet" href="{% static 'pals/css/effigies.css' %}">
+<link rel="stylesheet" href="{% static 'pals/effigy-map/leaflet/leaflet.css' %}">
+{% endblock %}
+{% block content %}
+<section class="effigy-page tool-page">
+    <header class="tool-heading effigy-heading">
+        <div>
+            <p class="eyebrow">PALS</p>
+            <h1>Effigies</h1>
+            <p class="lead">Save-synced collection progress with temporary live-play hiding.</p>
+            <p id="palsMeta" class="tool-meta">Loading local data...</p>
+        </div>
+        <div class="tool-action-stack">
+            <div class="tool-actions">
+                <button id="refreshLiveSave" type="button">Sync Save</button>
+                <label class="file-button">
+                    Upload Save
+                    <input id="saveUpload" type="file" accept=".zip,.sav" hidden>
+                </label>
+            </div>
+            <p id="liveStatus" class="status-line data-status-line"></p>
+        </div>
+    </header>
+    <div class="effigy-layout">
+        <aside class="effigy-sidebar">
+            <div class="effigy-summary">
+                <strong id="effigyCount">—</strong>
+                <span id="effigyCountLabel">Waiting for decoded save data</span>
+            </div>
+            <div class="effigy-controls">
+                <label>Player <select id="effigyPlayer"></select></label>
+                <p id="effigyPlayerStatus" class="effigy-player-status" aria-live="polite"></p>
+                <label>Map <select id="effigyMap"></select></label>
+                <label class="check-row"><input id="effigyShowCollected" type="checkbox"> Show collected</label>
+            </div>
+            <div id="effigyLegend" class="effigy-legend"></div>
+        </aside>
+        <section class="effigy-map-panel">
+            <div id="effigyMapCanvas" class="effigy-map-canvas" aria-label="Palworld effigy map"></div>
+        </section>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'pals/effigy-map/leaflet/leaflet.js' %}"></script>
+<script>
+window.PALS_EFFIGY_API = "{% url 'pals:api_effigies' %}";
+window.PALS_EFFIGY_ASSET = "{% static 'pals/effigy-map/' %}";
+</script>
+<script src="{% static 'pals/js/effigies.js' %}"></script>
+{% endblock %}
