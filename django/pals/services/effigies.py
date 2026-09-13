@@ -145,7 +145,8 @@ def _marker_payload(marker: dict, collected: set[str]) -> dict:
         "id": marker.get("id"),
         "key": key,
         "label": marker.get("label", "Effigy"),
-        "type": str(marker.get("label", "Effigy")).removesuffix(" Effigy"),
+        "category": marker.get("category", "effigy"),
+        "type": str(marker.get("label", "Effigy")).removesuffix(" Effigy") if marker.get("category") == "effigy" else "Notes",
         "map": map_id,
         "mapName": map_data["name"],
         "left": round(left, 5),
@@ -161,7 +162,7 @@ def tracker_payload(selected_player: str = "") -> dict:
         marker_data = json.loads(MARKERS_FILE.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return {"ok": False, "error": "Effigy map data is unavailable"}
-    markers = [m for m in marker_data.get("markers", []) if m.get("category") == "effigy"]
+    markers = [m for m in marker_data.get("markers", []) if m.get("category") in {"effigy", "note"}]
     files = _player_files()
     players_dir = files[0].parent if files else (PERSISTED_PLAYERS if PERSISTED_PLAYERS.exists() else WORK / "Players")
     labels = _player_labels(players_dir)
@@ -173,23 +174,32 @@ def tracker_payload(selected_player: str = "") -> dict:
             record = _record_data(payload)
             flags = _record_keys(record.get("RelicObtainForInstanceFlag"))
             flags.update(_record_keys(record.get("RelicObtainForInstanceFlagByType")))
-            progress[path.stem] = flags
+            progress[path.stem] = {
+                "effigy": flags,
+                "note": _record_keys(record.get("NoteObtainForInstanceFlag")),
+            }
             player_id = path.stem.lower()
             players.append({"id": path.stem, "label": _display_player_label(player_id, labels)})
         except (OSError, json.JSONDecodeError):
             continue
     default_player = next((player["id"] for player in players if player["label"].lower() == "david"), players[0]["id"] if players else "")
     chosen = selected_player if selected_player in progress else default_player
-    collected = progress.get(chosen, set())
-    result = [_marker_payload(marker, collected) for marker in markers]
+    collected = progress.get(chosen, {"effigy": set(), "note": set()})
+    result = [_marker_payload(marker, collected.get(marker.get("category"), set())) for marker in markers]
+    effigy_markers = [marker for marker in result if marker["category"] == "effigy"]
+    note_markers = [marker for marker in result if marker["category"] == "note"]
     return {
         "ok": True,
         "players": players,
         "selectedPlayer": chosen,
         "maps": {key: {"name": value["name"], "image": value["image"]} for key, value in MAPS.items()},
         "markers": result,
-        "collected": sum(1 for marker in result if marker["collected"]),
-        "total": len(result),
+        "collected": sum(1 for marker in effigy_markers if marker["collected"]),
+        "total": len(effigy_markers),
+        "effigyCollected": sum(1 for marker in effigy_markers if marker["collected"]),
+        "effigyTotal": len(effigy_markers),
+        "noteCollected": sum(1 for marker in note_markers if marker["collected"]),
+        "noteTotal": len(note_markers),
         "loaded": bool(chosen),
         "source": "synced save" if chosen else "no decoded player save",
     }

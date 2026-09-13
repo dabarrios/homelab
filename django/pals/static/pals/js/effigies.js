@@ -30,6 +30,9 @@
   function markerIcon(marker) {
     const hidden = state.hidden.has(marker.id) ? ' is-hidden' : '';
     const collected = marker.collected ? ' is-collected' : '';
+    if (marker.category === 'note') {
+      return L.divIcon({ className: '', iconSize: [24, 24], iconAnchor: [12, 12], html: `<div class="note-pin${collected}${hidden}" data-marker-id="${esc(marker.id)}">✎</div>` });
+    }
     return L.divIcon({
       className: '', iconSize: [24, 24], iconAnchor: [12, 12],
       html: `<div class="effigy-pin${collected}${hidden}" data-marker-id="${esc(marker.id)}"><img src="${assetBase}icons/effigy/Lifmunk_Effigy_icon.webp" alt=""></div>`,
@@ -86,17 +89,19 @@
     mapSelect.innerHTML = Object.entries(state.data.maps).map(([id, map]) => `<option value="${id}">${esc(map.name)}</option>`).join('');
     mapSelect.value = state.mapId;
     const types = [...new Set(state.data.markers.map(marker => marker.type))].sort();
-    const storedTypes = new Set(JSON.parse(localStorage.getItem('pals.effigies.visible-types.v1') || '[]'));
+    const storedTypes = new Set(JSON.parse(localStorage.getItem('pals.effigies.visible-types.v2') || '[]'));
     state.visibleTypes = storedTypes.size ? new Set(types.filter(type => storedTypes.has(type))) : new Set(types);
-    $('#effigyCount').textContent = state.data.loaded ? `${state.data.collected} / ${state.data.total}` : '—';
-    $('#effigyCountLabel').textContent = state.data.loaded ? 'collected from synced save' : 'Map loaded; save data not loaded';
+    $('#effigyCount').textContent = state.data.loaded ? `${state.data.effigyCollected} / ${state.data.effigyTotal}` : '—';
+    $('#effigyCountLabel').textContent = state.data.loaded ? 'effigies collected from synced save' : 'Map loaded; save data not loaded';
+    $('#noteCount').textContent = state.data.loaded ? `${state.data.noteCollected} / ${state.data.noteTotal}` : '—';
+    $('#noteCountLabel').textContent = 'notes collected from synced save';
     $('#palsMeta').textContent = state.data.loaded ? `Loaded ${state.data.total} effigy locations · ${state.data.source}` : 'Effigy map loaded · sync or upload a save to load progress';
     const counts = new Map();
     state.data.markers.forEach(marker => counts.set(marker.type, (counts.get(marker.type) || 0) + (marker.collected ? 1 : 0)));
     $('#effigyLegend').innerHTML = types.map(type => `<label class="effigy-type-toggle"><input type="checkbox" data-type-toggle="${esc(type)}" ${state.visibleTypes.has(type) ? 'checked' : ''}><span class="legend-dot"></span><span>${esc(type)}</span><span class="effigy-type-count">${counts.get(type) || 0} collected</span></label>`).join('');
     $('#effigyLegend').querySelectorAll('[data-type-toggle]').forEach(input => input.addEventListener('change', () => {
       if (input.checked) state.visibleTypes.add(input.dataset.typeToggle); else state.visibleTypes.delete(input.dataset.typeToggle);
-      localStorage.setItem('pals.effigies.visible-types.v1', JSON.stringify([...state.visibleTypes]));
+      localStorage.setItem('pals.effigies.visible-types.v2', JSON.stringify([...state.visibleTypes]));
       renderMap();
     }));
   }

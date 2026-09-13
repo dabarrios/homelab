@@ -8,6 +8,7 @@
 .effigy-sidebar { padding: 18px; }
 .effigy-summary { display: grid; gap: 2px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
 .effigy-summary strong { font: 800 30px Manrope, sans-serif; color: var(--accent-dark); }
+.effigy-summary strong.note-count { margin-top: 14px; font-size: 24px; color: #b1842d; }
 .effigy-summary span { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .effigy-controls { display: grid; gap: 12px; padding: 18px 0; }
 .check-row { display: flex !important; align-items: center; gap: 8px !important; text-transform: none !important; letter-spacing: 0 !important; font-size: 13px !important; }
@@ -28,6 +29,10 @@
 .effigy-pin.is-collected { opacity: .38; filter: grayscale(.45); }
 .effigy-pin.is-hidden { opacity: .08; filter: grayscale(1); }
 .effigy-pin.is-hidden:hover { opacity: .25; }
+.note-pin { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: rgba(251,191,36,.94); border: 2px solid #4a3005; color: #2b1b03; box-shadow: 0 2px 7px rgba(0,0,0,.5); cursor: pointer; font-size: 16px; font-weight: 900; }
+.note-pin.is-collected { opacity: .38; filter: grayscale(.45); }
+.note-pin.is-hidden { opacity: .08; filter: grayscale(1); }
+.note-pin.is-hidden:hover { opacity: .25; }
 .effigy-popup { min-width: 170px; }
 .effigy-popup strong { display: block; margin-bottom: 5px; color: var(--ink); }
 .effigy-popup p { margin: 0 0 9px; color: var(--muted); font-size: 12px; line-height: 1.45; }
