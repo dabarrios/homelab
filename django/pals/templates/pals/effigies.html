@@ -34,11 +34,18 @@
                 <span id="effigyCountLabel">Waiting for decoded save data</span>
                 <strong id="noteCount" class="note-count">—</strong>
                 <span id="noteCountLabel">Notes</span>
+                <strong id="dungeonCount" class="map-progress-count">—</strong>
+                <span id="dungeonCountLabel">Dungeon checklist</span>
+                <strong id="factionCount" class="map-progress-count faction-progress-count">—</strong>
+                <span id="factionCountLabel">Faction-base checklist</span>
             </div>
             <div class="effigy-controls">
                 <label>Player <select id="effigyPlayer"></select></label>
                 <p id="effigyPlayerStatus" class="effigy-player-status" aria-live="polite"></p>
-                <label>Map <select id="effigyMap"></select></label>
+                <fieldset class="map-options">
+                    <legend>Map</legend>
+                    <div id="effigyMapOptions"></div>
+                </fieldset>
                 <label class="check-row"><input id="effigyShowCollected" type="checkbox"> Show collected</label>
             </div>
             <div id="effigyLegend" class="effigy-legend"></div>

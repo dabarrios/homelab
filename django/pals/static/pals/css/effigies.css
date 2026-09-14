@@ -2,6 +2,14 @@
 .effigy-heading { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 24px; }
 .effigy-controls select { min-height: 36px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); padding: 8px 10px; font: 700 13px "DM Sans", system-ui, sans-serif; }
 .effigy-controls label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; }
+.map-options { margin: 0; padding: 0; border: 0; }
+.map-options legend { margin-bottom: 5px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; }
+.map-options > div { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.map-bubble { position: relative; display: block; cursor: pointer; }
+.map-bubble input { position: absolute; opacity: 0; pointer-events: none; }
+.map-bubble span { display: block; padding: 9px 7px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); text-align: center; font-size: 11px; font-weight: 800; }
+.map-bubble input:checked + span { border-color: var(--accent-dark); color: var(--accent-dark); background: var(--accent-soft); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-dark) 18%, transparent); }
+.map-bubble input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 .effigy-player-status { min-height: 18px; margin: -5px 0 0; color: var(--accent-dark); font-size: 12px; line-height: 1.4; }
 .effigy-layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 16px; }
 .effigy-sidebar, .effigy-map-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
@@ -9,6 +17,8 @@
 .effigy-summary { display: grid; gap: 2px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
 .effigy-summary strong { font: 800 30px Manrope, sans-serif; color: var(--accent-dark); }
 .effigy-summary strong.note-count { margin-top: 14px; font-size: 24px; color: #b1842d; }
+.effigy-summary strong.map-progress-count { margin-top: 14px; font-size: 22px; color: #7b61a8; }
+.effigy-summary strong.faction-progress-count { color: #b24b4b; }
 .effigy-summary span { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .effigy-controls { display: grid; gap: 12px; padding: 18px 0; }
 .check-row { display: flex !important; align-items: center; gap: 8px !important; text-transform: none !important; letter-spacing: 0 !important; font-size: 13px !important; }
@@ -20,19 +30,22 @@
 .effigy-type-count { color: var(--muted); font-size: 10px; }
 .effigy-legend { display: grid; gap: 6px; }
 .legend-dot { width: 12px; height: 12px; border-radius: 50%; background: #a3e635; box-shadow: 0 0 0 2px rgba(0,0,0,.25); }
-.legend-dot.collected { opacity: .38; }
 .effigy-map-panel { min-height: 660px; overflow: hidden; }
 .effigy-map-canvas { min-height: 660px; height: min(76vh, 820px); background: #17211d; }
 .effigy-map-canvas .leaflet-container { background: var(--surface); font-family: "DM Sans", system-ui, sans-serif; }
 .effigy-pin { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: rgba(163,230,53,.92); border: 2px solid #15210f; box-shadow: 0 2px 7px rgba(0,0,0,.5); cursor: pointer; }
 .effigy-pin img { width: 19px; height: 19px; object-fit: contain; }
-.effigy-pin.is-collected { opacity: .38; filter: grayscale(.45); }
-.effigy-pin.is-hidden { opacity: .08; filter: grayscale(1); }
+.effigy-pin.is-collected, .effigy-pin.is-hidden { opacity: .25; filter: grayscale(.65); }
 .effigy-pin.is-hidden:hover { opacity: .25; }
 .note-pin { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: rgba(251,191,36,.94); border: 2px solid #4a3005; color: #2b1b03; box-shadow: 0 2px 7px rgba(0,0,0,.5); cursor: pointer; font-size: 16px; font-weight: 900; }
-.note-pin.is-collected { opacity: .38; filter: grayscale(.45); }
-.note-pin.is-hidden { opacity: .08; filter: grayscale(1); }
+.note-pin.is-collected, .note-pin.is-hidden { opacity: .25; filter: grayscale(.65); }
 .note-pin.is-hidden:hover { opacity: .25; }
+.dungeon-pin, .faction-pin { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; border: 2px solid #241a36; box-shadow: 0 2px 7px rgba(0,0,0,.5); cursor: pointer; color: #fff; font-size: 15px; font-weight: 900; }
+.dungeon-pin { background: rgba(123,97,168,.94); }
+.faction-pin { background: rgba(178,75,75,.94); border-color: #421515; }
+.dungeon-pin.is-completed, .faction-pin.is-completed { opacity: .25; filter: grayscale(.65); }
+.dungeon-pin.is-hidden, .faction-pin.is-hidden { opacity: .25; filter: grayscale(.65); }
+.dungeon-pin.is-hidden:hover, .faction-pin.is-hidden:hover { opacity: .25; }
 .effigy-popup { min-width: 170px; }
 .effigy-popup strong { display: block; margin-bottom: 5px; color: var(--ink); }
 .effigy-popup p { margin: 0 0 9px; color: var(--muted); font-size: 12px; line-height: 1.45; }

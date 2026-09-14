@@ -10,9 +10,17 @@ from .data import DATA_ROOT, STORE, WORK
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKERS_FILE = ROOT / "reference_data" / "effigy_map" / "markers.json"
+FACTION_BASES_FILE = ROOT / "reference_data" / "effigy_map" / "faction_bases.json"
 PERSISTED_PLAYERS = DATA_ROOT / "effigy_players"
 GUID_RE = re.compile(r"^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$", re.I)
 IMAGE_SIZE = 8192
+# Palworld 1.0.4 recreated/renumbered these two World Tree collectibles. Keep
+# both the old catalog IDs and the current save ID valid so existing saves do
+# not appear to lose effigy progress after the relocation. The note IDs are
+# intentionally not aliased until the World Tree note identity is verified.
+SAVE_PROGRESS_ALIASES = {
+    "6ef30cb4472a23b0eeab539281df907b": "e4cca3164c726e1322acf4a59f349723",
+}
 MAPS = {
     "palpagos": {
         "name": "Palpagos",
@@ -86,6 +94,25 @@ def _record_keys(entry) -> set[str]:
     return result
 
 
+def _record_int(record: dict, key: str) -> int:
+    value = record.get(key, {})
+    if isinstance(value, dict):
+        value = value.get("value", 0)
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _normalize_progress(keys: set[str]) -> set[str]:
+    """Map post-update save IDs back to stable catalog IDs."""
+    normalized = set(keys)
+    for save_key, catalog_key in SAVE_PROGRESS_ALIASES.items():
+        if save_key in keys:
+            normalized.add(catalog_key)
+    return normalized
+
+
 def _player_files() -> list[Path]:
     persisted = list(PERSISTED_PLAYERS.glob("*.json")) if PERSISTED_PLAYERS.exists() else []
     players = PERSISTED_PLAYERS if persisted else WORK / "Players"
@@ -146,7 +173,11 @@ def _marker_payload(marker: dict, collected: set[str]) -> dict:
         "key": key,
         "label": marker.get("label", "Effigy"),
         "category": marker.get("category", "effigy"),
-        "type": str(marker.get("label", "Effigy")).removesuffix(" Effigy") if marker.get("category") == "effigy" else "Notes",
+        "type": (
+            str(marker.get("label", "Effigy")).removesuffix(" Effigy")
+            if marker.get("category") == "effigy"
+            else {"note": "Notes", "dungeon": "Dungeons", "factionBase": "Enemy Faction Bases"}.get(marker.get("category"), "Other")
+        ),
         "map": map_id,
         "mapName": map_data["name"],
         "left": round(left, 5),
@@ -162,7 +193,20 @@ def tracker_payload(selected_player: str = "") -> dict:
         marker_data = json.loads(MARKERS_FILE.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return {"ok": False, "error": "Effigy map data is unavailable"}
-    markers = [m for m in marker_data.get("markers", []) if m.get("category") in {"effigy", "note"}]
+    tracked_categories = {"effigy", "note", "dungeon"}
+    markers = [m for m in marker_data.get("markers", []) if m.get("category") in tracked_categories]
+    try:
+        faction_data = json.loads(FACTION_BASES_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        faction_data = {"markers": []}
+    # Faction coordinates are stored in the game's displayed map grid; convert
+    # them into the source-world coordinates used by the shared map projection.
+    for marker in faction_data.get("markers", []):
+        markers.append({
+            **marker,
+            "x": marker["y"] * MAPS["palpagos"]["div"] - MAPS["palpagos"]["offX"],
+            "y": marker["x"] * MAPS["palpagos"]["div"] - MAPS["palpagos"]["offY"],
+        })
     files = _player_files()
     players_dir = files[0].parent if files else (PERSISTED_PLAYERS if PERSISTED_PLAYERS.exists() else WORK / "Players")
     labels = _player_labels(players_dir)
@@ -174,9 +218,13 @@ def tracker_payload(selected_player: str = "") -> dict:
             record = _record_data(payload)
             flags = _record_keys(record.get("RelicObtainForInstanceFlag"))
             flags.update(_record_keys(record.get("RelicObtainForInstanceFlagByType")))
+            flags = _normalize_progress(flags)
             progress[path.stem] = {
                 "effigy": flags,
-                "note": _record_keys(record.get("NoteObtainForInstanceFlag")),
+                "note": _normalize_progress(_record_keys(record.get("NoteObtainForInstanceFlag"))),
+                "dungeonFixed": _record_int(record, "FixedDungeonClearCount"),
+                "dungeonNormal": _record_int(record, "NormalDungeonClearCount"),
+                "factionBase": _record_int(record, "CampConqueredCount"),
             }
             player_id = path.stem.lower()
             players.append({"id": path.stem, "label": _display_player_label(player_id, labels)})
@@ -184,8 +232,11 @@ def tracker_payload(selected_player: str = "") -> dict:
             continue
     default_player = next((player["id"] for player in players if player["label"].lower() == "david"), players[0]["id"] if players else "")
     chosen = selected_player if selected_player in progress else default_player
-    collected = progress.get(chosen, {"effigy": set(), "note": set()})
-    result = [_marker_payload(marker, collected.get(marker.get("category"), set())) for marker in markers]
+    collected = progress.get(chosen, {"effigy": set(), "note": set(), "dungeonFixed": 0, "dungeonNormal": 0, "factionBase": 0})
+    result = [
+        _marker_payload(marker, collected.get(marker.get("category"), set()) if marker.get("category") in {"effigy", "note"} else set())
+        for marker in markers
+    ]
     effigy_markers = [marker for marker in result if marker["category"] == "effigy"]
     note_markers = [marker for marker in result if marker["category"] == "note"]
     return {
@@ -200,6 +251,12 @@ def tracker_payload(selected_player: str = "") -> dict:
         "effigyTotal": len(effigy_markers),
         "noteCollected": sum(1 for marker in note_markers if marker["collected"]),
         "noteTotal": len(note_markers),
+        "savedProgress": {
+            "dungeonFixed": collected.get("dungeonFixed", 0),
+            "dungeonNormal": collected.get("dungeonNormal", 0),
+            "dungeonClears": collected.get("dungeonFixed", 0) + collected.get("dungeonNormal", 0),
+            "factionBaseClears": collected.get("factionBase", 0),
+        },
         "loaded": bool(chosen),
         "source": "synced save" if chosen else "no decoded player save",
     }
