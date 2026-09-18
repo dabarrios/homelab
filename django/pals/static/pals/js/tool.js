@@ -17,6 +17,7 @@ let restoredFormState = false;
 let restoredResult = false;
 let lastBreedingResult = null;
 let lastRenderedResult = null;
+let profileRequestToken = 0;
 
 const CUSTOM_PROFILES_KEY = 'pals.customProfiles.v1';
 const BUILT_IN_PROFILE_NAMES_KEY = 'pals.builtInProfileNames.v1';
@@ -1139,6 +1140,7 @@ function saveBreedingPlan() {
   renderSavedBreedingPlanOptions(plan.id);
   if (input) input.value = name;
   setBreedingPlanStatus('Pal profile saved.', 'good');
+  closeBreedingPlanModal();
 }
 
 function loadBreedingPlan() {
@@ -1159,6 +1161,7 @@ function loadBreedingPlan() {
     setBreedingPlanStatus('Loaded saved setup.');
   }
   updateSavedBreedingPlanControls();
+  closeBreedingPlanModal();
 }
 
 function deleteBreedingPlan() {
@@ -1202,6 +1205,25 @@ function initBreedingPlans() {
   $('#loadBreedingPlan')?.addEventListener('click', loadBreedingPlan);
   $('#deleteBreedingPlan')?.addEventListener('click', deleteBreedingPlan);
   $('#savedBreedingPlan')?.addEventListener('change', updateSavedBreedingPlanControls);
+  $('#openBreedingPlanSave')?.addEventListener('click', () => openBreedingPlanModal(true));
+  $('#openBreedingPlanManager')?.addEventListener('click', () => openBreedingPlanModal(false));
+  $('#closeBreedingPlanModal')?.addEventListener('click', closeBreedingPlanModal);
+  $('#breedingPlanModal')?.addEventListener('click', event => {
+    if (event.target === $('#breedingPlanModal')) closeBreedingPlanModal();
+  });
+}
+
+function openBreedingPlanModal(focusName = false) {
+  const modal = $('#breedingPlanModal');
+  if (!modal) return;
+  renderSavedBreedingPlanOptions(loadedBreedingPlanId);
+  if ($('#breedingPlanName') && !$('#breedingPlanName').value) $('#breedingPlanName').value = defaultBreedingPlanName();
+  modal.classList.remove('hidden');
+  if (focusName) $('#breedingPlanName')?.focus();
+}
+
+function closeBreedingPlanModal() {
+  $('#breedingPlanModal')?.classList.add('hidden');
 }
 
 function profileLabel(profile) {
@@ -1247,8 +1269,47 @@ function updateProfileHint() {
   hint.textContent = custom ? 'Profile loaded.' : builtIn?.locked ? 'Selects passives automatically when optimizing.' : '';
 }
 
-function applySelectedProfile() {
-  updateProfileHint();
+async function applySelectedProfile() {
+  const value = selectedProfileValue();
+  const custom = customProfileByValue(value);
+  const token = ++profileRequestToken;
+  passiveSelections.passives = [];
+  $$('[data-picker="passives"]').forEach(renderPassivePicker);
+  if (custom) {
+    passiveSelections.passives = [...custom.passives];
+    $$('[data-picker="passives"]').forEach(renderPassivePicker);
+    updateProfileHint();
+    markFormChanged();
+    return;
+  }
+  const builtIn = builtInProfileByValue(value);
+  if (builtIn?.locked) {
+    updateProfileHint();
+    const data = formData();
+    if (!data.target) {
+      $('#profileHint').textContent = 'Choose a target species to load this profile.';
+      markFormChanged();
+      return;
+    }
+    $('#profileHint').textContent = 'Loading profile passives...';
+    try {
+      const result = await postJson('/profile-passives', {
+        owner: data.owner || 'David',
+        target: data.target,
+        breedingProfile: value,
+        genderPreference: data.genderPreference || 'any',
+        includeInsomnia: Boolean(data.includeInsomnia),
+      });
+      if (token !== profileRequestToken) return;
+      passiveSelections.passives = (result.selected || result.ideal || []).slice(0, 4);
+      $$('[data-picker="passives"]').forEach(renderPassivePicker);
+      $('#profileHint').textContent = 'Profile passives loaded.';
+    } catch (error) {
+      if (token === profileRequestToken) $('#profileHint').textContent = error.message || 'Could not load profile passives.';
+    }
+  } else {
+    updateProfileHint();
+  }
   markFormChanged();
 }
 
@@ -2474,10 +2535,10 @@ async function submitTool(event) {
         owner: data.owner || 'David',
         target: data.target,
         passives: finalPassives,
-        includeImplants: Boolean(data.includeImplants),
+        includeImplants: true,
         includeInsomnia: Boolean(data.includeInsomnia),
         breedAnyway: Boolean(data.breedAnyway),
-        implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
+        implantPassives: selectedImplantPassives(finalPassives, true),
         genderPreference: data.genderPreference || 'any',
         breedingProfile: customProfile ? 'manual' : data.breedingProfile || 'manual',
         routePreference: 'best_overall',

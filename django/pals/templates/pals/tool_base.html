@@ -23,6 +23,10 @@
                         Upload Save
                         <input id="saveUpload" type="file" accept=".zip,.sav" hidden>
                     </label>
+                    {% if module_key == "breeding" %}
+                    <button id="openBreedingPlanSave" type="button">Save Setup</button>
+                    <button id="openBreedingPlanManager" type="button">Saved Setups</button>
+                    {% endif %}
                 </div>
                 <p id="liveStatus" class="status-line data-status-line"></p>
             </div>
@@ -48,6 +52,34 @@
         </div>
     </section>
 </section>
+
+{% if module_key == "breeding" %}
+<div id="breedingPlanModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="breedingPlanTitle">
+    <div class="modal-panel saved-plan-modal-panel">
+        <div class="modal-head">
+            <div>
+                <h2 id="breedingPlanTitle">Save Breeding Setup</h2>
+                <p class="status-line">Save the current breeding choices for later.</p>
+            </div>
+            <button type="button" id="closeBreedingPlanModal" aria-label="Close saved setup dialog">x</button>
+        </div>
+        <label>
+            Plan Name
+            <input id="breedingPlanName" autocomplete="off" placeholder="Plan name">
+        </label>
+        <div class="saved-plan-row saved-plan-load-row">
+            <select id="savedBreedingPlan"></select>
+        </div>
+        <div class="saved-plan-actions">
+            <button type="button" id="loadBreedingPlan">Load</button>
+            <button type="button" id="renameBreedingPlan">Rename</button>
+            <button type="button" id="deleteBreedingPlan">Delete</button>
+            <button type="button" id="saveBreedingPlan" class="primary-action">Save</button>
+        </div>
+        <p id="breedingPlanStatus" class="status-line"></p>
+    </div>
+</div>
+{% endif %}
 
 <datalist id="speciesList"></datalist>
 <datalist id="passiveList"></datalist>
