@@ -1,4 +1,4 @@
-"""Automatic work speed and ranch passive profiles."""
+"""Automatic work speed passive profile."""
 
 from __future__ import annotations
 
@@ -199,15 +199,13 @@ def profile_passives_payload(payload: dict) -> dict:
     if not target_key:
         return {"ok": False, "error": f"Unknown target species: {target_name}"}
     profile = payload.get("breedingProfile") or "work_speed"
-    if profile not in {"work_speed", "ranch_drops_focus"}:
+    if profile != "work_speed":
         return {"ok": False, "error": f"Profile is not automatic: {profile}"}
-    priority_passive_groups = [["Ranch Master"], ["Farmhand"]] if profile == "ranch_drops_focus" else []
     result = best_work_speed_profile(
         owned_states_for_owner(owner),
         target_key,
         payload.get("genderPreference") or "any",
-        include_insomnia=bool(payload.get("includeInsomnia")),
-        priority_passive_groups=priority_passive_groups,
+        include_insomnia=True,
     )
     return {
         "ok": True,

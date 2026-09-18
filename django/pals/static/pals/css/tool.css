@@ -2674,6 +2674,24 @@
     text-transform: uppercase;
 }
 
+.profile-hint-icon {
+    display: inline-flex;
+    width: 15px;
+    height: 15px;
+    margin-top: 5px;
+    color: var(--muted);
+    cursor: help;
+    vertical-align: middle;
+}
+
+.profile-hint-svg {
+    width: 15px;
+    height: 15px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+}
+
 .saved-plan-modal-panel {
     width: min(420px, 100%);
 }

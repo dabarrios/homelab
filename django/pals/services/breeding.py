@@ -37,14 +37,12 @@ def build_plan(payload: dict) -> dict:
     owned = owned_states_for_owner(owner)
     work_speed_profile = None
     profile_route = None
-    if breeding_profile in {"work_speed", "ranch_drops_focus"}:
-        priority_passive_groups = [["Ranch Master"], ["Farmhand"]] if breeding_profile == "ranch_drops_focus" else []
+    if breeding_profile == "work_speed":
         work_speed_profile = best_work_speed_profile(
             owned,
             target_key,
             gender_preference,
-            include_insomnia=bool(payload.get("includeInsomnia")),
-            priority_passive_groups=priority_passive_groups,
+            include_insomnia=True,
             implant_passives=inventory_implants,
         )
         if work_speed_profile["selected"]:

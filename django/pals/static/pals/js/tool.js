@@ -26,7 +26,6 @@ const MODULE_FORM_STATE_KEY = `pals.formState.${moduleKey}.v1`;
 const BUILT_IN_PROFILES = [
   {value: 'manual', label: 'Manual passives', locked: false},
   {value: 'work_speed', label: 'Best work speed', locked: true},
-  {value: 'ranch_drops_focus', label: 'Ranch drops focus', locked: true},
 ];
 const BUILT_IN_PROFILE_PASSIVES = {
   work_speed: [
@@ -34,12 +33,6 @@ const BUILT_IN_PROFILE_PASSIVES = {
     ['Remarkable Craftsmanship', 75],
     ['Artisan', 50],
     ['Work Slave', 30],
-  ],
-  ranch_drops_focus: [
-    ['Ranch Master', 0],
-    ['Farmhand', 0],
-    ['Remarkable Craftsmanship', 75],
-    ['Artisan', 50],
   ],
 };
 const DEFAULT_PASSIVE_HINTS = {
@@ -1262,11 +1255,17 @@ function updateProfileHint() {
   if (!hint) return;
   const custom = customProfileByValue(value);
   const builtIn = builtInProfileByValue(value);
+  const info = $('#profileHintIcon');
   if (custom) {
     passiveSelections.passives = [...custom.passives];
     $$('[data-picker="passives"]').forEach(renderPassivePicker);
   }
-  hint.textContent = custom ? 'Profile loaded.' : builtIn?.locked ? 'Selects passives automatically when optimizing.' : '';
+  hint.textContent = custom ? 'Profile loaded.' : builtIn?.locked ? 'Includes Insomnia for non-Dark Pals.' : '';
+  info?.classList?.toggle('hidden', value !== 'work_speed');
+  if (info && value === 'work_speed') {
+    info.innerHTML = lucideIconHtml('info', 'profile-hint-svg');
+    info.title = 'Best work speed includes Insomnia automatically for non-Dark Pals. Dark Pals omit it.';
+  }
 }
 
 async function applySelectedProfile() {
@@ -1298,7 +1297,7 @@ async function applySelectedProfile() {
         target: data.target,
         breedingProfile: value,
         genderPreference: data.genderPreference || 'any',
-        includeInsomnia: Boolean(data.includeInsomnia),
+        includeInsomnia: true,
       });
       if (token !== profileRequestToken) return;
       passiveSelections.passives = (result.selected || result.ideal || []).slice(0, 4);
@@ -2328,7 +2327,7 @@ function ranchDropMeta(card, itemName = '') {
 function renderRanchPalCard(card, itemName = '') {
   const drops = (card.ranchDrops || []).map(drop => `<span class="ranch-drop-chip ${drop.name === itemName ? 'active' : ''}">${escapeHtml(drop.name)}</span>`).join('');
   const partner = card.partnerSkill?.name ? `<span class="ranch-skill-name">${escapeHtml(card.partnerSkill.name)}</span>` : '';
-  return renderWorkCard(card, true, null, 'ranch_drops_focus').replace('</article>', `
+  return renderWorkCard(card, true, null, 'work_speed').replace('</article>', `
       <div class="ranch-drop-row">${drops}${ranchDropMeta(card, itemName)}</div>
       ${partner}
     </article>`);
@@ -2407,7 +2406,7 @@ function renderBaseWorker(card, ownedOnly) {
       </div>
       ${renderWorkSkillPills(work, role)}
       ${ownedOnly ? `<div class="base-worker-details"><span>${escapeHtml(card.plannerLocation || 'Unknown location')}</span><span>Level ${escapeHtml(card.plannerLevel ?? 0)} · ${escapeHtml(card.plannerGender || 'Unknown gender')} · ${escapeHtml(card.plannerCondensationStars ?? 0)} stars</span></div>
-        ${(card.plannerPassives || []).length ? `<div class="passive-list">${card.plannerPassives.map(passive => passiveBarHtml(passive)).join('')}</div>` : ''}` : `<div class="node-foot"><span class="role-badge">${card.ownedCount ? `Own: ${escapeHtml(card.ownedCount)}` : 'Not owned'}</span><a class="card-action" href="${escapeHtml(breedUrl(card, role === 'farming' ? 'ranch_drops_focus' : 'work_speed'))}">Breed</a></div>`}
+        ${(card.plannerPassives || []).length ? `<div class="passive-list">${card.plannerPassives.map(passive => passiveBarHtml(passive)).join('')}</div>` : ''}` : `<div class="node-foot"><span class="role-badge">${card.ownedCount ? `Own: ${escapeHtml(card.ownedCount)}` : 'Not owned'}</span><a class="card-action" href="${escapeHtml(breedUrl(card, 'work_speed'))}">Breed</a></div>`}
     </article>`;
 }
 
@@ -2536,7 +2535,7 @@ async function submitTool(event) {
         target: data.target,
         passives: finalPassives,
         includeImplants: true,
-        includeInsomnia: Boolean(data.includeInsomnia),
+        includeInsomnia: data.breedingProfile === 'work_speed',
         breedAnyway: Boolean(data.breedAnyway),
         implantPassives: selectedImplantPassives(finalPassives, true),
         genderPreference: data.genderPreference || 'any',
