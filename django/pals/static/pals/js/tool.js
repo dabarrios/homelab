@@ -1729,15 +1729,24 @@ function renderImplantInventories() {
   $$('[data-implant-inventory]').forEach(panel => {
     const list = panel.querySelector('[data-inventory-list]');
     if (!list) return;
-    list.innerHTML = entries.length ? entries.map(([passive, item]) => `
+    const infiniteEntries = entries.filter(([, item]) => item?.infinite);
+    const finiteEntries = entries.filter(([, item]) => !item?.infinite);
+    list.innerHTML = entries.length ? infiniteEntries.map(([passive]) => `
       <div class="implant-row">
         <span class="passive-chip ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}">${escapeHtml(passive)}</span>
-        <label class="inventory-toggle"><input type="checkbox" data-inventory-infinite="${escapeHtml(passive)}" ${item.infinite ? 'checked' : ''}> Infinite</label>
-        <input type="number" min="0" value="${escapeHtml(item.infinite ? 0 : item.count || 0)}" data-inventory-count="${escapeHtml(passive)}" ${item.infinite ? 'disabled' : ''}>
+        <span class="inventory-infinite">Infinite</span>
         <button type="button" class="chip-remove" data-inventory-delete="${escapeHtml(passive)}" aria-label="Remove ${escapeHtml(passive)}">x</button>
       </div>`).join('') : '<p class="field-hint">No implant passives inventoried yet.</p>';
+    if (entries.length) {
+      list.innerHTML += finiteEntries.map(([passive, item]) => `
+        <div class="implant-row implant-row-auto">
+          <span class="passive-chip ${passiveTone(passive)}" tabindex="0" data-passive-tooltip="${escapeHtml(passive)}">${escapeHtml(passive)}</span>
+          <span class="inventory-count">${escapeHtml(item.count || 0)} available</span>
+          <span class="inventory-source">Save synced</span>
+        </div>`).join('');
+    }
     const status = panel.querySelector('[data-inventory-status]');
-    if (status) status.textContent = entries.length ? `${entries.length} implant passive${entries.length === 1 ? '' : 's'} inventoried.` : '';
+    if (status) status.textContent = entries.length ? `${entries.length} implant passive${entries.length === 1 ? '' : 's'} available; finite counts come from the latest save sync.` : '';
   });
 }
 
@@ -1909,22 +1918,6 @@ function initImplantInventories() {
       }
       const deleted = event.target.closest('[data-inventory-delete]')?.dataset.inventoryDelete;
       if (deleted) await saveInventoryPassive(deleted, {delete: true});
-    });
-    panel.addEventListener('change', async event => {
-      const passive = event.target.dataset.inventoryInfinite;
-      if (!passive) return;
-      const existing = options.implantInventory?.[passive] || {};
-      await saveInventoryPassive(passive, {infinite: event.target.checked, count: existing.count || 0});
-    });
-    panel.addEventListener('input', event => {
-      const passive = event.target.dataset.inventoryCount;
-      if (!passive) return;
-      window.clearTimeout(event.target._inventoryTimer);
-      event.target._inventoryTimer = window.setTimeout(() => {
-        saveInventoryPassive(passive, {infinite: false, count: event.target.value}).catch(error => {
-          if (status) status.textContent = error.message;
-        });
-      }, 350);
     });
   });
 }

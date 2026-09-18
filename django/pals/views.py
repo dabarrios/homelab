@@ -287,12 +287,16 @@ def implant_inventory(request):
     passive = str(payload.get("passive") or "").strip()
     if not passive:
         return json_error("Missing passive")
+    existing = inventory.get(passive)
     if payload.get("delete"):
+        if isinstance(existing, dict) and not existing.get("infinite"):
+            return json_error("Finite implant counts are read from the latest synced save")
         inventory.pop(passive, None)
     else:
         infinite = bool(payload.get("infinite"))
-        count = max(0, data_service.as_int(payload.get("count")))
-        inventory[passive] = {"infinite": infinite, "count": None if infinite else count}
+        if not infinite:
+            return json_error("Finite implant counts are read from the latest synced save")
+        inventory[passive] = {"infinite": True, "count": None}
     ivs_service.save_implant_inventory(inventory)
     return JsonResponse({"ok": True, "inventory": inventory})
 

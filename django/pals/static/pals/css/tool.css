@@ -3447,6 +3447,19 @@
     width: 14px !important;
 }
 
+.inventory-infinite,
+.inventory-count,
+.inventory-source {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.inventory-source {
+    margin-left: auto;
+    font-weight: 600;
+}
+
 .implant-row input[type="number"] {
     width: 68px;
     border: 1px solid var(--line);
