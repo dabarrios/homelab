@@ -9,7 +9,44 @@ from unittest.mock import patch
 
 from django.test import SimpleTestCase
 
-from pals.services import bases, data, saves, work
+from pals.services import bases, data, implant_sync, saves, work
+
+
+class ImplantSyncTests(SimpleTestCase):
+    def test_sync_reads_only_implants_and_refreshes_disposable_counts(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            level = root / "Level.full.json"
+            items = root / "items.json"
+            skills = root / "skill.json"
+            inventory = root / "implant_inventory.json"
+            items.write_text(json.dumps({"en": [
+                {"id": "palpassiveskillchange_pal_allattack_up3", "name": "Implant: Demon God"},
+                {"id": "palpassiveskillchange_consumable_pal_allattack_up3", "name": "Disposable Implant: Demon God"},
+                {"id": "palpassiveskillchange_artisan", "name": "Implant: Artisan"},
+                {"id": "cake03", "name": "Cake"},
+            ]}))
+            skills.write_text(json.dumps({"en": {
+                "PAL_ALLAttack_up3": {"name": "Demon God"},
+                "CraftSpeed_up3": {"name": "Artisan"},
+            }}))
+            inventory.write_text(json.dumps({"Insomnia": {"infinite": True, "count": None}, "Old": {"infinite": False, "count": 99}}))
+            level.write_text(json.dumps({"properties": {"worldSaveData": {"value": {
+                "ItemContainerSaveData": {"value": [{"value": {"Slots": {"value": {"values": [
+                    {"RawData": {"value": {"item": {"static_id": "palpassiveskillchange_consumable_pal_allattack_up3"}, "count": 10}}},
+                    {"RawData": {"value": {"item": {"static_id": "palpassiveskillchange_artisan"}, "count": 1}}},
+                    {"RawData": {"value": {"item": {"static_id": "cake03"}, "count": 500}}},
+                ]}}}}]}
+            }}}}))
+            with patch.object(implant_sync, "PARSER_ASSETS", root), patch.object(implant_sync, "SKILL_METADATA", skills), patch.object(implant_sync, "IMPLANT_INVENTORY_FILE", inventory):
+                result = implant_sync.sync_implant_inventory(level)
+            saved = json.loads(inventory.read_text())
+            self.assertTrue(result["ok"])
+            self.assertEqual(saved["Demon God"], {"infinite": False, "count": 10})
+            self.assertTrue(saved["Artisan"]["infinite"])
+            self.assertTrue(saved["Insomnia"]["infinite"])
+            self.assertNotIn("Old", saved)
+            self.assertNotIn("Cake", saved)
 
 
 class BaseServiceTests(SimpleTestCase):

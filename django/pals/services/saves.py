@@ -166,6 +166,9 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
     if proc.returncode != 0:
         detail = decode_failure_detail(proc.stdout, proc.stderr)
         return {"ok": False, "error": "Decode failed", "errorDetail": detail, "stdout": proc.stdout[-4000:], "stderr": proc.stderr[-4000:], "returnCode": proc.returncode}
+    from .implant_sync import sync_implant_inventory
+
+    implant_sync = sync_implant_inventory(WORK / "Level.full.json")
     persist_effigy_players()
     copied = []
     for src_name, dest in [
@@ -180,7 +183,7 @@ def run_decode_workspace(uploaded_label: str, input_summary: dict | None = None,
             copied.append(path_for_result(dest))
     STORE.reload()
     invalidate_refresh_dependents()
-    return {"ok": True, "uploaded": uploaded_label, "input": input_summary or {}, "copied": copied, "rosterCount": len(STORE.roster), "owners": STORE.owners, "stdout": proc.stdout[-2000:]}
+    return {"ok": True, "uploaded": uploaded_label, "input": input_summary or {}, "copied": copied, "rosterCount": len(STORE.roster), "owners": STORE.owners, "implantInventory": implant_sync, "stdout": proc.stdout[-2000:]}
 
 
 def persist_effigy_players() -> None:
