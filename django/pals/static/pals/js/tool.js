@@ -2118,7 +2118,17 @@ function renderIvs(data) {
   if (data.error) return resultCard('No IV plan', escapeHtml(data.error));
   if (data.alphaOnly) return renderIvAlphaOnly(data);
   const pairs = data.pairs || data.parentPairs || [];
-  if (!pairs.length) return renderJson(data);
+  if (!pairs.length) {
+    const requested = data.requestedPassives || [];
+    const implants = data.implantPassives || [];
+    const natural = data.naturalPassives || [];
+    const implantText = implants.length ? ` Implantable passives allowed: ${implants.map(escapeHtml).join(', ')}.` : '';
+    const naturalText = natural.length ? ` Natural passives required: ${natural.map(escapeHtml).join(', ')}.` : ' No natural passives are required by this setup.';
+    const detail = requested.length
+      ? `No compatible parent pair was found for ${escapeHtml(data.target || 'this target')} with the current IV and gender settings.${naturalText}${implantText}`
+      : 'Choose at least one final passive before calculating IV parents.';
+    return resultCard('No compatible IV pair found', `<p>${detail}</p><p>Try disabling implantable passives for a natural-only search, changing the gender preference, or checking that the save contains at least two compatible parents.</p>`, `${data.matchingCount || 0} matching Pals · ${data.pairs?.length || 0} compatible pairs`);
+  }
   return pairs.slice(0, 8).map((pair, index) => `
     <article class="route-card iv-card">
       <div class="route-header">
