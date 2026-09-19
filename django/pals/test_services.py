@@ -348,6 +348,18 @@ class IvBoundaryTests(SimpleTestCase):
         self.assertEqual(result["pairs"][0]["junk"], [])
         self.assertTrue(result["pairs"][0]["clean"])
 
+    def test_gender_changes_allow_same_gender_iv_pair_when_reverser_is_available(self):
+        from pals.services import ivs
+        parents = [self.state("Female", ["Artisan"], label="A"), self.state("Female", ["Serious"], label="B")]
+        store = SimpleNamespace(name_to_key={"target": "target"}, pals={"target": SimpleNamespace(name="Target")})
+        payload = {"target": "Target", "allowGenderChanges": True}
+        with patch.object(ivs, "STORE", store), patch.object(ivs, "owned_states_for_owner", return_value=parents), patch.object(ivs, "available_gender_reversers", return_value=9), patch.object(ivs, "icon_url_for_key", return_value=None):
+            result = ivs.build_iv_plan(payload)
+        self.assertEqual(result["availableGenderReversers"], 9)
+        self.assertEqual(result["pairs"][0]["genderChangeCount"], 1)
+        self.assertEqual(result["pairs"][0]["genderChanges"][0]["item"], "Pal Reverser")
+        self.assertEqual({parent["displayGender"] for parent in result["pairs"][0]["parents"]}, {"Male", "Female"})
+
 
 
 class ServiceArchitectureTests(SimpleTestCase):

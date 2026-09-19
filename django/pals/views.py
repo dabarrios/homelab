@@ -117,6 +117,7 @@ def options(request):
         ],
         "baseSites": bases_service.base_work_sites_payload(),
         "implantInventory": ivs_service.load_implant_inventory(),
+        "itemInventory": ivs_service.load_item_inventory(),
         "passiveColorOverrides": data_service.load_passive_color_overrides(),
         "rosterCount": len(data_service.STORE.roster),
         "dataVersion": data_service.STORE.breeding_data.get("dataVersion"),

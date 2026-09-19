@@ -2202,6 +2202,18 @@
     gap: 16px;
 }
 
+.gender-change-summary,
+.gender-change-hint {
+    margin: 4px 0 0;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.gender-change-hint {
+    margin: -4px 0 8px;
+}
+
 .iv-combined-summary {
     display: grid;
     gap: 8px;

@@ -860,6 +860,9 @@ function renderPalNode(node, isRoot = false, plan = null) {
   const roleClass = role === 'OWNED' ? 'owned' : role === 'FINAL EGG' ? 'target' : 'breed';
   const roleIcon = roleClass === 'owned' ? lucideIconHtml('circle-check', 'badge-svg') : '';
   const gender = genderLabel(node);
+  const genderChange = node.genderChange
+    ? `<p class="gender-change-hint">Use Pal Reverser: ${escapeHtml(node.gender)} → ${escapeHtml(node.displayGender)}</p>`
+    : '';
   return `
     <article class="pal-node ${roleClass}">
       <div class="pal-main">
@@ -870,6 +873,7 @@ function renderPalNode(node, isRoot = false, plan = null) {
           ${renderTypeChips(node.types || [])}
         </div>
       </div>
+      ${genderChange}
       ${renderPassiveBars(node, isRoot, plan)}
       <div class="node-foot">
         <span class="role-badge ${roleClass}">${roleIcon}<span>${role}</span></span>
@@ -904,6 +908,8 @@ function fillOptions() {
   });
   updateBaseLabelField();
   setText('#palsMeta', `${options.rosterCount || 0} Pals loaded | breeding data ${options.dataVersion || 'unknown'}`);
+  const reversers = Number(options.itemInventory?.['Pal Reverser'] || 0);
+  setText('[data-gender-change-hint]', reversers ? `${reversers} Pal Reverser${reversers === 1 ? '' : 's'} recorded from the latest save sync.` : 'No Pal Reversers recorded from the latest save sync.');
   renderProfileOptions();
   renderImplantInventories();
   syncCustomSelects();
@@ -2133,16 +2139,19 @@ function renderIvs(data) {
   const bestHp = pair.bestHpIv ?? '?';
   const bestAttack = pair.bestAttackIv ?? '?';
   const bestDefense = pair.bestDefenseIv ?? '?';
+  const parents = [...(pair.parents || [])].sort((a, b) => {
+    const genderRank = gender => String(gender || '').toLowerCase() === 'male' ? 0 : String(gender || '').toLowerCase() === 'female' ? 1 : 2;
+    return genderRank(a.displayGender || a.plannedGender || a.gender) - genderRank(b.displayGender || b.plannedGender || b.gender);
+  });
   return `
-    <article class="route-card iv-card iv-focused-card">
+    <div class="iv-focused-card">
       <div class="route-header">
         <div>
           <h3>Best IV Pair</h3>
-          <p>100 support: HP ${escapeHtml(pair.hp100Support || 0)}x / ATK ${escapeHtml(pair.attack100Support || 0)}x / DEF ${escapeHtml(pair.defense100Support || 0)}x</p>
+          ${(pair.genderChanges || []).length ? `<p class="gender-change-summary">${escapeHtml(pair.genderChangeCount)} Pal Reverser required</p>` : ''}
         </div>
         <div class="badges">
           <span>${escapeHtml(pair.goalScore || 0)} avg best IV</span>
-          <span class="${(pair.junk || []).length ? 'bad' : 'good'}">${(pair.junk || []).length} junk</span>
         </div>
       </div>
       <div class="iv-combined-summary">
@@ -2154,9 +2163,9 @@ function renderIvs(data) {
         </div>
         <p>The pair is ranked by the strongest combined stat coverage, then parent quality and passive support.</p>
       </div>
-      <div class="iv-pair-grid">${(pair.parents || []).map(parent => renderPalNode(parent)).join('')}</div>
+      <div class="iv-pair-grid">${parents.map(parent => renderPalNode(parent)).join('')}</div>
       ${(pair.junk || []).length ? `<p class="junk-text">Junk in parent pool: ${escapeHtml(pair.junk.join(', '))}</p>` : ''}
-    </article>`;
+    </div>`;
 }
 
 function renderIvStat(label, value) {
@@ -2566,6 +2575,7 @@ async function submitTool(event) {
         passives: finalPassives,
         implantPassives: selectedImplantPassives(finalPassives, Boolean(data.includeImplants)),
         genderPreference: data.genderPreference || 'any',
+        allowGenderChanges: Boolean(data.allowGenderChanges),
         ivGoal: 'perfect',
         requireAlpha: Boolean(data.requireAlpha),
       });

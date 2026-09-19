@@ -45,6 +45,7 @@ LIVE_LOCK = threading.Lock()
 LIVE_STATE_FILE = DATA_ROOT / "live_save_state.json"
 BASE_LABELS_FILE = DATA_ROOT / "base_labels.json"
 IMPLANT_INVENTORY_FILE = DATA_ROOT / "implant_inventory.json"
+ITEM_INVENTORY_FILE = DATA_ROOT / "item_inventory.json"
 PASSIVE_COLOR_OVERRIDES_FILE = DATA_ROOT / "passive_color_overrides.json"
 LIVE_STATE = {
     "last_refresh_fingerprint": "",

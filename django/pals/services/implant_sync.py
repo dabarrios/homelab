@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from .data import IMPLANT_INVENTORY_FILE, PARSER_ASSETS, SKILL_METADATA
+from .data import IMPLANT_INVENTORY_FILE, ITEM_INVENTORY_FILE, PARSER_ASSETS, SKILL_METADATA
 
 
 def _item_names() -> dict[str, str]:
@@ -68,6 +68,7 @@ def sync_implant_inventory(level_json: Path) -> dict:
     passive_names = _passive_names()
     finite: dict[str, int] = {}
     infinite: set[str] = set()
+    pal_reverser_count = 0
 
     for container in world.get("ItemContainerSaveData", {}).get("value", []):
         slots = container.get("value", {}).get("Slots", {}).get("value", {}).get("values", [])
@@ -75,6 +76,10 @@ def sync_implant_inventory(level_json: Path) -> dict:
             raw = slot.get("RawData", {}).get("value") or {}
             item = raw.get("item") or {}
             item_id = str(item.get("static_id") or "").lower()
+            item_label = item_names.get(item_id, "")
+            if item_label.casefold() == "pal reverser" or "palreverser" in item_id.replace("_", ""):
+                pal_reverser_count += max(1, int(raw.get("count") or item.get("count") or 0))
+                continue
             if not item_id.startswith("palpassiveskillchange_"):
                 continue
             passive = _passive_name(item_id, item_names, passive_names)
@@ -99,9 +104,12 @@ def sync_implant_inventory(level_json: Path) -> dict:
 
     IMPLANT_INVENTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
     IMPLANT_INVENTORY_FILE.write_text(json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    ITEM_INVENTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ITEM_INVENTORY_FILE.write_text(json.dumps({"Pal Reverser": pal_reverser_count}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return {
         "ok": True,
         "infiniteCount": sum(1 for item in inventory.values() if item.get("infinite")),
         "finite": finite,
+        "items": {"Pal Reverser": pal_reverser_count},
         "inventory": inventory,
     }
