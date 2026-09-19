@@ -2578,6 +2578,7 @@ async function submitTool(event) {
         allowGenderChanges: Boolean(data.allowGenderChanges),
         ivGoal: 'perfect',
         requireAlpha: Boolean(data.requireAlpha),
+        breedAnyway: Boolean(data.breedAnyway),
       });
     } else if (moduleKey === 'work') {
       const includeSelf = data.includeSelfBreeders ? '1' : '0';

@@ -256,6 +256,11 @@
     align-items: center;
 }
 
+.check-row .field-hint {
+    grid-column: 2;
+    margin: 0;
+}
+
 .check-row input {
     width: 16px;
 }

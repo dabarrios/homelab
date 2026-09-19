@@ -360,6 +360,18 @@ class IvBoundaryTests(SimpleTestCase):
         self.assertEqual(result["pairs"][0]["genderChanges"][0]["item"], "Pal Reverser")
         self.assertEqual({parent["displayGender"] for parent in result["pairs"][0]["parents"]}, {"Male", "Female"})
 
+    def test_breed_anyway_keeps_pair_search_available_when_alpha_shortcut_applies(self):
+        from dataclasses import replace
+        from pals.services import ivs
+        normal = replace(self.state("Female", ["Artisan"], label="Owned"), attack_iv=100, defense_iv=100, iv_total=300)
+        partner = replace(self.state("Male", ["Artisan"], label="Partner"), attack_iv=90, defense_iv=90, iv_total=280)
+        store = SimpleNamespace(name_to_key={"target": "target"}, pals={"target": SimpleNamespace(name="Target")})
+        payload = {"target": "Target", "passives": ["Artisan"], "requireAlpha": True, "breedAnyway": True}
+        with patch.object(ivs, "STORE", store), patch.object(ivs, "owned_states_for_owner", return_value=[normal, partner]), patch.object(ivs, "icon_url_for_key", return_value=None):
+            result = ivs.build_iv_plan(payload)
+        self.assertIsNone(result["alphaOnly"])
+        self.assertTrue(result["pairs"])
+
 
 
 class ServiceArchitectureTests(SimpleTestCase):

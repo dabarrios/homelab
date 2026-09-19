@@ -184,6 +184,7 @@ def build_iv_plan(payload: dict) -> dict:
     allowed_extras = canonical_passives(payload.get("allowedExtras", []))
     gender_preference = payload.get("genderPreference") or "any"
     require_alpha = as_bool(payload.get("requireAlpha"))
+    breed_anyway = as_bool(payload.get("breedAnyway"))
     target = canonical_passives(payload.get("passives", []))
     allow_gender_changes = as_bool(payload.get("allowGenderChanges"))
     available_reversers = available_gender_reversers()
@@ -254,7 +255,7 @@ def build_iv_plan(payload: dict) -> dict:
         if round(s.avg_hp_iv) >= 100 and round(s.avg_attack_iv) >= 100 and round(s.avg_defense_iv) >= 100
     ]
     alpha_only = None
-    if require_alpha and perfect_matching:
+    if require_alpha and perfect_matching and not breed_anyway:
         owned_match = next((s for s in perfect_matching if s.is_alpha), perfect_matching[0])
         missing = [] if owned_match.is_alpha else ["Alpha"]
         clean_parent_pairs = [pair for pair in serialized_pairs if pair.get("clean") and not pair.get("missing")]
@@ -300,6 +301,7 @@ def build_iv_plan(payload: dict) -> dict:
         "target": STORE.pals[target_key].name,
         "owner": owner,
         "requireAlpha": require_alpha,
+        "breedAnyway": breed_anyway,
         "alphaOnly": alpha_only,
         "requestedPassives": sorted(target),
         "naturalPassives": sorted(natural_target),
