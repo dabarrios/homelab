@@ -78,6 +78,7 @@ def iv_100_score(a: State, b: State) -> tuple[int, int, int, float]:
 def serialize_iv_pal(s: State, target: frozenset[str], allowed: frozenset[str]) -> dict:
     location = display_owned_location(s.location)
     selection_id = s.instance_id or f"{s.species_key}|{s.gender}|{s.location}|{s.box}|{s.slot}|{s.label}"
+    passive_agnostic = not target
     return {
         "instanceId": s.instance_id,
         "selectionId": selection_id,
@@ -85,7 +86,7 @@ def serialize_iv_pal(s: State, target: frozenset[str], allowed: frozenset[str]) 
         "gender": s.gender,
         "passives": sorted(s.passives),
         "desired": sorted(s.passives & target),
-        "junk": sorted(s.passives - target - allowed),
+        "junk": sorted(s.passives - target - allowed) if not passive_agnostic else [],
         "missing": sorted(target - s.passives),
         "hpIv": round(s.avg_hp_iv, 1),
         "attackIv": round(s.avg_attack_iv, 1),
@@ -103,6 +104,7 @@ def serialize_iv_pal(s: State, target: frozenset[str], allowed: frozenset[str]) 
 
 def serialize_iv_pair(a: State, b: State, target: frozenset[str], required: frozenset[str], allowed: frozenset[str]) -> dict:
     pool = frozenset(set(a.passives) | set(b.passives))
+    passive_agnostic = not target
     best_hp = max(a.avg_hp_iv, b.avg_hp_iv)
     best_attack = max(a.avg_attack_iv, b.avg_attack_iv)
     best_defense = max(a.avg_defense_iv, b.avg_defense_iv)
@@ -111,7 +113,7 @@ def serialize_iv_pair(a: State, b: State, target: frozenset[str], required: froz
         "parents": [serialize_iv_pal(a, target, allowed), serialize_iv_pal(b, target, allowed)],
         "desired": sorted(pool & target),
         "missing": sorted(required - pool),
-        "junk": sorted(pool - target - allowed),
+        "junk": sorted(pool - target - allowed) if not passive_agnostic else [],
         "passivePool": sorted(pool),
         "bestHpIv": round(best_hp, 1),
         "bestAttackIv": round(best_attack, 1),
@@ -124,7 +126,7 @@ def serialize_iv_pair(a: State, b: State, target: frozenset[str], required: froz
         "defense100Support": support["defense"],
         "perfectCoverage": sum(1 for value in support.values() if value > 0),
         "doublePerfectCoverage": sum(1 for value in support.values() if value > 1),
-        "clean": not (pool - target - allowed),
+        "clean": passive_agnostic or not (pool - target - allowed),
         "compatible": compatible(a, b),
     }
 
@@ -140,8 +142,6 @@ def build_iv_plan(payload: dict) -> dict:
     gender_preference = payload.get("genderPreference") or "any"
     require_alpha = as_bool(payload.get("requireAlpha"))
     target = canonical_passives(payload.get("passives", []))
-    if not target:
-        return {"error": "Choose the passives you want before calculating perfect IV pairs."}
     if len(target) > 4:
         return {"error": "A Pal can only have 4 final passives."}
     implant_passives &= target
@@ -149,11 +149,15 @@ def build_iv_plan(payload: dict) -> dict:
     natural_target = frozenset(target - implant_passives)
     owned = owned_states_for_owner(owner)
     species_states = [s for s in owned if s.species_key == target_key]
-    matching = [
-        s
-        for s in species_states
-        if natural_target <= s.passives and not (s.passives - target - allowed)
-    ]
+    matching = (
+        list(species_states)
+        if not target
+        else [
+            s
+            for s in species_states
+            if natural_target <= s.passives and not (s.passives - target - allowed)
+        ]
+    )
     matching_gender = gender_filtered(matching, gender_preference)
     rank_pool = matching_gender or matching
     ranked_matching = sorted(
@@ -173,9 +177,9 @@ def build_iv_plan(payload: dict) -> dict:
             continue
         pool = frozenset(set(a.passives) | set(b.passives))
         missing = natural_target - pool
-        junk = pool - target - allowed
+        junk = pool - target - allowed if target else frozenset()
         covered, doubled, single, backup = iv_100_score(a, b)
-        parent_desired_count = len(a.passives & target) + len(b.passives & target)
+        parent_desired_count = len(a.passives & target) + len(b.passives & target) if target else 0
         parent_avg = (a.avg_iv + b.avg_iv) / 2
         pairs.append((
             (len(missing), len(junk), -(covered), -(doubled), single, -parent_desired_count, -backup, -parent_avg, a.label, b.label),
@@ -208,9 +212,9 @@ def build_iv_plan(payload: dict) -> dict:
             "state": "complete" if owned_match.is_alpha else "missing_alpha",
             "title": "Target complete" if owned_match.is_alpha else "Target already solved except Alpha",
             "message": (
-                f"You own an Alpha {STORE.pals[target_key].name} with the exact passives and 100/100/100 IVs."
+                f"You own an Alpha {STORE.pals[target_key].name} with 100/100/100 IVs."
                 if owned_match.is_alpha
-                else f"You own a {STORE.pals[target_key].name} with the exact passives and 100/100/100 IVs. Only an Alpha version is remaining."
+                else f"You own a {STORE.pals[target_key].name} with 100/100/100 IVs. Only an Alpha version is remaining."
             ),
             "missing": missing,
             "ownedMatch": serialize_iv_pal(owned_match, target, allowed),

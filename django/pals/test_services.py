@@ -336,11 +336,17 @@ class IvBoundaryTests(SimpleTestCase):
         self.assertEqual(implanted["pairs"][0]["missing"], [])
         self.assertEqual(parents[0].passives, frozenset(["Artisan"]))
 
-    def test_unknown_species_and_missing_passives_are_rejected(self):
+    def test_unknown_species_is_rejected_but_passives_are_optional(self):
         from pals.services import ivs
-        with patch.object(ivs, "STORE", SimpleNamespace(name_to_key={"target": "target"})):
+        store = SimpleNamespace(name_to_key={"target": "target"}, pals={"target": SimpleNamespace(name="Target")})
+        states = [self.state("Male", ["Artisan"], label="A"), self.state("Female", ["Serious"], label="B")]
+        with patch.object(ivs, "STORE", store), patch.object(ivs, "owned_states_for_owner", return_value=states), patch.object(ivs, "icon_url_for_key", return_value=None):
             self.assertIn("Unknown target", ivs.build_iv_plan({"target": "Missing"})["error"])
-            self.assertIn("Choose the passives", ivs.build_iv_plan({"target": "Target"})["error"])
+            result = ivs.build_iv_plan({"target": "Target"})
+        self.assertEqual(result["requestedPassives"], [])
+        self.assertEqual(result["matchingCount"], 2)
+        self.assertEqual(result["pairs"][0]["junk"], [])
+        self.assertTrue(result["pairs"][0]["clean"])
 
 
 

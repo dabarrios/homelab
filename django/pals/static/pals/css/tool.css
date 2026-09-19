@@ -2197,6 +2197,56 @@
     gap: 12px;
 }
 
+.iv-focused-card {
+    display: grid;
+    gap: 16px;
+}
+
+.iv-combined-summary {
+    display: grid;
+    gap: 8px;
+    border: 1px solid rgba(80, 221, 176, .34);
+    border-radius: 8px;
+    background: rgba(80, 221, 176, .08);
+    padding: 14px;
+}
+
+.iv-combined-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.iv-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.iv-summary-grid span {
+    display: grid;
+    gap: 3px;
+}
+
+.iv-summary-grid b {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.iv-summary-grid strong {
+    color: var(--ink);
+    font-size: 20px;
+}
+
+.iv-combined-summary p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
 .iv-alpha-result {
     display: grid;
     gap: 16px;

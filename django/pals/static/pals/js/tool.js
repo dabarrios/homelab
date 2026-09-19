@@ -440,7 +440,7 @@ const EMPTY_STATES = {
   },
   ivs: {
     title: 'Find IV parents',
-    lead: 'Pick a target Pal and final passives to compare parent pairs.',
+    lead: 'Pick a target Pal; final passives are optional when comparing parent pairs.',
     features: [
       ['Parent Coverage', 'Highlights pairs with the best HP, Attack, and Defense support.'],
       ['Implant Aware', 'Ignores passives you plan to add later when enabled.'],
@@ -2126,24 +2126,37 @@ function renderIvs(data) {
     const naturalText = natural.length ? ` Natural passives required: ${natural.map(escapeHtml).join(', ')}.` : ' No natural passives are required by this setup.';
     const detail = requested.length
       ? `No compatible parent pair was found for ${escapeHtml(data.target || 'this target')} with the current IV and gender settings.${naturalText}${implantText}`
-      : 'Choose at least one final passive before calculating IV parents.';
+      : `No compatible parent pair was found for ${escapeHtml(data.target || 'this target')} with the current IV and gender settings. Passive filtering was not applied.`;
     return resultCard('No compatible IV pair found', `<p>${detail}</p><p>Try disabling implantable passives for a natural-only search, changing the gender preference, or checking that the save contains at least two compatible parents.</p>`, `${data.matchingCount || 0} matching Pals · ${data.pairs?.length || 0} compatible pairs`);
   }
-  return pairs.slice(0, 8).map((pair, index) => `
-    <article class="route-card iv-card">
+  const pair = pairs[0];
+  const bestHp = pair.bestHpIv ?? '?';
+  const bestAttack = pair.bestAttackIv ?? '?';
+  const bestDefense = pair.bestDefenseIv ?? '?';
+  return `
+    <article class="route-card iv-card iv-focused-card">
       <div class="route-header">
         <div>
-          <h3>Option ${index + 1}</h3>
+          <h3>Best IV Pair</h3>
           <p>100 support: HP ${escapeHtml(pair.hp100Support || 0)}x / ATK ${escapeHtml(pair.attack100Support || 0)}x / DEF ${escapeHtml(pair.defense100Support || 0)}x</p>
         </div>
         <div class="badges">
-          <span>${escapeHtml(pair.doublePerfectCoverage || 0)} doubled</span>
+          <span>${escapeHtml(pair.goalScore || 0)} avg best IV</span>
           <span class="${(pair.junk || []).length ? 'bad' : 'good'}">${(pair.junk || []).length} junk</span>
         </div>
       </div>
+      <div class="iv-combined-summary">
+        <span class="iv-combined-label">Best combined IVs</span>
+        <div class="iv-summary-grid">
+          <span><b>HP</b><strong>${escapeHtml(bestHp)}</strong></span>
+          <span><b>ATK</b><strong>${escapeHtml(bestAttack)}</strong></span>
+          <span><b>DEF</b><strong>${escapeHtml(bestDefense)}</strong></span>
+        </div>
+        <p>The pair is ranked by the strongest combined stat coverage, then parent quality and passive support.</p>
+      </div>
       <div class="iv-pair-grid">${(pair.parents || []).map(parent => renderPalNode(parent)).join('')}</div>
       ${(pair.junk || []).length ? `<p class="junk-text">Junk in parent pool: ${escapeHtml(pair.junk.join(', '))}</p>` : ''}
-    </article>`).join('');
+    </article>`;
 }
 
 function renderIvStat(label, value) {
